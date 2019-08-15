@@ -1,7 +1,13 @@
 # Directories
 .vs/
-/bin/
+.vscode/
+bin/
 bin-int/
 
 # Files
 *.user
+Makefile
+
+
+*.ini
+*.patch

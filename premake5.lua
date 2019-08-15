@@ -48,7 +48,8 @@ project "Hazel"
 
 	defines
 	{
-		"_CRT_SECURE_NO_WARNINGS"
+		"HZ_BUILD_DLL",
+		"GLFW_INCLUDE_NONE"
 	}
 
 	includedirs
@@ -65,8 +66,8 @@ project "Hazel"
 	{ 
 		"GLFW",
 		"Glad",
-		"ImGui",
-		"opengl32.lib"
+		"ImGui"
+		
 	}
 
 	filter "system:windows"
@@ -75,8 +76,24 @@ project "Hazel"
 		defines
 		{
 			"HZ_PLATFORM_WINDOWS",
-			"HZ_BUILD_DLL",
-			"GLFW_INCLUDE_NONE"
+			"_CRT_SECURE_NO_WARNINGS"		
+		}
+
+		links
+		{
+			"opengl32.lib"
+		}
+
+	filter "system:linux"
+		
+		linkoptions
+		{
+			"`pkg-config --static --libs glfw3`"
+		}
+
+		defines
+		{
+			"HZ_PLATFORM_LINUX"
 		}
 
 	filter "configurations:Debug"
@@ -120,7 +137,7 @@ project "Sandbox"
 
 	links
 	{
-		"Hazel"
+		"Hazel",
 	}
 
 	filter "system:windows"
@@ -129,6 +146,24 @@ project "Sandbox"
 		defines
 		{
 			"HZ_PLATFORM_WINDOWS"
+		}
+
+	filter "system:linux"
+
+		links
+		{
+			"imgui",
+			"glad"
+		}
+
+		linkoptions
+		{
+			"`pkg-config --static --libs glfw3`"
+		}
+
+		defines
+		{
+			"HZ_PLATFORM_LINUX"
 		}
 
 	filter "configurations:Debug"
