@@ -7,7 +7,7 @@ bin-int/
 # Files
 *.user
 Makefile
-
-
 *.ini
 *.patch
+*.vcxProj*
+*.sln
