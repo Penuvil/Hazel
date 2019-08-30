@@ -6,6 +6,7 @@
 #include "Hazel/LayerStack.h"
 #include "Hazel/Events/Event.h"
 #include "Hazel/Events/ApplicationEvent.h"
+#include "Hazel/Renderer/RendererAPI.h"
 
 #include "Hazel/Core/Timestep.h"
 
@@ -16,7 +17,7 @@ namespace Hazel {
 	class Application
 	{
 	public:
-		Application();
+		Application(RendererAPI::API api);
 		virtual ~Application() = default;
 
 		void Run();

@@ -254,7 +254,8 @@ private:
 class Sandbox : public Hazel::Application
 {
 public:
-	Sandbox()
+	Sandbox(Hazel::RendererAPI::API api)
+		:Hazel::Application(api)
 	{
 		PushLayer(new ExampleLayer());
 	}
@@ -268,5 +269,5 @@ public:
 
 Hazel::Application* Hazel::CreateApplication()
 {
-	return new Sandbox();
+	return new Sandbox(Hazel::RendererAPI::API::Vulkan);
 }

@@ -68,15 +68,20 @@ project "Hazel"
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}"
+		"%{IncludeDir.stb_image}",
+		"$(VULKAN_SDK)/Include"
+	}
+
+	libdirs
+	{
+		"$(VULKAN_SDK)/Lib"
 	}
 
 	links 
 	{ 
 		"GLFW",
 		"Glad",
-		"ImGui"
-		
+		"ImGui"	
 	}
 
 	filter "system:windows"
@@ -90,10 +95,16 @@ project "Hazel"
 
 		links
 		{
-			"opengl32.lib"
+			"opengl32.lib",
+			"vulkan-1.lib"
 		}
 
 	filter "system:linux"
+
+		links
+		{
+			"vulkan"		
+		}
 		
 		linkoptions
 		{
