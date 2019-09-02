@@ -4,6 +4,7 @@
 
 #include "Hazel/Core.h"
 #include "Hazel/Events/Event.h"
+#include "Hazel/Renderer/RendererAPI.h"
 
 namespace Hazel {
 
@@ -41,7 +42,7 @@ namespace Hazel {
 
 		virtual void* GetNativeWindow() const = 0;
 
-		static Window* Create(const WindowProps& props = WindowProps());
+		static Window* Create(RendererAPI::API api, const WindowProps& props = WindowProps());
 	};
 
 }

@@ -10,7 +10,7 @@ namespace Hazel {
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowProps& props);
+		WindowsWindow(RendererAPI::API api, const WindowProps& props);
 		virtual ~WindowsWindow();
 
 		void OnUpdate() override;
@@ -25,7 +25,7 @@ namespace Hazel {
 
 		inline virtual void* GetNativeWindow() const { return m_Window; }
 	private:
-		virtual void Init(const WindowProps& props);
+		virtual void Init(RendererAPI::API api, const WindowProps& props);
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
