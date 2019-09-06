@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Hazel/Renderer/GraphicsContext.h"
+#include "Platform/Vulkan/VulkanSwapChain.h"
 
 #include <vulkan/vulkan.h>
 
@@ -27,13 +28,14 @@ namespace Hazel {
 		const std::vector<const char*> m_DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 		GLFWwindow* m_WindowHandle;
-		VkInstance m_Instance;
-		VkDebugUtilsMessengerEXT m_debugMessenger;
-		VkPhysicalDevice m_PhysicalDevice;
-		VkDevice m_LogicalDevice;
-		VkQueue m_GraphicsQueue;
-		VkQueue m_PresentQueue;
-		VkSurfaceKHR m_Surface;
+		VkInstance m_Instance = nullptr;
+		VkDebugUtilsMessengerEXT m_debugMessenger = nullptr;
+		VkPhysicalDevice m_PhysicalDevice = nullptr;
+		VkDevice m_LogicalDevice = nullptr;
+		VkQueue m_GraphicsQueue = nullptr;
+		VkQueue m_PresentQueue = nullptr;
+		VkSurfaceKHR m_Surface = nullptr;
+		Ref<VulkanSwapChain> m_SwapChain;
 
 #ifdef HZ_DEBUG
 		const bool m_EnableValidationLayers = true;
@@ -41,30 +43,11 @@ namespace Hazel {
 		const bool m_EnableValidationLayers = false;
 #endif
 
-		struct QueueFamilyIndices
-		{
-			std::optional<uint32_t> graphicsFamily;
-			std::optional<uint32_t> presentFamily;
-
-			bool isComplete()
-			{
-				return graphicsFamily.has_value() && presentFamily.has_value();
-			}
-		};
-		struct SwapChainSupportDetails
-		{
-			VkSurfaceCapabilitiesKHR surfaceCapabilities;
-			std::vector<VkSurfaceFormatKHR> surfaceFormats;
-			std::vector<VkPresentModeKHR> presentModes;
-		};
-
 		void CreateInstance(uint32_t* vulkanVersion);
 		bool CheckValidationLayerSupport();
 		std::vector<const char*> GetRequiredExtensions();
 		void SetupDebugMessenger();
 		uint32_t EvaluateDevice(VkPhysicalDevice device);
-		QueueFamilyIndices QueryQueueFamilies(VkPhysicalDevice device);
-		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 		void SelectPhysicalDevice();
 		void CreateLogicalDevice();
 		void CreateSurface();

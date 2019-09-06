@@ -1,9 +1,9 @@
 #include "hzpch.h"
 #include "VulkanContext.h"
-#include "Platform/Windows/WindowsWindow.h"
+//#include "Platform/Windows/WindowsWindow.h"
+#include "Platform/Vulkan/VulkanUtility.h"
 
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
+//#include <glad/glad.h>
 
 
 namespace Hazel {
@@ -16,6 +16,7 @@ namespace Hazel {
 
 	VulkanContext::~VulkanContext()
 	{
+		m_SwapChain->Destroy();
 		vkDestroyDevice(m_LogicalDevice, nullptr);
 		if (m_EnableValidationLayers)
 		{
@@ -39,6 +40,7 @@ namespace Hazel {
 		CreateSurface();
 		SelectPhysicalDevice();
 		CreateLogicalDevice();
+		m_SwapChain.reset(new VulkanSwapChain(m_WindowHandle, m_PhysicalDevice, m_LogicalDevice, m_Surface));
 
 		VkPhysicalDeviceProperties physicalDeviceProperties;
 		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &physicalDeviceProperties);
@@ -49,7 +51,7 @@ namespace Hazel {
 		HZ_CORE_INFO("  Version: {0}.{1}.{2}", VK_VERSION_MAJOR(vulkanVersion),
 			VK_VERSION_MINOR(vulkanVersion), VK_VERSION_PATCH(vulkanVersion));
 
-		HZ_CORE_ASSERT(false, "Vulkan implementation is not complete!");
+//		HZ_CORE_ASSERT(false, "Vulkan implementation is not complete!");
 	}
 
 	void VulkanContext::SwapBuffers()
@@ -172,6 +174,8 @@ namespace Hazel {
 		debugMessengerCreateInfo.pNext = NULL;
 		debugMessengerCreateInfo.flags = 0;
 		debugMessengerCreateInfo.messageSeverity = 
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		debugMessengerCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
@@ -183,7 +187,7 @@ namespace Hazel {
 		auto CreateDebugUtilsMessengerEXT =
 			(PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugUtilsMessengerEXT");
 		VkResult result = CreateDebugUtilsMessengerEXT(m_Instance, &debugMessengerCreateInfo, nullptr, &m_debugMessenger);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger callnback! {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger callback! {0}", result);
 	}
 	uint32_t VulkanContext::EvaluateDevice(VkPhysicalDevice device)
 	{
@@ -201,7 +205,8 @@ namespace Hazel {
 		}
 
 		//Check for required Queue Families
-		QueueFamilyIndices queueFamilyIndices = QueryQueueFamilies(device);
+		VulkanUtility::QueueFamilyIndices queueFamilyIndices;
+		VulkanUtility::QueryQueueFamilies(device, m_Surface, queueFamilyIndices);
 		if (!queueFamilyIndices.isComplete())
 		{
 			score = 0;
@@ -225,7 +230,8 @@ namespace Hazel {
 		}
 
 		//Verify swap chain support details
-		SwapChainSupportDetails swapChainSupportDetails = QuerySwapChainSupport(device);
+		VulkanUtility::SwapChainSupportDetails swapChainSupportDetails;
+		VulkanUtility::QuerySwapChainSupport(device, m_Surface, swapChainSupportDetails);
 		if (swapChainSupportDetails.surfaceFormats.empty() || swapChainSupportDetails.presentModes.empty())
 		{
 			score = 0;
@@ -250,71 +256,6 @@ namespace Hazel {
 		}
 
 		return score;
-	}
-
-	VulkanContext::QueueFamilyIndices VulkanContext::QueryQueueFamilies(VkPhysicalDevice device)
-	{
-		uint32_t queueFamilyCount = 0;
-		QueueFamilyIndices indices;
-		VkBool32 presentationSupport = false;
-
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-		std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-
-		int i = 0;
-		for (const auto& queueFamily : queueFamilies)
-		{
-			if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			{
-				if (!indices.graphicsFamily.has_value())
-				{
-					indices.graphicsFamily = i;
-				}
-			}
-
-			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface, &presentationSupport);
-			if (queueFamily.queueCount > 0 && presentationSupport)
-			{
-				if (!indices.presentFamily.has_value())
-				{
-					indices.presentFamily = i;
-				}
-			}
-
-			if (indices.isComplete())
-			{
-				break;
-			}
-
-			i++;
-		}
-		
-		return indices;
-	}
-
-	VulkanContext::SwapChainSupportDetails VulkanContext::QuerySwapChainSupport(VkPhysicalDevice device)
-	{
-		SwapChainSupportDetails details;
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface, &details.surfaceCapabilities);
-
-		uint32_t formatCount;
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, nullptr);
-		if (formatCount != 0)
-		{
-			details.surfaceFormats.resize(formatCount);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, details.surfaceFormats.data());
-		}
-
-		uint32_t presentModeCount;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, nullptr);
-		if (presentModeCount != 0)
-		{
-			details.presentModes.resize(presentModeCount);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, details.presentModes.data());
-
-		}
-		return details;
 	}
 
 	void VulkanContext::SelectPhysicalDevice()
@@ -345,7 +286,8 @@ namespace Hazel {
 	void VulkanContext::CreateLogicalDevice()
 	{
 		VkResult result;
-		QueueFamilyIndices queueFamilyIndices = QueryQueueFamilies(m_PhysicalDevice);
+		VulkanUtility::QueueFamilyIndices queueFamilyIndices;
+		VulkanUtility::QueryQueueFamilies(m_PhysicalDevice, m_Surface, queueFamilyIndices);
 
 		std::vector<VkDeviceQueueCreateInfo> deviceQueueCreateInfos;
 		std::unordered_set<uint32_t> uniqueDeviceQueueFamilies = { queueFamilyIndices.graphicsFamily.value(),
