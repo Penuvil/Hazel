@@ -8,15 +8,20 @@
 
 namespace Hazel {
 
+	VulkanContext* VulkanContext::s_Context = nullptr;
+
 	VulkanContext::VulkanContext(GLFWwindow* windowHandle)
 		:m_WindowHandle(windowHandle)
 	{
+		HZ_CORE_ASSERT(!s_Context, "VulkanContext already exsists!");
+		s_Context = this;
 		HZ_CORE_ASSERT(windowHandle, "Window handle is null");
 	}
 
 	VulkanContext::~VulkanContext()
 	{
 		m_SwapChain->Destroy();
+		vkDestroyCommandPool(m_LogicalDevice, m_CommandPool, nullptr);
 		vkDestroyDevice(m_LogicalDevice, nullptr);
 		if (m_EnableValidationLayers)
 		{
@@ -40,6 +45,7 @@ namespace Hazel {
 		CreateSurface();
 		SelectPhysicalDevice();
 		CreateLogicalDevice();
+		CreateCommandPool();
 		m_SwapChain.reset(new VulkanSwapChain(m_WindowHandle, m_PhysicalDevice, m_LogicalDevice, m_Surface));
 
 		VkPhysicalDeviceProperties physicalDeviceProperties;
@@ -341,6 +347,22 @@ namespace Hazel {
 		VkResult result;
 		result = glfwCreateWindowSurface(m_Instance, m_WindowHandle, nullptr, &m_Surface);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create window surface: {0}", result);
+	}
+
+	void VulkanContext::CreateCommandPool()
+	{
+		VkResult result;
+		VulkanUtility::QueueFamilyIndices queueFamilyIndices;
+		VulkanUtility::QueryQueueFamilies(m_PhysicalDevice, m_Surface, queueFamilyIndices);
+
+		VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		commandPoolCreateInfo.pNext = NULL;
+		commandPoolCreateInfo.flags = 0;
+		commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+		result = vkCreateCommandPool(m_LogicalDevice, &commandPoolCreateInfo, nullptr, &m_CommandPool);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create command pool {0}", result);
 	}
 
 }

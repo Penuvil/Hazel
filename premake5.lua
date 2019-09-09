@@ -74,7 +74,7 @@ project "Hazel"
 
 	libdirs
 	{
-		"$(VULKAN_SDK)/Lib"
+		"$(VULKAN_SDK)/Lib/Debug"
 	}
 
 	links 
@@ -96,7 +96,8 @@ project "Hazel"
 		links
 		{
 			"opengl32.lib",
-			"vulkan-1.lib"
+			"vulkan-1.lib",
+			"shaderc_combined.lib"
 		}
 
 	filter "system:linux"

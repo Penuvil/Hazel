@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace Hazel {
 
 	enum class ShaderDataType
@@ -125,6 +126,19 @@ namespace Hazel {
 		virtual uint32_t GetCount() const = 0;
 
 		static IndexBuffer* Create(uint32_t* indices, uint32_t size);
+	};
+
+	class UniformBuffer
+	{
+	public:
+		virtual ~UniformBuffer() = default;
+
+		virtual void Bind() = 0;
+		virtual void Unbind() = 0;
+
+		virtual std::variant<unsigned int, VkBuffer> GetBuffer() = 0;
+
+		static UniformBuffer* Create(std::string name, uint32_t size);
 	};
 
 }

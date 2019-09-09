@@ -1,6 +1,8 @@
 #pragma once
 
 #include "RendererAPI.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
+#include "Platform/Vulkan/VulkanRendererAPI.h"
 
 namespace Hazel {
 
@@ -9,6 +11,14 @@ namespace Hazel {
 	public:
 		inline static void Init()
 		{
+			switch (RendererAPI::GetAPI())
+			{
+			case RendererAPI::API::OpenGL:
+				s_RendererAPI = new OpenGLRendererAPI();
+				break;
+			case RendererAPI::API::Vulkan:
+				s_RendererAPI = new VulkanRendererAPI();
+			}
 			s_RendererAPI->Init();
 		}
 
@@ -20,6 +30,11 @@ namespace Hazel {
 		inline static void Clear()
 		{
 			s_RendererAPI->Clear();
+		}
+
+		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform, const glm::mat4& viewProjection)
+		{
+			s_RendererAPI->Submit(shader, vertexArray, transform, viewProjection);
 		}
 
 		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
