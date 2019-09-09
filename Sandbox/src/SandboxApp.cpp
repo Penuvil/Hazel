@@ -63,11 +63,11 @@ public:
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
 
-			layout(binding = 0) uniform UniformBufferObject
+			layout(binding = 0) uniform Matrices
 			{
 				mat4 u_ViewProjection;
 				mat4 u_Transform;
-			} ubo;
+			} mats;
 
 			layout(location = 0) out vec3 v_Position;
 			layout(location = 1) out vec4 v_Color;
@@ -76,7 +76,7 @@ public:
 			{
 				v_Position = a_Position;
 				v_Color = a_Color;
-				gl_Position = ubo.u_ViewProjection * ubo.u_Transform * vec4(a_Position, 1.0);	
+				gl_Position = mats.u_ViewProjection * mats.u_Transform * vec4(a_Position, 1.0);	
 			}
 		)";
 
@@ -98,28 +98,31 @@ public:
 		m_Shader.reset(Hazel::Shader::Create(vertexSrc, fragmentSrc));
 
 		std::string flatColorShaderVertexSrc = R"(
-			#version 330 core
+			#version 450
 			
 			layout(location = 0) in vec3 a_Position;
 
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;
+			layout(binding = 0) uniform Matrices
+			{
+				mat4 u_ViewProjection;
+				mat4 u_Transform;
+			} mats;
 
-			out vec3 v_Position;
+			layout(location = 0) out vec3 v_Position;
 
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);	
+				gl_Position = mats.u_ViewProjection * mats.u_Transform * vec4(a_Position, 1.0);	
 			}
 		)";
 
 		std::string flatColorShaderFragmentSrc = R"(
-			#version 330 core
+			#version 450
 			
 			layout(location = 0) out vec4 color;
 
-			in vec3 v_Position;
+			layout(location = 0) in vec3 v_Position;
 			
 			uniform vec3 u_Color;
 
@@ -132,29 +135,32 @@ public:
 		m_FlatColorShader.reset(Hazel::Shader::Create(flatColorShaderVertexSrc, flatColorShaderFragmentSrc));
 
 		std::string textureShaderVertexSrc = R"(
-			#version 330 core
+			#version 450
 			
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec2 a_TexCoord;
 
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;
+			layout(binding = 0) uniform Matrices
+			{
+				mat4 u_ViewProjection;
+				mat4 u_Transform;
+			} mats;
 
-			out vec2 v_TexCoord;
+			layout(location = 0) out vec2 v_TexCoord;
 
 			void main()
 			{
 				v_TexCoord = a_TexCoord;
-				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);	
+				gl_Position = mats.u_ViewProjection * mats.u_Transform * vec4(a_Position, 1.0);	
 			}
 		)";
 
 		std::string textureShaderFragmentSrc = R"(
-			#version 330 core
+			#version 450
 			
 			layout(location = 0) out vec4 color;
 
-			in vec2 v_TexCoord;
+			layout(location = 0) in vec2 v_TexCoord;
 			
 			uniform sampler2D u_Texture;
 
@@ -209,18 +215,18 @@ public:
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-		//		Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
+				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
 			}
 		}
 
 		m_Texture->Bind();
-		//Hazel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Hazel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		m_ChernoLogoTexture->Bind();
-		//Hazel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Hazel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 
 		// Triangle
-		 Hazel::Renderer::Submit(m_Shader, m_VertexArray);
+		// Hazel::Renderer::Submit(m_Shader, m_VertexArray);
 
 		Hazel::Renderer::EndScene();
 	}

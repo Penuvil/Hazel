@@ -34,12 +34,12 @@ namespace Hazel {
 		return nullptr;
 	}
 
-	UniformBuffer * UniformBuffer::Create(std::string name, uint32_t size)
+	UniformBuffer * UniformBuffer::Create(std::string name, uint32_t size, uint32_t shaderBlock)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:    HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::OpenGL:  return new OpenGLUniformBuffer(name, size);
+		case RendererAPI::API::OpenGL:  return new OpenGLUniformBuffer(name, size, shaderBlock);
 //		case RendererAPI::API::Vulkan:	return new VulkanUniformBuffer(name, size);
 		}
 

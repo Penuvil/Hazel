@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace Hazel {
 
 	enum class ShaderDataType
@@ -136,9 +135,10 @@ namespace Hazel {
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
-		virtual std::variant<unsigned int, VkBuffer> GetBuffer() = 0;
+//		virtual std::variant<unsigned int, VkBuffer> GetBuffer() = 0;
+		virtual std::string GetName() = 0;
 
-		static UniformBuffer* Create(std::string name, uint32_t size);
+		static UniformBuffer* Create(std::string name, uint32_t size, uint32_t shaderBlock);
 	};
 
 }

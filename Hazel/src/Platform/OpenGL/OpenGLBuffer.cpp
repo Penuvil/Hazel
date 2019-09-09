@@ -58,4 +58,30 @@ namespace Hazel {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
+	OpenGLUniformBuffer::OpenGLUniformBuffer(std::string name, uint32_t size, uint32_t shaderBlock)
+		: m_Name(name), m_ShaderBlock(shaderBlock)
+	{
+		glCreateBuffers(1, &m_Buffer);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_Buffer);
+		glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+	OpenGLUniformBuffer::~OpenGLUniformBuffer()
+	{
+		glDeleteBuffers(1, &m_Buffer);
+	}
+
+	void OpenGLUniformBuffer::Bind()
+	{
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_ShaderBlock, m_Buffer);
+	}
+
+	void OpenGLUniformBuffer::Unbind()
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+
+
 }
