@@ -96,6 +96,7 @@ public:
 		)";
 
 		m_Shader = Hazel::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
+		m_ShaderLibrary.Add(m_Shader);
 
 		std::string flatColorShaderVertexSrc = R"(
 			#version 450
@@ -133,6 +134,7 @@ public:
 		)";
 
 		m_FlatColorShader = Hazel::Shader::Create("FlatColor", flatColorShaderVertexSrc, flatColorShaderFragmentSrc);
+		m_ShaderLibrary.Add(m_FlatColorShader);
 
 		auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 

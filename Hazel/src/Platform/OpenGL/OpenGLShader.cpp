@@ -171,6 +171,17 @@ namespace Hazel {
 		glUseProgram(0);
 	}
 
+	void OpenGLShader::SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers)
+	{
+		m_UniformBuffers = buffers;
+	}
+
+	Ref<UniformBuffer> OpenGLShader::GetUniformBuffer(const std::string & name) const
+	{
+		HZ_CORE_ASSERT(m_UniformBuffers->find(name) != m_UniformBuffers->end(), "Uniform buffer not found! {0}", name);
+		return m_UniformBuffers->find(name)->second;
+	}
+
 	void OpenGLShader::UploadUniformInt(const std::string& name, int value)
 	{
 		GLint location = glGetUniformLocation(m_RendererID, name.c_str());

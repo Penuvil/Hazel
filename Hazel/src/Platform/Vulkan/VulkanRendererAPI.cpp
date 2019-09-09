@@ -15,9 +15,9 @@ namespace Hazel {
 	{
 	}
 
-	void VulkanRendererAPI::AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer)
-	{
-	}
+	//void VulkanRendererAPI::AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer)
+	//{
+	//}
 
 	void VulkanRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4 & transform, const glm::mat4 & viewProjection)
 	{

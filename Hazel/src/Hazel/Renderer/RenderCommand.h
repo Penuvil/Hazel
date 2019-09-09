@@ -32,10 +32,10 @@ namespace Hazel {
 			s_RendererAPI->Clear();
 		}
 
-		inline static void AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer)
-		{
-			s_RendererAPI->AddUniformBuffer(buffer);
-		}
+		//inline static void AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer)
+		//{
+		//	s_RendererAPI->AddUniformBuffer(buffer);
+		//}
 
 		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform, const glm::mat4& viewProjection)
 		{
