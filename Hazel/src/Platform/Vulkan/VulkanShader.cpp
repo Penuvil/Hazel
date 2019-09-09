@@ -5,7 +5,11 @@
 #include <shaderc/shaderc.hpp>
 
 namespace Hazel {
-	VulkanShader::VulkanShader(const std::string& vertexSrc, const std::string& fragmentSource)
+	VulkanShader::VulkanShader(const std::string & filepath)
+	{
+	}
+
+	VulkanShader::VulkanShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSource)
 	{
 
 		shaderc::Compiler shaderCompiler;
