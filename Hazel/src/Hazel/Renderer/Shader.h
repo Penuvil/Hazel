@@ -20,8 +20,8 @@ namespace Hazel {
 		virtual void SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers) = 0;
 		virtual inline Ref<UniformBuffer> GetUniformBuffer(const std::string& name) const = 0;
 
-		static Ref<Shader> Create(const std::string& filepath);
-		static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
+		static Ref<Shader> Create(const std::string& filepath, const BufferLayout& vertexBufferLayout);
+		static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc, const BufferLayout& vertexBufferLayout);
 
 	};
 
@@ -34,8 +34,8 @@ namespace Hazel {
 		void Add(const Ref<Shader>& shader);
 		void AddUniformBuffer(const Ref<UniformBuffer>& buffer);
 
-		Ref<Shader> Load(const std::string& filepath);
-		Ref<Shader> Load(const std::string& name, const std::string& filepath);
+		Ref<Shader> Load(const std::string& filepath, const BufferLayout& vertexBufferLayout);
+		Ref<Shader> Load(const std::string& name, const std::string& filepath, const BufferLayout& vertexBufferLayout);
 
 		Ref<Shader> Get(const std::string& name);
 		Ref<UniformBuffer> GetUniformBuffer(const std::string& name);

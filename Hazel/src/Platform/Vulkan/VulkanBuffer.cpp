@@ -5,6 +5,10 @@
 
 namespace Hazel {
 
+	/////////////////////////////////////////////////////////////////////////////
+	// VertexBuffer /////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+
 	VulkanVertexBuffer::VulkanVertexBuffer(float * vertices, uint32_t size)
 	{
 		m_Vertices.resize(size / sizeof(float));
@@ -56,6 +60,10 @@ namespace Hazel {
 		m_Layout = layout;
 	}
 
+	/////////////////////////////////////////////////////////////////////////////
+	// IndexBuffer //////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+
 	VulkanIndexBuffer::VulkanIndexBuffer(uint32_t * indices, uint32_t count)
 		:m_Count(count)
 	{
@@ -99,6 +107,38 @@ namespace Hazel {
 
 	void VulkanIndexBuffer::Unbind() const
 	{
+	}
+
+	/////////////////////////////////////////////////////////////////////////////
+	// UniformBuffer ////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+
+	VulkanUniformBuffer::VulkanUniformBuffer(std::string name, uint32_t size, uint32_t shaderBlock)
+	{
+		m_Name = name;
+		uint32_t swapImageCount = VulkanContext::GetContext().GetSwapChain()->GetImageCount();
+
+		m_Buffers.resize(swapImageCount);
+
+		VulkanUtility::CreateBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Buffers, m_BufferMemory);
+	}
+
+	VulkanUniformBuffer::~VulkanUniformBuffer()
+	{
+	}
+
+	void VulkanUniformBuffer::Bind()
+	{
+	}
+
+	void VulkanUniformBuffer::Unbind()
+	{
+	}
+
+	std::string VulkanUniformBuffer::GetName()
+	{
+		return m_Name;
 	}
 
 }

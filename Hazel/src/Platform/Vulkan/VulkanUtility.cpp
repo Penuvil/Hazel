@@ -124,6 +124,49 @@ namespace Hazel {
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind buffer memory!");
 	}
 
+	void VulkanUtility::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, std::vector<VkBuffer> & buffers, VkDeviceMemory & bufferMemory)
+	{
+		VkResult result;
+		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		VkBufferCreateInfo bufferCreateInfo = {};
+		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferCreateInfo.pNext = NULL;
+		bufferCreateInfo.flags = 0;
+		bufferCreateInfo.size = size;
+		bufferCreateInfo.usage = bufferUsage;
+		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		bufferCreateInfo.queueFamilyIndexCount = 0;
+		bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+		for (auto& buffer : buffers) 
+		{
+			result = vkCreateBuffer(*device, &bufferCreateInfo, nullptr, &buffer);
+			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create vertex buffer!");
+		}
+
+		VkMemoryRequirements memoryRequirements;
+		vkGetBufferMemoryRequirements(*device, buffers[0], &memoryRequirements);
+
+
+		uint32_t memoryTypeIndex = UINT32_MAX;
+		memoryTypeIndex = VulkanUtility::FindMemoryTypeIndex(memoryRequirements.memoryTypeBits, propertyFlags);
+
+		VkMemoryAllocateInfo memoryAllocateInfo = {};
+		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memoryAllocateInfo.pNext = NULL;
+		memoryAllocateInfo.allocationSize = memoryRequirements.size * buffers.size();
+		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
+
+		result = vkAllocateMemory(*device, &memoryAllocateInfo, nullptr, &bufferMemory);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate buffer memory!");
+		
+		for (int i = 0; i < buffers.size(); i++)
+		{
+			result = vkBindBufferMemory(*device, buffers[i], bufferMemory, i * size);
+			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind buffer memory!");
+		}
+	}
+
 	void VulkanUtility::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 	{ 
 		VkResult result;

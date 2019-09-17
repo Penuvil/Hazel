@@ -8,6 +8,9 @@ namespace Hazel
 	public:
 		VulkanSwapChain(GLFWwindow* windowHandle, VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface);
 		void Destroy();
+
+		inline uint32_t GetImageCount() { return static_cast<uint32_t>(m_SwapChainImages.size()); }
+		inline const VkExtent2D* GetExtent2D() { return &m_SwapChainExtent; } 
 	private:
 		void Init();
 		void CreateSwapChain();

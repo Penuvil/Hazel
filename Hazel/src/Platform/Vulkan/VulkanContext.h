@@ -22,6 +22,7 @@ namespace Hazel {
 		inline VkPhysicalDevice* GetPhysicalDevice() { return &m_PhysicalDevice; }
 		inline VkCommandPool* GetCommandPool() { return &m_CommandPool; }
 		inline VkQueue* GetGraphicsQueue() { return &m_GraphicsQueue; }
+		inline Ref<VulkanSwapChain> GetSwapChain() { return m_SwapChain; }
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

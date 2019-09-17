@@ -26,6 +26,8 @@ namespace Hazel {
 
 		const auto& layout = vertexBuffer->GetLayout();
 
+		//Broken -- needs to be fixed to make format correct
+
 		m_VertexInputBindingDescription.binding = 0;
 		m_VertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		m_VertexInputBindingDescription.stride = layout.GetStride();

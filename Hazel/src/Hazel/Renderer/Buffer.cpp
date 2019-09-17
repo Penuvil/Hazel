@@ -40,7 +40,7 @@ namespace Hazel {
 		{
 		case RendererAPI::API::None:    HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 		case RendererAPI::API::OpenGL:  return new OpenGLUniformBuffer(name, size, shaderBlock);
-//		case RendererAPI::API::Vulkan:	return new VulkanUniformBuffer(name, size);
+		case RendererAPI::API::Vulkan:	return new VulkanUniformBuffer(name, size, shaderBlock);
 		}
 
 		HZ_CORE_ASSERT(false, "Unknown RendererAPI!");

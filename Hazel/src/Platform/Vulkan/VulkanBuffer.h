@@ -42,4 +42,20 @@ namespace Hazel {
 		VkBuffer m_Buffer;
 		VkDeviceMemory m_BufferMemory;
 	};
+
+	class VulkanUniformBuffer : public UniformBuffer
+	{	
+	public:
+		VulkanUniformBuffer(std::string name, uint32_t size, uint32_t shaderBlock);
+		virtual ~VulkanUniformBuffer();
+
+		// Inherited via UniformBuffer
+		virtual void Bind() override;
+		virtual void Unbind() override;
+		virtual std::string GetName() override;
+	private:
+		std::string m_Name;
+		std::vector<VkBuffer> m_Buffers;
+		VkDeviceMemory m_BufferMemory;
+	};
 }
