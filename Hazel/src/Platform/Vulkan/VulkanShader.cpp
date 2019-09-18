@@ -22,6 +22,7 @@ namespace Hazel {
 	VulkanShader::~VulkanShader()
 	{
 		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		vkDestroyPipeline(*device, m_GraphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(*device, m_PipelineLayout, nullptr);
 		vkDestroyDescriptorSetLayout(*device, m_DescriptorSetLayout, nullptr);
 	}
@@ -44,16 +45,16 @@ namespace Hazel {
 		return shaderModule;
 	}
 
-	std::vector<uint32_t> VulkanShader::Compile(const std::string& shaderSource)
+	std::vector<uint32_t> VulkanShader::Compile(const std::string& shaderSource, shaderc_shader_kind shaderType)
 	{
 		shaderc::Compiler shaderCompiler;
 		shaderc::CompileOptions compileOptions;
 		shaderc::SpvCompilationResult spvCompilationResult;
 		
-		spvCompilationResult = shaderCompiler.CompileGlslToSpv(shaderSource, shaderc_vertex_shader, "Shader", "main", compileOptions);
+		spvCompilationResult = shaderCompiler.CompileGlslToSpv(shaderSource, shaderType, "Shader", "main", compileOptions);
 		HZ_CORE_ASSERT(spvCompilationResult.GetCompilationStatus() == shaderc_compilation_status_success, "Shader compilaton failed! " + spvCompilationResult.GetErrorMessage());
-		std::vector<uint32_t> buffer;
-		buffer.reserve(std::distance(spvCompilationResult.cbegin(), spvCompilationResult.cend()));
+		std::vector<uint32_t> buffer;		
+		buffer.reserve(std::distance(spvCompilationResult.cbegin(), spvCompilationResult.cend()) + 1);
 		for (auto iter = spvCompilationResult.cbegin(); iter < spvCompilationResult.cend(); iter++)
 		{
 			buffer.push_back(*iter);
@@ -64,8 +65,8 @@ namespace Hazel {
 	void VulkanShader::CreateGraphicsPipeline(const std::string & vertexSrc, const std::string & fragmentSrc, const BufferLayout& vertexBufferLayout)
 	{
 		VkDevice* device = VulkanContext::GetContext().GetDevice();
-		std::vector<uint32_t> vertexShaderCode = Compile(vertexSrc);
-		std::vector<uint32_t> fragmentShaderCode = Compile(fragmentSrc);
+		std::vector<uint32_t> vertexShaderCode = Compile(vertexSrc, shaderc_vertex_shader);
+		std::vector<uint32_t> fragmentShaderCode = Compile(fragmentSrc, shaderc_fragment_shader);
 
 		VkShaderModule vertexShaderModule = CreateShaderModule(vertexShaderCode);
 		VkShaderModule fragmentShaderModule = CreateShaderModule(fragmentShaderCode);
@@ -121,8 +122,8 @@ namespace Hazel {
 		}
 		vertexInputAttributeDescriptions[0].offset = vertexBufferLayout.GetElements()[0].Offset;
 
-		vertexInputAttributeDescriptions[1].location = 0;
-		vertexInputAttributeDescriptions[1].binding = 1;
+		vertexInputAttributeDescriptions[1].location = 1;
+		vertexInputAttributeDescriptions[1].binding = 0;
 		switch (vertexBufferLayout.GetElements()[1].GetComponentCount())
 		{
 		case 1:
@@ -274,6 +275,30 @@ namespace Hazel {
 
 		result = vkCreatePipelineLayout(*device, &layoutCreateInfo, nullptr, &m_PipelineLayout);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed tp create pipeline layout! " + result);
+
+		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
+		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineCreateInfo.pNext = NULL;
+		pipelineCreateInfo.flags = 0;
+		pipelineCreateInfo.stageCount = 2;
+		pipelineCreateInfo.pStages = shaderStageCreateInfos;
+		pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
+		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+		pipelineCreateInfo.pTessellationState = nullptr;
+		pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+		pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
+		pipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
+		pipelineCreateInfo.pDepthStencilState = nullptr;
+		pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
+		pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
+		pipelineCreateInfo.layout = m_PipelineLayout;
+		pipelineCreateInfo.renderPass = *VulkanContext::GetContext().GetSwapChain()->GetRenderPass();
+		pipelineCreateInfo.subpass = 0;
+		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+		pipelineCreateInfo.basePipelineIndex = -1;
+
+		result = vkCreateGraphicsPipelines(*device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_GraphicsPipeline);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create graphics pipeline! " + result);
 
 		vkDestroyShaderModule(*device, vertexShaderModule, nullptr);
 		vkDestroyShaderModule(*device, fragmentShaderModule, nullptr);

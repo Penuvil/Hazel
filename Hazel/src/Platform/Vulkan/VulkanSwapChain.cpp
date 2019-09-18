@@ -15,6 +15,7 @@ namespace Hazel
 	{
 		CreateSwapChain();
 		CreateImageViews();
+		CreateRenderPass();
 	}
 
 	void VulkanSwapChain::CreateSwapChain()
@@ -106,6 +107,50 @@ namespace Hazel
 		}
 	}
 
+	void VulkanSwapChain::CreateRenderPass()
+	{
+		VkAttachmentDescription colorAttachment = {};
+		colorAttachment.flags = 0;
+		colorAttachment.format = m_SwapChainImageFormat;
+		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		VkAttachmentReference colorAttachmentRef = {};
+		colorAttachmentRef.attachment = 0;
+		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		VkSubpassDescription subpassDescription = {};
+		subpassDescription.flags = 0;
+		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpassDescription.inputAttachmentCount = 0;
+		subpassDescription.pInputAttachments = nullptr;
+		subpassDescription.colorAttachmentCount = 1;
+		subpassDescription.pColorAttachments = &colorAttachmentRef;
+		subpassDescription.pResolveAttachments = nullptr;
+		subpassDescription.pDepthStencilAttachment = nullptr;
+		subpassDescription.preserveAttachmentCount = 0;
+		subpassDescription.pPreserveAttachments = nullptr;
+
+		VkRenderPassCreateInfo renderPassCreateInfo = {};
+		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassCreateInfo.pNext = NULL;
+		renderPassCreateInfo.flags = 0;
+		renderPassCreateInfo.attachmentCount = 1;
+		renderPassCreateInfo.pAttachments = &colorAttachment;
+		renderPassCreateInfo.subpassCount = 1;
+		renderPassCreateInfo.pSubpasses = &subpassDescription;
+		renderPassCreateInfo.dependencyCount = 0;
+		renderPassCreateInfo.pDependencies = nullptr;
+
+		VkResult result = vkCreateRenderPass(m_Device, &renderPassCreateInfo, nullptr, &m_RenderPass);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
+	}
+
 	VkSurfaceFormatKHR VulkanSwapChain::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& supportedFormats)
 	{
 		for (const auto& format : supportedFormats)
@@ -155,10 +200,13 @@ namespace Hazel
 
 	void VulkanSwapChain::Destroy()
 	{
+		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
+
 		for (auto imageview : m_SwapChainImageViews) 
 		{
 			vkDestroyImageView(m_Device, imageview, nullptr);
 		}
+
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
 	}
 }

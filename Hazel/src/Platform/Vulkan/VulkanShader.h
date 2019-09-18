@@ -15,7 +15,7 @@ namespace Hazel {
 		virtual ~VulkanShader();
 
 		VkShaderModule CreateShaderModule(std::vector<uint32_t>& code);
-		std::vector<uint32_t> Compile(const std::string& shaderSource);
+		std::vector<uint32_t> Compile(const std::string& shaderSource, shaderc_shader_kind shaderType);
 		void CreateGraphicsPipeline(const std::string& vertexSrc, const std::string& fragmentSrc, const BufferLayout& vertexBufferLayout);
 
 		// Inherited via Shader
@@ -32,5 +32,6 @@ namespace Hazel {
 		Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> m_UniformBuffers;
 		VkDescriptorSetLayout m_DescriptorSetLayout;
 		VkPipelineLayout m_PipelineLayout;
+		VkPipeline m_GraphicsPipeline;
 	};
 }
