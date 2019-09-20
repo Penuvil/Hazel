@@ -69,7 +69,7 @@ project "Hazel"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
-		"$(VULKAN_SDK)/Include"
+		"$(VULKAN_SDK)/include"
 	}
 
 	libdirs
@@ -174,7 +174,13 @@ project "Sandbox"
 		links
 		{
 			"imgui",
-			"glad"
+			"glad",
+			"vulkan",
+			"shaderc_combined",
+			"SPIRV",
+			"SPIRV-Tools",
+			"SPIRV-Tools-opt",
+			"glslang"
 		}
 
 		linkoptions
