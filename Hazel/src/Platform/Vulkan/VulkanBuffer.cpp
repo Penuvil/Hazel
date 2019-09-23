@@ -16,7 +16,7 @@ namespace Hazel {
 		{
 			m_Vertices[i] = *(vertices + i);
 		}
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 		VkDeviceSize bufferSize = sizeof(m_Vertices[0]) * m_Vertices.size();
 
 		VkBuffer stagingBuffer;
@@ -42,7 +42,7 @@ namespace Hazel {
 
 	VulkanVertexBuffer::~VulkanVertexBuffer()
 	{
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 		vkDestroyBuffer(*device, m_Buffer, nullptr);
 		vkFreeMemory(*device, m_BufferMemory, nullptr);
 	}
@@ -72,7 +72,7 @@ namespace Hazel {
 		{
 			m_Indices[i] = *(indices + i);
 		}
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 		VkDeviceSize bufferSize = sizeof(m_Indices[0]) * m_Indices.size();
 
 		VkBuffer stagingBuffer;
@@ -96,7 +96,7 @@ namespace Hazel {
 
 	VulkanIndexBuffer::~VulkanIndexBuffer()
 	{
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 		vkDestroyBuffer(*device, m_Buffer, nullptr);
 		vkFreeMemory(*device, m_BufferMemory, nullptr);
 	}
@@ -116,7 +116,7 @@ namespace Hazel {
 	VulkanUniformBuffer::VulkanUniformBuffer(std::string name, uint32_t size, uint32_t shaderBlock)
 	{
 		m_Name = name;
-		uint32_t swapImageCount = VulkanContext::GetContext().GetSwapChain()->GetImageCount();
+		uint32_t swapImageCount = VulkanContext::GetContext()->GetSwapChain()->GetImageCount();
 
 		m_Buffers.resize(swapImageCount);
 

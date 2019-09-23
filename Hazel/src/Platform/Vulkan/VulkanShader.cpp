@@ -21,10 +21,10 @@ namespace Hazel {
 
 	VulkanShader::~VulkanShader()
 	{
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
-		vkDestroyPipeline(*device, m_GraphicsPipeline, nullptr);
-		vkDestroyPipelineLayout(*device, m_PipelineLayout, nullptr);
-		vkDestroyDescriptorSetLayout(*device, m_DescriptorSetLayout, nullptr);
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
+//		vkDestroyPipeline(*device, m_GraphicsPipeline, nullptr);
+//		vkDestroyPipelineLayout(*device, m_PipelineLayout, nullptr);
+//		vkDestroyDescriptorSetLayout(*device, m_DescriptorSetLayout, nullptr);
 	}
 
 	VkShaderModule VulkanShader::CreateShaderModule(std::vector<uint32_t>& code)
@@ -39,7 +39,7 @@ namespace Hazel {
 		shaderModuleCreateInfo.codeSize = sizeof(code[0]) * code.size() ;
 		shaderModuleCreateInfo.pCode = code.data();
 
-		result = vkCreateShaderModule(*VulkanContext::GetContext().GetDevice(), &shaderModuleCreateInfo, nullptr, &shaderModule);
+		result = vkCreateShaderModule(*VulkanContext::GetContext()->GetDevice(), &shaderModuleCreateInfo, nullptr, &shaderModule);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create shader module! " + result);
 		
 		return shaderModule;
@@ -64,7 +64,7 @@ namespace Hazel {
 
 	void VulkanShader::CreateGraphicsPipeline(const std::string & vertexSrc, const std::string & fragmentSrc, const BufferLayout& vertexBufferLayout)
 	{
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 		std::vector<uint32_t> vertexShaderCode = Compile(vertexSrc, shaderc_vertex_shader);
 		std::vector<uint32_t> fragmentShaderCode = Compile(fragmentSrc, shaderc_fragment_shader);
 
@@ -163,7 +163,7 @@ namespace Hazel {
 		inputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
-		const VkExtent2D* swapChainExtent = VulkanContext::GetContext().GetSwapChain()->GetExtent2D();
+		const VkExtent2D* swapChainExtent = VulkanContext::GetContext()->GetSwapChain()->GetExtent2D();
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
@@ -292,7 +292,7 @@ namespace Hazel {
 		pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		pipelineCreateInfo.layout = m_PipelineLayout;
-		pipelineCreateInfo.renderPass = *VulkanContext::GetContext().GetSwapChain()->GetRenderPass();
+		pipelineCreateInfo.renderPass = *VulkanContext::GetContext()->GetSwapChain()->GetRenderPass();
 		pipelineCreateInfo.subpass = 0;
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineCreateInfo.basePipelineIndex = -1;

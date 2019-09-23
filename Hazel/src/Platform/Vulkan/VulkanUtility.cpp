@@ -72,7 +72,7 @@ namespace Hazel {
 
 	uint32_t VulkanUtility::FindMemoryTypeIndex(uint32_t typeRequirement, VkMemoryPropertyFlags propertyFlags)
 	{
-		VkPhysicalDevice* physicalDevice = VulkanContext::GetContext().GetPhysicalDevice();
+		VkPhysicalDevice* physicalDevice = VulkanContext::GetContext()->GetPhysicalDevice();
 		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
 		vkGetPhysicalDeviceMemoryProperties(*physicalDevice, &physicalDeviceMemoryProperties);
 
@@ -90,7 +90,7 @@ namespace Hazel {
 	void VulkanUtility::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, VkBuffer & buffer, VkDeviceMemory & bufferMemory)
 	{
 		VkResult result;
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 		VkBufferCreateInfo bufferCreateInfo = {};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCreateInfo.pNext = NULL;
@@ -127,7 +127,7 @@ namespace Hazel {
 	void VulkanUtility::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, std::vector<VkBuffer> & buffers, VkDeviceMemory & bufferMemory)
 	{
 		VkResult result;
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 		VkBufferCreateInfo bufferCreateInfo = {};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCreateInfo.pNext = NULL;
@@ -170,8 +170,8 @@ namespace Hazel {
 	void VulkanUtility::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 	{ 
 		VkResult result;
-		VkDevice* device = VulkanContext::GetContext().GetDevice();
-		VkCommandPool* commandPool = VulkanContext::GetContext().GetCommandPool();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
+		VkCommandPool* commandPool = VulkanContext::GetContext()->GetCommandPool();
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
 		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		commandBufferAllocateInfo.pNext = NULL;
@@ -213,7 +213,7 @@ namespace Hazel {
 		submitInfo.signalSemaphoreCount = 0;
 		submitInfo.pSignalSemaphores = nullptr;
 
-		VkQueue* graphicsQueue = VulkanContext::GetContext().GetGraphicsQueue();
+		VkQueue* graphicsQueue = VulkanContext::GetContext()->GetGraphicsQueue();
 		result = vkQueueSubmit(*graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command buffers to queue! {0}", result);
 		vkQueueWaitIdle(*graphicsQueue);

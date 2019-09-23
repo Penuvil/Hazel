@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Hazel/Layer.h"
 #include "Hazel/ImGui/ImGuiAPI.h"
 
 #include "Hazel/Events/ApplicationEvent.h"
@@ -9,21 +8,20 @@
 
 namespace Hazel {
 
-	class HAZEL_API ImGuiLayer : public Layer
+	class HAZEL_API OpenGLImGuiAPI : public ImGuiAPI
 	{
 	public:
-		ImGuiLayer();
-		~ImGuiLayer() = default;
+		OpenGLImGuiAPI();
+		~OpenGLImGuiAPI() = default;
 
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
+		virtual void Init() override;
+		virtual void Shutdown() override;
 		virtual void OnImGuiRender() override;
 
-		virtual void Begin();
-		virtual void End();
+		virtual void Begin() override;
+		virtual void End() override;
 	private:
 		float m_Time = 0.0f;
-		static ImGuiAPI* s_ImGuiAIP;
 	};
 
 }

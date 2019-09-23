@@ -16,6 +16,7 @@ namespace Hazel
 		CreateSwapChain();
 		CreateImageViews();
 		CreateRenderPass();
+		CreateDescriptorPool();
 	}
 
 	void VulkanSwapChain::CreateSwapChain()
@@ -34,9 +35,9 @@ namespace Hazel
 			imageCount = swapChainSupportDetails.surfaceCapabilities.maxImageCount;
 		}
 
-		VulkanUtility::QueueFamilyIndices queueFamilyIndices;
-		VulkanUtility::QueryQueueFamilies(m_PhysicalDevice, m_Surface, queueFamilyIndices);
-		uint32_t indices[] = { queueFamilyIndices.graphicsFamily.value(), queueFamilyIndices.presentFamily.value() };
+		
+		VulkanUtility::QueryQueueFamilies(m_PhysicalDevice, m_Surface, m_QueueFamilyIndices);
+		uint32_t indices[] = { m_QueueFamilyIndices.graphicsFamily.value(), m_QueueFamilyIndices.presentFamily.value() };
 
 		VkSwapchainCreateInfoKHR swapChainCreateInfo = {};
 		swapChainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -49,7 +50,7 @@ namespace Hazel
 		swapChainCreateInfo.imageExtent = extent;
 		swapChainCreateInfo.imageArrayLayers = 1;
 		swapChainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-		if (queueFamilyIndices.graphicsFamily.value() != queueFamilyIndices.presentFamily.value())
+		if (m_QueueFamilyIndices.graphicsFamily.value() != m_QueueFamilyIndices.presentFamily.value())
 		{
 			swapChainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 			swapChainCreateInfo.queueFamilyIndexCount = 2;
@@ -151,6 +152,24 @@ namespace Hazel
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
 	}
 
+	void VulkanSwapChain::CreateDescriptorPool()
+	{
+		VkDescriptorPoolSize descriptorPoolSize = {};
+		descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorPoolSize.descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size());
+
+		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
+		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		descriptorPoolCreateInfo.pNext = NULL;
+		descriptorPoolCreateInfo.flags = 0;
+		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size());
+		descriptorPoolCreateInfo.poolSizeCount = 1;
+		descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
+
+		VkResult result = vkCreateDescriptorPool(m_Device, &descriptorPoolCreateInfo, nullptr, &m_DescriptorPool);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool! " + result);
+	}
+
 	VkSurfaceFormatKHR VulkanSwapChain::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& supportedFormats)
 	{
 		for (const auto& format : supportedFormats)
@@ -200,6 +219,7 @@ namespace Hazel
 
 	void VulkanSwapChain::Destroy()
 	{
+		vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 
 		for (auto imageview : m_SwapChainImageViews) 

@@ -18,6 +18,7 @@ namespace Hazel {
 		virtual void Init() override;
 		virtual void SwapBuffers() override;
 
+		inline VkInstance* GetInstance() { return &m_Instance; }
 		inline VkDevice* GetDevice() { return &m_LogicalDevice; }
 		inline VkPhysicalDevice* GetPhysicalDevice() { return &m_PhysicalDevice; }
 		inline VkCommandPool* GetCommandPool() { return &m_CommandPool; }
@@ -29,7 +30,7 @@ namespace Hazel {
 			VkDebugUtilsMessageSeverityFlagsEXT messageType,
 			const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
 			void* userData);
-		inline static VulkanContext& GetContext() { return *s_Context; }
+		inline static VulkanContext* GetContext() { return s_Context; }
 	private:
 		const std::vector<const char*> m_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 		const std::vector<const char*> m_DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };

@@ -18,6 +18,7 @@ namespace Hazel {
 				break;
 			case RendererAPI::API::Vulkan:
 				s_RendererAPI = new VulkanRendererAPI();
+				break;
 			}
 			s_RendererAPI->Init();
 		}
