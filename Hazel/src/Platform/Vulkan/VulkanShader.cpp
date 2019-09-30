@@ -2,6 +2,7 @@
 
 #include "Platform/Vulkan/VulkanContext.h"
 #include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanBuffer.h"
 
 
 
@@ -193,7 +194,7 @@ namespace Hazel {
 		rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
 		rasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
 		rasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
 		rasterizationStateCreateInfo.depthBiasClamp = 0.0f;
@@ -246,30 +247,14 @@ namespace Hazel {
 		dynamicStateCreateInfo.dynamicStateCount = 2;
 		dynamicStateCreateInfo.pDynamicStates = dynamicStates;
 
-		VkDescriptorSetLayoutBinding matricesUboLayoutBinding = {};
-		matricesUboLayoutBinding.binding = 0;
-		matricesUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		matricesUboLayoutBinding.descriptorCount = 1;
-		matricesUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		matricesUboLayoutBinding.pImmutableSamplers = nullptr;
-
-		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
-		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorSetLayoutCreateInfo.pNext = NULL;
-		descriptorSetLayoutCreateInfo.flags = 0;
-		descriptorSetLayoutCreateInfo.bindingCount = 1;
-		descriptorSetLayoutCreateInfo.pBindings = &matricesUboLayoutBinding;
-
 		VkResult result;
-		result = vkCreateDescriptorSetLayout(*device, &descriptorSetLayoutCreateInfo, nullptr, &m_DescriptorSetLayout);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor sey layout! " + result);
 
 		VkPipelineLayoutCreateInfo layoutCreateInfo = {};
 		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		layoutCreateInfo.pNext = NULL;
 		layoutCreateInfo.flags = 0;
 		layoutCreateInfo.setLayoutCount = 1;
-		layoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
+		layoutCreateInfo.pSetLayouts = std::static_pointer_cast<VulkanUniformBuffer>(ShaderLibrary::GetInstance()->GetUniformBuffer("Matrices"))->GetDescriptorSetLayout();
 		layoutCreateInfo.pushConstantRangeCount = 0;
 		layoutCreateInfo.pPushConstantRanges = nullptr;
 

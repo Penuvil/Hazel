@@ -162,8 +162,8 @@ public:
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
 			m_CameraRotation -= m_CameraRotationSpeed * ts;
 
-		Hazel::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-		Hazel::RenderCommand::Clear();
+		Hazel::Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		Hazel::Renderer::Clear();
 
 		m_Camera.SetPosition(m_CameraPosition);
 		m_Camera.SetRotation(m_CameraRotation);

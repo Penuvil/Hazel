@@ -6,6 +6,8 @@
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
+#include <vulkan/vulkan.h>
+
 namespace Hazel {
 
 	class VulkanImGuiAPI : public ImGuiAPI
@@ -25,5 +27,6 @@ namespace Hazel {
 
 	private:
 		float m_Time = 0.0f;
+		VkCommandBuffer* m_CommandBuffer;
 	};
 }

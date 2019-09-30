@@ -40,10 +40,14 @@ namespace Hazel {
 		Ref<Shader> Get(const std::string& name);
 		Ref<UniformBuffer> GetUniformBuffer(const std::string& name);
 
+		static ShaderLibrary* GetInstance() { return s_ShaderLibrary; }
+
 		bool Exists(const std::string& name) const;
 	private:
 		std::unordered_map<std::string, Ref<Shader>> m_Shaders;
 		Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> m_UniformBuffers;
+
+		static ShaderLibrary* s_ShaderLibrary;
 	};
 
 }

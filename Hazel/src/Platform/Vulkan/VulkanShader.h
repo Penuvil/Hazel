@@ -14,9 +14,9 @@ namespace Hazel {
 		VulkanShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc, const BufferLayout& vertexBufferLayout);
 		virtual ~VulkanShader();
 
-		VkShaderModule CreateShaderModule(std::vector<uint32_t>& code);
-		std::vector<uint32_t> Compile(const std::string& shaderSource, shaderc_shader_kind shaderType);
-		void CreateGraphicsPipeline(const std::string& vertexSrc, const std::string& fragmentSrc, const BufferLayout& vertexBufferLayout);
+		inline  VkPipeline* GetGraphicsPipeline() { return &m_GraphicsPipeline; }
+		inline VkPipelineLayout* GetGraphicsPipelineLayout() { return &m_PipelineLayout; }
+//		inline std::vector<VkDescriptorSet>* GetDescriptorSets() { return &m_DecsriptorSets; }
 
 		// Inherited via Shader
 		virtual void Bind() const override;
@@ -26,11 +26,13 @@ namespace Hazel {
 
 		virtual void SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers) override;
 		virtual	Ref<UniformBuffer> GetUniformBuffer(const std::string& name) const override;
-
+	private:
+		VkShaderModule CreateShaderModule(std::vector<uint32_t>& code);
+		std::vector<uint32_t> Compile(const std::string& shaderSource, shaderc_shader_kind shaderType);
+		void CreateGraphicsPipeline(const std::string& vertexSrc, const std::string& fragmentSrc, const BufferLayout& vertexBufferLayout);
 	private:
 		std::string m_Name;
 		Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> m_UniformBuffers;
-		VkDescriptorSetLayout m_DescriptorSetLayout;
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 	};

@@ -1,6 +1,6 @@
 #include "hzpch.h"
 #include "Renderer.h"
-
+#include "RenderCommand.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Hazel {
@@ -21,20 +21,19 @@ namespace Hazel {
 	{
 	}
 
-	//void Renderer::AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer)
-	//{
-	//	RenderCommand::AddUniformBuffer(buffer);
-	//}
+	void Renderer::SetClearColor(const glm::vec4 & color)
+	{
+		RenderCommand::SetClearColor(color);
+	}
+
+	void Renderer::Clear()
+	{
+		RenderCommand::Clear();
+	}
 
 	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		RenderCommand::Submit(shader, vertexArray, transform, s_SceneData->ViewProjectionMatrix);
-//		shader->Bind();
-// 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
-//		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
-//
-//		vertexArray->Bind();
-//		RenderCommand::DrawIndexed(vertexArray);
 	}
 
 }

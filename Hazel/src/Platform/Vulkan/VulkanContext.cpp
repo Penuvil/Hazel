@@ -336,7 +336,7 @@ namespace Hazel {
 		deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
 		result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create logical deivce: {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create logical deivce! " + result);
 
 		vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.graphicsFamily.value(), 0, &m_GraphicsQueue);
 		vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.presentFamily.value(), 0, &m_PresentQueue);
@@ -346,7 +346,7 @@ namespace Hazel {
 	{
 		VkResult result;
 		result = glfwCreateWindowSurface(m_Instance, m_WindowHandle, nullptr, &m_Surface);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create window surface: {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create window surface! " + result);
 	}
 
 	void VulkanContext::CreateCommandPool()
@@ -358,11 +358,11 @@ namespace Hazel {
 		VkCommandPoolCreateInfo commandPoolCreateInfo = {};
 		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		commandPoolCreateInfo.pNext = NULL;
-		commandPoolCreateInfo.flags = 0;
+		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
 		result = vkCreateCommandPool(m_LogicalDevice, &commandPoolCreateInfo, nullptr, &m_CommandPool);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create command pool {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create command pool! " + result);
 	}
 
 }

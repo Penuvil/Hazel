@@ -22,6 +22,7 @@ namespace Hazel {
 
 	void VulkanImGuiAPI::Init()
 	{
+		m_CommandBuffer = VulkanContext::GetContext()->GetSwapChain()->GetImGuiCommandBuffer();
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -145,7 +146,7 @@ namespace Hazel {
 
 		// Rendering
 		ImGui::Render();
-//		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),);
+//		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *m_CommandBuffer);
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{

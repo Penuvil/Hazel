@@ -37,8 +37,11 @@ namespace Hazel {
 		return nullptr;
 	}
 
+	ShaderLibrary* ShaderLibrary::s_ShaderLibrary = nullptr;
+
 	ShaderLibrary::ShaderLibrary()
 	{
+		s_ShaderLibrary = this;
 		Ref<UniformBuffer> uniformBuffer;
 		uniformBuffer.reset(UniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
 		m_UniformBuffers.reset(new std::unordered_map<std::string, Ref<UniformBuffer>>());

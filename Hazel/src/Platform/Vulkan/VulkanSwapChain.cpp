@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "Platform/Vulkan/VulkanSwapChain.h"
+#include "Platform/Vulkan/VulkanContext.h"
 
 namespace Hazel
 {
@@ -16,7 +17,9 @@ namespace Hazel
 		CreateSwapChain();
 		CreateImageViews();
 		CreateRenderPass();
+		CreateFramebuffers();
 		CreateDescriptorPool();
+		AllocateCommandBuffers();
 	}
 
 	void VulkanSwapChain::CreateSwapChain()
@@ -137,6 +140,15 @@ namespace Hazel
 		subpassDescription.preserveAttachmentCount = 0;
 		subpassDescription.pPreserveAttachments = nullptr;
 
+		VkSubpassDependency subpassDependency = {};
+		subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+		subpassDependency.dstSubpass = 0;
+		subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassDependency.srcAccessMask = 0;
+		subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		subpassDependency.dependencyFlags = 0;
+
 		VkRenderPassCreateInfo renderPassCreateInfo = {};
 		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassCreateInfo.pNext = NULL;
@@ -145,29 +157,80 @@ namespace Hazel
 		renderPassCreateInfo.pAttachments = &colorAttachment;
 		renderPassCreateInfo.subpassCount = 1;
 		renderPassCreateInfo.pSubpasses = &subpassDescription;
-		renderPassCreateInfo.dependencyCount = 0;
-		renderPassCreateInfo.pDependencies = nullptr;
+		renderPassCreateInfo.dependencyCount = 1;
+		renderPassCreateInfo.pDependencies = &subpassDependency;
 
 		VkResult result = vkCreateRenderPass(m_Device, &renderPassCreateInfo, nullptr, &m_RenderPass);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
+	}
+
+	void VulkanSwapChain::CreateFramebuffers()
+	{
+		m_Framebuffers.resize(m_SwapChainImageViews.size());
+
+		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
+		{
+			VkResult result;
+			VkImageView attachment = m_SwapChainImageViews[i];
+
+			VkFramebufferCreateInfo framebufferCreateInfo = {};
+			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferCreateInfo.pNext = NULL;
+			framebufferCreateInfo.flags = 0;
+			framebufferCreateInfo.renderPass = m_RenderPass;
+			framebufferCreateInfo.attachmentCount = 1;
+			framebufferCreateInfo.pAttachments = &attachment;
+			framebufferCreateInfo.width = m_SwapChainExtent.width;
+			framebufferCreateInfo.height = m_SwapChainExtent.height;
+			framebufferCreateInfo.layers = 1;
+
+			result = vkCreateFramebuffer(m_Device, &framebufferCreateInfo, nullptr, &m_Framebuffers[i]);
+			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer")
+		}
 	}
 
 	void VulkanSwapChain::CreateDescriptorPool()
 	{
 		VkDescriptorPoolSize descriptorPoolSize = {};
 		descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorPoolSize.descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size());
+		descriptorPoolSize.descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2);
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.pNext = NULL;
 		descriptorPoolCreateInfo.flags = 0;
-		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size());
+		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 2);
 		descriptorPoolCreateInfo.poolSizeCount = 1;
 		descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
 
 		VkResult result = vkCreateDescriptorPool(m_Device, &descriptorPoolCreateInfo, nullptr, &m_DescriptorPool);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool! " + result);
+	}
+
+	void VulkanSwapChain::AllocateCommandBuffers()
+	{
+		VkResult result;
+		m_CommandBuffers.resize(m_Framebuffers.size());
+
+		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
+		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		commandBufferAllocateInfo.pNext = NULL;
+		commandBufferAllocateInfo.commandPool = *VulkanContext::GetContext()->GetCommandPool();
+		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		commandBufferAllocateInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
+
+		result = vkAllocateCommandBuffers(m_Device, &commandBufferAllocateInfo, m_CommandBuffers.data());
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate commad buffers! " + result);
+
+		VkCommandBufferAllocateInfo imGuiCommandBufferAllocateInfo = {};
+		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		commandBufferAllocateInfo.pNext = NULL;
+		commandBufferAllocateInfo.commandPool = *VulkanContext::GetContext()->GetCommandPool();
+		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		commandBufferAllocateInfo.commandBufferCount = 1;
+
+		result = vkAllocateCommandBuffers(m_Device, &commandBufferAllocateInfo, &m_ImGuiCommandBuffer);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate ImGui commad buffer! " + result);
 	}
 
 	VkSurfaceFormatKHR VulkanSwapChain::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& supportedFormats)
@@ -220,6 +283,12 @@ namespace Hazel
 	void VulkanSwapChain::Destroy()
 	{
 		vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
+
+		for (auto framebuffer : m_Framebuffers)
+		{
+			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
+		}
+
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 
 		for (auto imageview : m_SwapChainImageViews) 

@@ -12,6 +12,8 @@ namespace Hazel {
 		VulkanVertexBuffer(float* vertices, uint32_t size);
 		virtual ~VulkanVertexBuffer();
 
+		const inline VkBuffer* GetBuffer() { return &m_Buffer; }
+
 		// Inherited via VertexBuffer
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
@@ -22,8 +24,7 @@ namespace Hazel {
 		std::vector<float> m_Vertices;
 		BufferLayout m_Layout;
 		VkBuffer m_Buffer;
-		VkDeviceMemory m_BufferMemory;
-		
+		VkDeviceMemory m_BufferMemory;		
 	};
 
 	class VulkanIndexBuffer : public IndexBuffer
@@ -31,6 +32,8 @@ namespace Hazel {
 	public:
 		VulkanIndexBuffer(uint32_t* indices, uint32_t count);
 		virtual ~VulkanIndexBuffer();
+
+		const inline VkBuffer* GetBuffer() { return &m_Buffer; }
 
 		// Inherited via IndexBuffer
 		virtual void Bind() const override;
@@ -49,13 +52,24 @@ namespace Hazel {
 		VulkanUniformBuffer(std::string name, uint32_t size, uint32_t shaderBlock);
 		virtual ~VulkanUniformBuffer();
 
+		inline uint32_t* GetBufferSize() { return &m_BufferSize; }
+		inline std::vector<VkBuffer>* GetBuffers() { return &m_Buffers; }
+		inline VkDeviceMemory* GetBufferMemory() { return &m_BufferMemory; }
+		inline VkDescriptorSetLayout* GetDescriptorSetLayout() { return &m_DescriptorSetLayout; }
+		inline const std::vector<VkDescriptorSet>* GetDescriptorSets() { return &m_DecsriptorSets; }
+
+
+
 		// Inherited via UniformBuffer
 		virtual void Bind() override;
 		virtual void Unbind() override;
 		virtual std::string GetName() override;
 	private:
 		std::string m_Name;
+		uint32_t m_BufferSize;
 		std::vector<VkBuffer> m_Buffers;
 		VkDeviceMemory m_BufferMemory;
+		VkDescriptorSetLayout m_DescriptorSetLayout;
+		std::vector<VkDescriptorSet> m_DecsriptorSets;
 	};
 }

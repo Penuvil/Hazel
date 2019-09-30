@@ -23,6 +23,7 @@ namespace Hazel {
 		inline VkPhysicalDevice* GetPhysicalDevice() { return &m_PhysicalDevice; }
 		inline VkCommandPool* GetCommandPool() { return &m_CommandPool; }
 		inline VkQueue* GetGraphicsQueue() { return &m_GraphicsQueue; }
+		inline VkQueue* GetPresentQueue() { return &m_PresentQueue; }
 		inline Ref<VulkanSwapChain> GetSwapChain() { return m_SwapChain; }
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
@@ -33,7 +34,7 @@ namespace Hazel {
 		inline static VulkanContext* GetContext() { return s_Context; }
 	private:
 		const std::vector<const char*> m_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
-		const std::vector<const char*> m_DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+		const std::vector<const char*> m_DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME ,VK_KHR_MAINTENANCE1_EXTENSION_NAME };
 
 		GLFWwindow* m_WindowHandle;
 		VkInstance m_Instance = VK_NULL_HANDLE;

@@ -1,9 +1,11 @@
 #pragma once
 
-#include "RenderCommand.h"
+//#include "RenderCommand.h"
 
 #include "OrthographicCamera.h"
 #include "Shader.h"
+#include "VertexArray.h"
+#include "RendererAPI.h"
 
 namespace Hazel {
 
@@ -16,6 +18,8 @@ namespace Hazel {
 		static void EndScene();
 
 //		static void AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer);
+		static void SetClearColor(const glm::vec4 & color);
+		static void Clear();
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.0f));
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
