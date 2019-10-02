@@ -1,5 +1,6 @@
 #include "hzpch.h"
 #include "Platform/Vulkan/VulkanRendererAPI.h"
+#include "Platform/Vulkan/ImGui/VulkanImGuiAPI.h"
 #include "Platform/Vulkan/VulkanContext.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanBuffer.h"
@@ -7,12 +8,17 @@
 
 namespace Hazel {
 
+	Ref<VulkanRendererAPI::FrameInfo> VulkanRendererAPI::s_CurrentFrame = nullptr;
+
 	void VulkanRendererAPI::Init()
 	{
 		VkResult result;
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 
+		s_CurrentFrame.reset(new FrameInfo);
+
 		m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+		m_LayerCompleteSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -29,6 +35,8 @@ namespace Hazel {
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			result = vkCreateSemaphore(*device, &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]);
+			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create semaphore!");
+			result = vkCreateSemaphore(*device, &semaphoreCreateInfo, nullptr, &m_LayerCompleteSemaphores[i]);
 			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create semaphore!");
 			result = vkCreateSemaphore(*device, &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
 			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create semaphore!");
@@ -56,7 +64,8 @@ namespace Hazel {
 		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
 		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
 		std::vector<std::shared_ptr<VertexBuffer>> vertexBuffers = vertexArray->GetVertexBuffers();
-		vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
+
+		vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
 		Ref<VulkanUniformBuffer> uniformBuffer = std::static_pointer_cast<VulkanUniformBuffer>(shader->GetUniformBuffer("Matrices"));
 		struct UBO
 		{
@@ -68,10 +77,16 @@ namespace Hazel {
 		memcpy(data, &ubo, *uniformBuffer->GetBufferSize());
 		vkUnmapMemory(*vulkanContext->GetDevice(), *uniformBuffer->GetBufferMemory());
 
-//		vkResetCommandBuffer(commandBuffers->at(imageIndex), 0);
+		s_CurrentFrame->imageIndex = imageIndex;
+		s_CurrentFrame->frameIndex = m_FrameIndex;
+		s_CurrentFrame->clearColor = &clearColor;
+		s_CurrentFrame->imageAvailableSemaphore = &m_ImageAvailableSemaphores[m_FrameIndex];
+		s_CurrentFrame->layerCompleteSemaphore = &m_LayerCompleteSemaphores[m_FrameIndex];
+		s_CurrentFrame->renderFinishedSemaphore = &m_RenderFinishedSemaphores[m_FrameIndex];
+		s_CurrentFrame->inFlightFence = &m_InFlightFences[m_FrameIndex];
 
-		vkWaitForFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
-		vkResetFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
+		vkWaitForFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_FrameIndex], VK_TRUE, UINT64_MAX);
+		vkResetFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_FrameIndex]);
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo = {};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -122,14 +137,20 @@ namespace Hazel {
 
 		vkCmdDrawIndexed(commandBuffers->at(imageIndex), vertexArray->GetIndexBuffer()->GetCount(), 1, 0, 0, 0);
 
+/*		ImDrawData* drawData = ImGui::GetDrawData();
+		if (drawData)
+		{
+			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffers->at(imageIndex));
+		}
+*/
 		vkCmdEndRenderPass(commandBuffers->at(imageIndex));
 
 		result = vkEndCommandBuffer(commandBuffers->at(imageIndex));
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to en command buffer! " + result);
 
-		VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+		VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_FrameIndex] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		VkSemaphore signalSemiphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+		VkSemaphore signalSemiphores[] = { m_LayerCompleteSemaphores[m_FrameIndex] };
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -142,7 +163,7 @@ namespace Hazel {
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemiphores;
 
-		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
+		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
 
 		const VkSwapchainKHR* swapChain = vulkanSwapChain->GetSwapChain();
@@ -157,9 +178,9 @@ namespace Hazel {
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr;
 
-		vkQueuePresentKHR(*vulkanContext->GetPresentQueue(), &presentInfo);
+//		vkQueuePresentKHR(*vulkanContext->GetPresentQueue(), &presentInfo);
 
-		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+		m_FrameIndex = (m_FrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)

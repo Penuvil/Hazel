@@ -211,6 +211,7 @@ namespace Hazel
 	{
 		VkResult result;
 		m_CommandBuffers.resize(m_Framebuffers.size());
+		m_ImGuiCommandBuffers.resize(m_Framebuffers.size());
 
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
 		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -222,14 +223,7 @@ namespace Hazel
 		result = vkAllocateCommandBuffers(m_Device, &commandBufferAllocateInfo, m_CommandBuffers.data());
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate commad buffers! " + result);
 
-		VkCommandBufferAllocateInfo imGuiCommandBufferAllocateInfo = {};
-		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		commandBufferAllocateInfo.pNext = NULL;
-		commandBufferAllocateInfo.commandPool = *VulkanContext::GetContext()->GetCommandPool();
-		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		commandBufferAllocateInfo.commandBufferCount = 1;
-
-		result = vkAllocateCommandBuffers(m_Device, &commandBufferAllocateInfo, &m_ImGuiCommandBuffer);
+		result = vkAllocateCommandBuffers(m_Device, &commandBufferAllocateInfo, m_ImGuiCommandBuffers.data());
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate ImGui commad buffer! " + result);
 	}
 

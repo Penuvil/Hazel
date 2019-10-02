@@ -17,7 +17,8 @@ namespace Hazel
 		inline const VkDescriptorPool* GetDescriptorPool() { return &m_DescriptorPool; }
 		inline std::vector<VkFramebuffer>* GetFramebuffers() { return &m_Framebuffers;  }
 		inline std::vector<VkCommandBuffer>* GetCommandBuffers() { return &m_CommandBuffers; }
-		inline VkCommandBuffer* GetImGuiCommandBuffer() { return &m_ImGuiCommandBuffer; }
+		inline std::vector<VkCommandBuffer>* GetImGuiCommandBuffer() { return &m_ImGuiCommandBuffers; }
+		inline const VkFormat* GetSwapChainImageFormat() { return &m_SwapChainImageFormat; }
 	private:
 		void Init();
 		void CreateSwapChain();
@@ -45,7 +46,7 @@ namespace Hazel
 		std::vector<VkFramebuffer> m_Framebuffers;
 		VkDescriptorPool m_DescriptorPool;
 		std::vector<VkCommandBuffer> m_CommandBuffers;
-		VkCommandBuffer m_ImGuiCommandBuffer;
+		std::vector<VkCommandBuffer> m_ImGuiCommandBuffers;
 	};
 
 }

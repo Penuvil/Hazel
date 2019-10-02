@@ -2,10 +2,9 @@
 
 #include "VulkanImGuiAPI.h"
 #include "Platform/Vulkan/VulkanContext.h"
+#include "Platform/Vulkan/VulkanRendererAPI.h"
 
-#include "imgui.h"
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_vulkan.h"
+
 
 #include "Hazel/Application.h"
 
@@ -20,9 +19,62 @@ namespace Hazel {
 	{
 	}
 
+	void VulkanImGuiAPI::CreateRenderPass()
+	{
+		VkAttachmentDescription colorAttachment = {};
+		colorAttachment.flags = 0;
+		colorAttachment.format = *VulkanContext::GetContext()->GetSwapChain()->GetSwapChainImageFormat();
+		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		VkAttachmentReference colorAttachmentRef = {};
+		colorAttachmentRef.attachment = 0;
+		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		VkSubpassDescription subpassDescription = {};
+		subpassDescription.flags = 0;
+		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpassDescription.inputAttachmentCount = 0;
+		subpassDescription.pInputAttachments = nullptr;
+		subpassDescription.colorAttachmentCount = 1;
+		subpassDescription.pColorAttachments = &colorAttachmentRef;
+		subpassDescription.pResolveAttachments = nullptr;
+		subpassDescription.pDepthStencilAttachment = nullptr;
+		subpassDescription.preserveAttachmentCount = 0;
+		subpassDescription.pPreserveAttachments = nullptr;
+
+		VkSubpassDependency subpassDependency = {};
+		subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+		subpassDependency.dstSubpass = 0;
+		subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassDependency.srcAccessMask = 0;
+		subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		subpassDependency.dependencyFlags = 0;
+
+		VkRenderPassCreateInfo renderPassCreateInfo = {};
+		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassCreateInfo.pNext = NULL;
+		renderPassCreateInfo.flags = 0;
+		renderPassCreateInfo.attachmentCount = 1;
+		renderPassCreateInfo.pAttachments = &colorAttachment;
+		renderPassCreateInfo.subpassCount = 1;
+		renderPassCreateInfo.pSubpasses = &subpassDescription;
+		renderPassCreateInfo.dependencyCount = 1;
+		renderPassCreateInfo.pDependencies = &subpassDependency;
+
+		VkResult result = vkCreateRenderPass(*VulkanContext::GetContext()->GetDevice(), &renderPassCreateInfo, nullptr, &m_RenderPass);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
+	}
+
 	void VulkanImGuiAPI::Init()
 	{
-		m_CommandBuffer = VulkanContext::GetContext()->GetSwapChain()->GetImGuiCommandBuffer();
+		m_CommandBuffers = VulkanContext::GetContext()->GetSwapChain()->GetImGuiCommandBuffer();
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -66,6 +118,7 @@ namespace Hazel {
 
 		ImGui_ImplVulkan_Init(&imGUiImplVulkanInitInfo, *vulkanContext->GetSwapChain()->GetRenderPass());
 		UploadFonts();
+		CreateRenderPass();
 	}
 
 	void VulkanImGuiAPI::UploadFonts()
@@ -146,7 +199,72 @@ namespace Hazel {
 
 		// Rendering
 		ImGui::Render();
-//		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *m_CommandBuffer);
+
+		VkResult result;
+		VulkanContext* vulkanContext = VulkanContext::GetContext();
+		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
+		Ref<VulkanRendererAPI::FrameInfo> frameInfo = VulkanRendererAPI::GetFrame();
+
+		VkCommandBufferBeginInfo commandBufferBeginInfo = {};
+		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		commandBufferBeginInfo.pNext = NULL;
+		commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		commandBufferBeginInfo.pInheritanceInfo = nullptr;
+
+		result = vkBeginCommandBuffer(m_CommandBuffers->at(frameInfo->imageIndex), &commandBufferBeginInfo);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer! " + result);
+
+		VkRenderPassBeginInfo renderPassBeginInfo = {};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.pNext = NULL;
+		renderPassBeginInfo.renderPass = m_RenderPass;
+		renderPassBeginInfo.framebuffer = vulkanSwapChain->GetFramebuffers()->at(frameInfo->imageIndex);
+		renderPassBeginInfo.renderArea.offset = { 0,0 };
+		renderPassBeginInfo.renderArea.extent = *vulkanSwapChain->GetExtent2D();
+		renderPassBeginInfo.clearValueCount = 1;
+		renderPassBeginInfo.pClearValues = frameInfo->clearColor;
+
+		vkCmdBeginRenderPass(m_CommandBuffers->at(frameInfo->imageIndex), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), m_CommandBuffers->at(frameInfo->imageIndex));
+
+		vkCmdEndRenderPass(m_CommandBuffers->at(frameInfo->imageIndex));
+
+		result = vkEndCommandBuffer(m_CommandBuffers->at(frameInfo->imageIndex));
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to en command buffer! " + result);
+
+		VkSemaphore waitSemaphores[] = { *frameInfo->layerCompleteSemaphore };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		VkSemaphore signalSemiphores[] = { *frameInfo->renderFinishedSemaphore };
+
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.pNext = NULL;
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_CommandBuffers->at(frameInfo->imageIndex);
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemiphores;
+
+		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *frameInfo->inFlightFence);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
+
+		const VkSwapchainKHR* swapChain = vulkanSwapChain->GetSwapChain();
+
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.pNext = NULL;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemiphores;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChain;
+		presentInfo.pImageIndices = &frameInfo->imageIndex;
+		presentInfo.pResults = nullptr;
+
+		vkQueuePresentKHR(*vulkanContext->GetPresentQueue(), &presentInfo);
+
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
