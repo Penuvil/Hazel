@@ -23,6 +23,16 @@ namespace Hazel {
 			s_RendererAPI->Init();
 		}
 
+		inline static void BeginScene()
+		{
+			s_RendererAPI->BeginScene();
+		}
+
+		inline static void EndScene()
+		{
+			s_RendererAPI->EndScene();
+		}
+
 		inline static void SetClearColor(const glm::vec4& color)
 		{
 			s_RendererAPI->SetClearColor(color);

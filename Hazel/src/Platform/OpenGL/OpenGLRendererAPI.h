@@ -8,7 +8,8 @@ namespace Hazel {
 	{
 	public:
 		virtual void Init() override;
-
+		virtual void BeginScene() override;
+		virtual void EndScene() override;
 		virtual void SetClearColor(const glm::vec4& color) override;
 		virtual void Clear() override;
 //		virtual void AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer) override;

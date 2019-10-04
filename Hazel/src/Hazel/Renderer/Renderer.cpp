@@ -15,10 +15,12 @@ namespace Hazel {
 	void Renderer::BeginScene(OrthographicCamera& camera)
 	{
 		s_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+		RenderCommand::BeginScene();
 	}
 
 	void Renderer::EndScene()
 	{
+		RenderCommand::EndScene();
 	}
 
 	void Renderer::SetClearColor(const glm::vec4 & color)

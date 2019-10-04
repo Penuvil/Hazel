@@ -42,10 +42,15 @@ namespace Hazel {
 	ShaderLibrary::ShaderLibrary()
 	{
 		s_ShaderLibrary = this;
-		Ref<UniformBuffer> uniformBuffer;
-		uniformBuffer.reset(UniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
+		Ref<UniformBuffer> matricesUniformBuffer;
+		matricesUniformBuffer.reset(UniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
+
+		Ref<UniformBuffer> colorUniformBuffer;
+		colorUniformBuffer.reset(UniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float3), 0));
+
 		m_UniformBuffers.reset(new std::unordered_map<std::string, Ref<UniformBuffer>>());
-		AddUniformBuffer(uniformBuffer);
+		AddUniformBuffer(matricesUniformBuffer);
+		AddUniformBuffer(colorUniformBuffer);
 	}
 
 	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)

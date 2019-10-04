@@ -186,6 +186,8 @@ namespace Hazel {
 
 	void VulkanImGuiAPI::Begin()
 	{
+		vkWaitForFences(*VulkanContext::GetContext()->GetDevice(), 1, VulkanRendererAPI::GetFrame()->inFlightFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(*VulkanContext::GetContext()->GetDevice(), 1, VulkanRendererAPI::GetFrame()->inFlightFence);
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -247,7 +249,7 @@ namespace Hazel {
 		submitInfo.pCommandBuffers = &m_CommandBuffers->at(frameInfo->imageIndex);
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemiphores;
-
+		
 		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *frameInfo->inFlightFence);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
 
