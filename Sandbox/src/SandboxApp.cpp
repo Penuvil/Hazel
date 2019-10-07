@@ -125,16 +125,19 @@ public:
 
 			layout(location = 0) in vec3 v_Position;
 			
-			uniform vec3 u_Color;
+			layout(binding = 1) uniform Color
+			{
+				vec3 u_Color;
+			} col;		
 
 			void main()
 			{
-				color = vec4(u_Color, 1.0);
+				color = vec4(col.u_Color, 1.0);
 			}
 		)";
 
-//		m_FlatColorShader = Hazel::Shader::Create("FlatColor", flatColorShaderVertexSrc, flatColorShaderFragmentSrc);
-//		m_ShaderLibrary.Add(m_FlatColorShader);
+		m_FlatColorShader = Hazel::Shader::Create("FlatColor", flatColorShaderVertexSrc, flatColorShaderFragmentSrc, squareVB->GetLayout());
+		m_ShaderLibrary.Add(m_FlatColorShader);
 
 		auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl", squareVB->GetLayout());
 
@@ -181,7 +184,7 @@ public:
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-//				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
+				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
 			}
 		}
 

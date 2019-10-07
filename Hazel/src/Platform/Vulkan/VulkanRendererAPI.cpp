@@ -4,6 +4,7 @@
 #include "Platform/Vulkan/VulkanContext.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanBuffer.h"
+#include "Platform/Vulkan/VulkanVertexArray.h"
 
 
 namespace Hazel {
@@ -103,6 +104,7 @@ namespace Hazel {
 
 		vkCmdSetViewport(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &scissor);
+		
 	}
 
 	void VulkanRendererAPI::EndScene()
@@ -168,9 +170,9 @@ namespace Hazel {
 		vkCmdBindVertexBuffers(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, std::static_pointer_cast<VulkanVertexBuffer>(vertexArray->GetVertexBuffers().at(0))->GetBuffer(), offsets);
 		vkCmdBindIndexBuffer(commandBuffers->at(s_CurrentFrame->imageIndex), *std::static_pointer_cast<VulkanIndexBuffer>(vertexArray->GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-		const VkDescriptorSet descriptorSet = std::static_pointer_cast<VulkanUniformBuffer>(shader->GetUniformBuffer("Matrices"))->GetDescriptorSets()->at(s_CurrentFrame->imageIndex);
+		const std::vector<VkDescriptorSet>* descriptorSets = std::static_pointer_cast<VulkanVertexArray>(vertexArray)->GetDescriptorSets();
 		vkCmdBindDescriptorSets(commandBuffers->at(s_CurrentFrame->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, *std::static_pointer_cast<VulkanShader>(shader)->GetGraphicsPipelineLayout(),
-			0, 1, &descriptorSet, 0, nullptr);
+			0, 1, &descriptorSets->at(s_CurrentFrame->imageIndex), 0, nullptr);
 
 		vkCmdDrawIndexed(commandBuffers->at(s_CurrentFrame->imageIndex), vertexArray->GetIndexBuffer()->GetCount(), 1, 0, 0, 0);
 	}

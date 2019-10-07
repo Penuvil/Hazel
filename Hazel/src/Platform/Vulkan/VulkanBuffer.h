@@ -55,8 +55,8 @@ namespace Hazel {
 		inline uint32_t* GetBufferSize() { return &m_BufferSize; }
 		inline std::vector<VkBuffer>* GetBuffers() { return &m_Buffers; }
 		inline VkDeviceMemory* GetBufferMemory() { return &m_BufferMemory; }
-		inline VkDescriptorSetLayout* GetDescriptorSetLayout() { return &m_DescriptorSetLayout; }
-		inline const std::vector<VkDescriptorSet>* GetDescriptorSets() { return &m_DecsriptorSets; }
+//		inline VkDescriptorSetLayout* GetDescriptorSetLayout() { return &m_DescriptorSetLayout; }
+//		inline const std::vector<VkDescriptorSet>* GetDescriptorSets() { return &m_DecsriptorSets; }
 
 
 
@@ -69,7 +69,7 @@ namespace Hazel {
 		uint32_t m_BufferSize;
 		std::vector<VkBuffer> m_Buffers;
 		VkDeviceMemory m_BufferMemory;
-		VkDescriptorSetLayout m_DescriptorSetLayout;
-		std::vector<VkDescriptorSet> m_DecsriptorSets;
+//		VkDescriptorSetLayout m_DescriptorSetLayout;
+//		std::vector<VkDescriptorSet> m_DecsriptorSets;
 	};
 }

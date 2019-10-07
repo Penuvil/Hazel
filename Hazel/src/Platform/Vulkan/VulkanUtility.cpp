@@ -87,7 +87,7 @@ namespace Hazel {
 		HZ_CORE_ASSERT(false, "Failed to find suitable memory type!");
 	}
 
-	void VulkanUtility::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, VkBuffer & buffer, VkDeviceMemory & bufferMemory)
+	void VulkanUtility::CreateBuffer(VkDeviceSize& size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, VkBuffer & buffer, VkDeviceMemory & bufferMemory)
 	{
 		VkResult result;
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
@@ -106,8 +106,9 @@ namespace Hazel {
 
 		VkMemoryRequirements memoryRequirements;
 		vkGetBufferMemoryRequirements(*device, buffer, &memoryRequirements);
-		
 
+		if (memoryRequirements.size > size) size = memoryRequirements.size;
+		
 		uint32_t memoryTypeIndex = UINT32_MAX;
 		memoryTypeIndex = VulkanUtility::FindMemoryTypeIndex(memoryRequirements.memoryTypeBits, propertyFlags);
 
@@ -124,7 +125,7 @@ namespace Hazel {
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind buffer memory!");
 	}
 
-	void VulkanUtility::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, std::vector<VkBuffer> & buffers, VkDeviceMemory & bufferMemory)
+	void VulkanUtility::CreateBuffer(VkDeviceSize& size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, std::vector<VkBuffer> & buffers, VkDeviceMemory & bufferMemory)
 	{
 		VkResult result;
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
@@ -147,6 +148,7 @@ namespace Hazel {
 		VkMemoryRequirements memoryRequirements;
 		vkGetBufferMemoryRequirements(*device, buffers[0], &memoryRequirements);
 
+		if (memoryRequirements.size > size) size = memoryRequirements.size;
 
 		uint32_t memoryTypeIndex = UINT32_MAX;
 		memoryTypeIndex = VulkanUtility::FindMemoryTypeIndex(memoryRequirements.memoryTypeBits, propertyFlags);

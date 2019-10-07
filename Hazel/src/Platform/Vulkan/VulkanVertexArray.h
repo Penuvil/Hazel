@@ -11,6 +11,9 @@ namespace Hazel {
 		VulkanVertexArray();
 		virtual ~VulkanVertexArray();
 
+		void CreateDescriptorSets();
+		inline const std::vector<VkDescriptorSet>* GetDescriptorSets() { return &m_DecsriptorSets; }
+
 		// Inherited via VertexArray
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
@@ -23,5 +26,7 @@ namespace Hazel {
 	private:
 		std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
 		std::shared_ptr<IndexBuffer> m_IndexBuffer;
+		std::vector<VkDescriptorSet> m_DecsriptorSets;
+
 	};
 }

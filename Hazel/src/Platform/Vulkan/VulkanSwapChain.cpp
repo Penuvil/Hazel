@@ -19,6 +19,7 @@ namespace Hazel
 		CreateRenderPass();
 		CreateFramebuffers();
 		CreateDescriptorPool();
+		CreateDescriptorSetLayout();
 		AllocateCommandBuffers();
 	}
 
@@ -193,18 +194,48 @@ namespace Hazel
 	{
 		VkDescriptorPoolSize descriptorPoolSize = {};
 		descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorPoolSize.descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2);
+		descriptorPoolSize.descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 5);
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.pNext = NULL;
 		descriptorPoolCreateInfo.flags = 0;
-		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 2);
+		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 5);
 		descriptorPoolCreateInfo.poolSizeCount = 1;
 		descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
 
 		VkResult result = vkCreateDescriptorPool(m_Device, &descriptorPoolCreateInfo, nullptr, &m_DescriptorPool);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool! " + result);
+	}
+
+	void VulkanSwapChain::CreateDescriptorSetLayout()
+	{
+		VkDescriptorSetLayoutBinding matricesUboLayoutBinding = {};
+		matricesUboLayoutBinding.binding = 0;
+		matricesUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		matricesUboLayoutBinding.descriptorCount = 1;
+		matricesUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		matricesUboLayoutBinding.pImmutableSamplers = nullptr;
+
+		VkDescriptorSetLayoutBinding colorUboLayoutBinding = {};
+		colorUboLayoutBinding.binding = 1;
+		colorUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		colorUboLayoutBinding.descriptorCount = 1;
+		colorUboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		colorUboLayoutBinding.pImmutableSamplers = nullptr;
+
+		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings = { matricesUboLayoutBinding, colorUboLayoutBinding };
+
+		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
+		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		descriptorSetLayoutCreateInfo.pNext = NULL;
+		descriptorSetLayoutCreateInfo.flags = 0;
+		descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
+		descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
+
+		VkResult result;
+		result = vkCreateDescriptorSetLayout(m_Device, &descriptorSetLayoutCreateInfo, nullptr, &m_DescriptorSetLayout);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout! " + result);
 	}
 
 	void VulkanSwapChain::AllocateCommandBuffers()

@@ -254,7 +254,7 @@ namespace Hazel {
 		layoutCreateInfo.pNext = NULL;
 		layoutCreateInfo.flags = 0;
 		layoutCreateInfo.setLayoutCount = 1;
-		layoutCreateInfo.pSetLayouts = std::static_pointer_cast<VulkanUniformBuffer>(ShaderLibrary::GetInstance()->GetUniformBuffer("Matrices"))->GetDescriptorSetLayout();
+		layoutCreateInfo.pSetLayouts = VulkanContext::GetContext()->GetSwapChain()->GetDescriptorSetLayout();
 		layoutCreateInfo.pushConstantRangeCount = 0;
 		layoutCreateInfo.pPushConstantRanges = nullptr;
 

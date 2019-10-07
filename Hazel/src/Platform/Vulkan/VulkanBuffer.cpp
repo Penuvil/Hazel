@@ -119,11 +119,12 @@ namespace Hazel {
 		uint32_t swapImageCount = VulkanContext::GetContext()->GetSwapChain()->GetImageCount();
 
 		m_Buffers.resize(swapImageCount);
-
-		VulkanUtility::CreateBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VkDeviceSize requiredSize = size;
+		VulkanUtility::CreateBuffer(requiredSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Buffers, m_BufferMemory);
 
-		VkDescriptorSetLayoutBinding matricesUboLayoutBinding = {};
+		if (m_BufferSize < requiredSize) m_BufferSize = requiredSize;
+/*		VkDescriptorSetLayoutBinding matricesUboLayoutBinding = {};
 		matricesUboLayoutBinding.binding = 0;
 		matricesUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		matricesUboLayoutBinding.descriptorCount = 1;
@@ -177,6 +178,7 @@ namespace Hazel {
 
 			vkUpdateDescriptorSets(*device, 1, &writeDescriptorSet, 0, nullptr);
 		}
+	*/
 	}
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
