@@ -8,23 +8,35 @@
 
 namespace Hazel {
 
-	VulkanVertexArray::VulkanVertexArray()
+	VulkanVertexArray::VulkanVertexArray(uint32_t& numberOfInstances)
 	{
-		CreateDescriptorSets();
+		m_UniformBuffers.resize(numberOfInstances);
+		m_DecsriptorSets.resize(numberOfInstances);
+
+		for (uint32_t i = 0; i < numberOfInstances; i++) {
+			std::unordered_map<std::string, Ref<UniformBuffer>> buffers;
+			Ref<UniformBuffer> uniformBuffer;
+			uniformBuffer.reset(VulkanUniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
+			m_UniformBuffers.at(i).insert({ uniformBuffer->GetName(), uniformBuffer });
+			uniformBuffer.reset(VulkanUniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float3), 0));
+			m_UniformBuffers.at(i).insert({ uniformBuffer->GetName(), uniformBuffer });
+
+			CreateDescriptorSets(i);
+		}
 	}
 
 	VulkanVertexArray::~VulkanVertexArray()
 	{
 	}
 
-	void VulkanVertexArray::CreateDescriptorSets()
+	void VulkanVertexArray::CreateDescriptorSets(uint32_t instanceIndex)
 	{
 		VkResult result;
 		VulkanContext* context = VulkanContext::GetContext();
 		Ref<VulkanSwapChain> swapChain = context->GetSwapChain();
 		uint32_t swapImageCount = swapChain->GetImageCount();
-		std::vector<VkBuffer>* matricesBuffers = std::static_pointer_cast<VulkanUniformBuffer>(ShaderLibrary::GetInstance()->GetUniformBuffer("Matrices"))->GetBuffers();
-		std::vector<VkBuffer>* colorBuffers = std::static_pointer_cast<VulkanUniformBuffer>(ShaderLibrary::GetInstance()->GetUniformBuffer("Color"))->GetBuffers();
+		std::vector<VkBuffer>* matricesBuffers = std::static_pointer_cast<VulkanUniformBuffer>(m_UniformBuffers[instanceIndex].find("Matrices")->second)->GetBuffers();
+		std::vector<VkBuffer>* colorBuffers = std::static_pointer_cast<VulkanUniformBuffer>(m_UniformBuffers[instanceIndex].find("Color")->second)->GetBuffers();;
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(swapImageCount, *swapChain->GetDescriptorSetLayout());
 
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {};
@@ -34,9 +46,9 @@ namespace Hazel {
 		descriptorSetAllocateInfo.descriptorSetCount = swapImageCount;
 		descriptorSetAllocateInfo.pSetLayouts = descriptorSetLayouts.data();
 
-		m_DecsriptorSets.resize(swapImageCount);
+		m_DecsriptorSets[instanceIndex].resize(swapImageCount);
 
-		result = vkAllocateDescriptorSets(*context->GetDevice(), &descriptorSetAllocateInfo, m_DecsriptorSets.data());
+		result = vkAllocateDescriptorSets(*context->GetDevice(), &descriptorSetAllocateInfo, m_DecsriptorSets[instanceIndex].data());
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets! ");
 
 		for (uint32_t i = 0; i < swapImageCount; i++)
@@ -49,7 +61,7 @@ namespace Hazel {
 			VkWriteDescriptorSet matricesWriteDescriptorSet = {};
 			matricesWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			matricesWriteDescriptorSet.pNext = NULL;
-			matricesWriteDescriptorSet.dstSet = m_DecsriptorSets[i];
+			matricesWriteDescriptorSet.dstSet = m_DecsriptorSets[instanceIndex][i];
 			matricesWriteDescriptorSet.dstBinding = 0;
 			matricesWriteDescriptorSet.dstArrayElement = 0;
 			matricesWriteDescriptorSet.descriptorCount = 1;
@@ -66,7 +78,7 @@ namespace Hazel {
 			VkWriteDescriptorSet colorWriteDescriptorSet = {};
 			colorWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			colorWriteDescriptorSet.pNext = NULL;
-			colorWriteDescriptorSet.dstSet = m_DecsriptorSets[i];
+			colorWriteDescriptorSet.dstSet = m_DecsriptorSets[instanceIndex][i];
 			colorWriteDescriptorSet.dstBinding = 1;
 			colorWriteDescriptorSet.dstArrayElement = 0;
 			colorWriteDescriptorSet.descriptorCount = 1;

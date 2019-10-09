@@ -8,11 +8,11 @@ namespace Hazel {
 	class VulkanVertexArray : public VertexArray
 	{
 	public:
-		VulkanVertexArray();
+		VulkanVertexArray(uint32_t& numberOfInstances);
 		virtual ~VulkanVertexArray();
 
-		void CreateDescriptorSets();
-		inline const std::vector<VkDescriptorSet>* GetDescriptorSets() { return &m_DecsriptorSets; }
+		void CreateDescriptorSets(uint32_t instanceIndex);
+		inline const std::vector<VkDescriptorSet>* GetDescriptorSets(uint32_t instance) { return &m_DecsriptorSets[instance]; }
 
 		// Inherited via VertexArray
 		virtual void Bind() const override;
@@ -23,10 +23,12 @@ namespace Hazel {
 
 		virtual const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() const { return m_VertexBuffers; }
 		virtual const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer; }
+		virtual Ref<UniformBuffer> GetUniformBuffer(uint32_t instance, std::string name) override { return m_UniformBuffers[instance].find(name)->second; }
 	private:
 		std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
 		std::shared_ptr<IndexBuffer> m_IndexBuffer;
-		std::vector<VkDescriptorSet> m_DecsriptorSets;
+		std::vector<std::unordered_map<std::string, Ref<UniformBuffer>>> m_UniformBuffers;
+		std::vector<std::vector<VkDescriptorSet>> m_DecsriptorSets;
 
 	};
 }

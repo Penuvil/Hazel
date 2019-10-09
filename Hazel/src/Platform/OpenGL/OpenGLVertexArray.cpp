@@ -77,4 +77,9 @@ namespace Hazel {
 		m_IndexBuffer = indexBuffer;
 	}
 
+	Ref<UniformBuffer> OpenGLVertexArray::GetUniformBuffer(uint32_t instance, std::string name)
+	{
+		return Ref<UniformBuffer>();
+	}
+
 }

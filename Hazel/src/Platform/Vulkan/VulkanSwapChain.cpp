@@ -194,13 +194,13 @@ namespace Hazel
 	{
 		VkDescriptorPoolSize descriptorPoolSize = {};
 		descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorPoolSize.descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 5);
+		descriptorPoolSize.descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 403);
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.pNext = NULL;
 		descriptorPoolCreateInfo.flags = 0;
-		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 5);
+		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 403);
 		descriptorPoolCreateInfo.poolSizeCount = 1;
 		descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
 

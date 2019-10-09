@@ -139,14 +139,19 @@ namespace Hazel {
 		bufferCreateInfo.queueFamilyIndexCount = 0;
 		bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
+
+		VkMemoryRequirements memoryRequirements;
+		
 		for (auto& buffer : buffers) 
 		{
 			result = vkCreateBuffer(*device, &bufferCreateInfo, nullptr, &buffer);
 			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create vertex buffer!");
+
+			vkGetBufferMemoryRequirements(*device, buffer, &memoryRequirements);
 		}
 
-		VkMemoryRequirements memoryRequirements;
-		vkGetBufferMemoryRequirements(*device, buffers[0], &memoryRequirements);
+//		VkMemoryRequirements memoryRequirements;
+//		vkGetBufferMemoryRequirements(*device, buffers[0], &memoryRequirements);
 
 		if (memoryRequirements.size > size) size = memoryRequirements.size;
 

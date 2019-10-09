@@ -20,8 +20,8 @@ namespace Hazel {
 
 		virtual const std::string& GetName() const override { return m_Name; }
 
-		virtual void SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers) override;
-		virtual Ref<UniformBuffer> GetUniformBuffer(const std::string& name) const override;
+//		virtual void SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers) override;
+//		virtual Ref<UniformBuffer> GetUniformBuffer(const std::string& name) const override;
 
 		void UploadUniformInt(const std::string& name, int value);
 

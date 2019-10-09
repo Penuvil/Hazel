@@ -33,9 +33,9 @@ namespace Hazel {
 		RenderCommand::Clear();
 	}
 
-	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
+	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::mat4& transform)
 	{
-		RenderCommand::Submit(shader, vertexArray, transform, s_SceneData->ViewProjectionMatrix);
+		RenderCommand::Submit(shader, vertexArray, instanceId, transform, s_SceneData->ViewProjectionMatrix);
 	}
 
 }

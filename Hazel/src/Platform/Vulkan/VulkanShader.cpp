@@ -297,7 +297,7 @@ namespace Hazel {
 	{
 	}
 
-	void VulkanShader::SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers)
+/*	void VulkanShader::SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers)
 	{
 		m_UniformBuffers = buffers;
 	}
@@ -307,5 +307,5 @@ namespace Hazel {
 		HZ_CORE_ASSERT(m_UniformBuffers->find(name) != m_UniformBuffers->end(), "Uniform buffer not found! {0}", name);
 		return m_UniformBuffers->find(name)->second;
 	}
-
+*/
 }

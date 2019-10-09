@@ -42,7 +42,7 @@ namespace Hazel {
 	ShaderLibrary::ShaderLibrary()
 	{
 		s_ShaderLibrary = this;
-		Ref<UniformBuffer> matricesUniformBuffer;
+/*		Ref<UniformBuffer> matricesUniformBuffer;
 		matricesUniformBuffer.reset(UniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
 
 		Ref<UniformBuffer> colorUniformBuffer;
@@ -51,13 +51,14 @@ namespace Hazel {
 		m_UniformBuffers.reset(new std::unordered_map<std::string, Ref<UniformBuffer>>());
 		AddUniformBuffer(matricesUniformBuffer);
 		AddUniformBuffer(colorUniformBuffer);
+		*/
 	}
 
 	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
 	{
 		HZ_CORE_ASSERT(!Exists(name), "Shader already exists!");
 		m_Shaders[name] = shader;
-		shader->SetUniformBuffers(m_UniformBuffers);
+//		shader->SetUniformBuffers(m_UniformBuffers);
 	}
 
 	void ShaderLibrary::Add(const Ref<Shader>& shader)
@@ -66,11 +67,11 @@ namespace Hazel {
 		Add(name, shader);
 	}
 
-	void ShaderLibrary::AddUniformBuffer(const Ref<UniformBuffer>& buffer)
+/*	void ShaderLibrary::AddUniformBuffer(const Ref<UniformBuffer>& buffer)
 	{		
 		HZ_CORE_ASSERT(m_UniformBuffers->find(buffer->GetName()) == m_UniformBuffers->end(), "Uniform buffer already exists! {0}", buffer->GetName());
 		m_UniformBuffers->insert({ buffer->GetName(), buffer });		
-	}
+	}*/
 
 	Hazel::Ref<Hazel::Shader> ShaderLibrary::Load(const std::string& filepath, const BufferLayout& vertexBufferLayout)
 	{
@@ -92,10 +93,10 @@ namespace Hazel {
 		return m_Shaders[name];
 	}
 
-	Ref<UniformBuffer> ShaderLibrary::GetUniformBuffer(const std::string & name)
+/*	Ref<UniformBuffer> ShaderLibrary::GetUniformBuffer(const std::string & name)
 	{
 		return m_UniformBuffers->find(name)->second;
-	}
+	}*/
 
 	bool ShaderLibrary::Exists(const std::string& name) const
 	{

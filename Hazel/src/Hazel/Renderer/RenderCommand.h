@@ -43,9 +43,9 @@ namespace Hazel {
 			s_RendererAPI->Clear();
 		}
 
-		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform, const glm::mat4& viewProjection)
+		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::mat4& transform, const glm::mat4& viewProjection)
 		{
-			s_RendererAPI->Submit(shader, vertexArray, transform, viewProjection);
+			s_RendererAPI->Submit(shader, vertexArray, instanceId, transform, viewProjection);
 		}
 
 		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)

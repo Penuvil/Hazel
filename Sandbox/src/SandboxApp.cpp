@@ -13,7 +13,7 @@ public:
 	ExampleLayer()
 		: Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
 	{
-		m_VertexArray.reset(Hazel::VertexArray::Create());
+		m_VertexArray.reset(Hazel::VertexArray::Create(1));
 
 		float vertices[3 * 7] = {
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -35,7 +35,7 @@ public:
 		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
-		m_SquareVA.reset(Hazel::VertexArray::Create());
+		m_SquareVA.reset(Hazel::VertexArray::Create(20 * 20 + 1));
 
 		float squareVertices[5 * 4] = {
 			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -178,13 +178,15 @@ public:
 //		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_FlatColorShader)->Bind();
 //		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
 
+		uint32_t instance = 0;
 		for (int y = 0; y < 20; y++)
 		{
 			for (int x = 0; x < 20; x++)
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;				
+				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, instance, transform);
+				instance++;
 			}
 		}
 
@@ -196,7 +198,7 @@ public:
 //		Hazel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		// Triangle
-		Hazel::Renderer::Submit(m_Shader, m_VertexArray);
+//		Hazel::Renderer::Submit(m_Shader, m_VertexArray, 0);
 
 		Hazel::Renderer::EndScene();
 	}

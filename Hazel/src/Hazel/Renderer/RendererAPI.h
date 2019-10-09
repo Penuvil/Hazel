@@ -21,7 +21,7 @@ namespace Hazel {
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
 //		virtual void AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer) = 0;
-		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform, const glm::mat4& viewProjection) = 0;
+		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::mat4& transform, const glm::mat4& viewProjection) = 0;
 
 		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray) = 0;
 

@@ -24,15 +24,15 @@ namespace Hazel {
 
 		virtual const std::string& GetName() const override { return m_Name; }
 
-		virtual void SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers) override;
-		virtual	Ref<UniformBuffer> GetUniformBuffer(const std::string& name) const override;
+//		virtual void SetUniformBuffers(const Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> buffers) override;
+//		virtual	Ref<UniformBuffer> GetUniformBuffer(const std::string& name) const override;
 	private:
 		VkShaderModule CreateShaderModule(std::vector<uint32_t>& code);
 		std::vector<uint32_t> Compile(const std::string& shaderSource, shaderc_shader_kind shaderType);
 		void CreateGraphicsPipeline(const std::string& vertexSrc, const std::string& fragmentSrc, const BufferLayout& vertexBufferLayout);
 	private:
 		std::string m_Name;
-		Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> m_UniformBuffers;
+//		Ref<std::unordered_map<std::string, Ref<UniformBuffer>>> m_UniformBuffers;
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 	};
