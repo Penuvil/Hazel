@@ -149,7 +149,7 @@ namespace Hazel {
 	{
 	}
 
-	void VulkanRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::mat4 & transform, const glm::mat4 & viewProjection)
+	void VulkanRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
 	{
 		VulkanContext* vulkanContext = VulkanContext::GetContext();
 		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
@@ -159,9 +159,9 @@ namespace Hazel {
 		Ref<VulkanUniformBuffer> colorBuffer = std::static_pointer_cast<VulkanUniformBuffer>(vertexArray->GetUniformBuffer(instanceId, "Color"));
 		struct Matrices
 		{
-			glm::mat4 transform;
 			glm::mat4 viewProjection;
-		} matrices = { transform, viewProjection };
+			glm::mat4 transform;
+		} matrices = { viewProjection, transform };
 		void* data;
 		vkMapMemory(*vulkanContext->GetDevice(), *matricesBuffer->GetBufferMemory(), *matricesBuffer->GetBufferSize() * s_CurrentFrame->imageIndex, *matricesBuffer->GetBufferSize(), 0, &data);
 		memcpy(data, &matrices, *matricesBuffer->GetBufferSize());
@@ -170,7 +170,7 @@ namespace Hazel {
 		struct Color
 		{
 			glm::vec3 color;
-		} color = { {0.2f, 0.3f, 0.8f} };
+		} color = { fragColor };
 		vkMapMemory(*vulkanContext->GetDevice(), *colorBuffer->GetBufferMemory(), *colorBuffer->GetBufferSize() * s_CurrentFrame->imageIndex, *colorBuffer->GetBufferSize(), 0, &data);
 		memcpy(data, &color, *colorBuffer->GetBufferSize());
 		vkUnmapMemory(*vulkanContext->GetDevice(), *colorBuffer->GetBufferMemory());

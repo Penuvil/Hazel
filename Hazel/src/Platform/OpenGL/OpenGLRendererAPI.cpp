@@ -31,13 +31,17 @@ namespace Hazel {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::mat4 & transform, const glm::mat4 & viewProjection)
+	void OpenGLRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
 	{
 		shader->Bind();
-//		shader->GetUniformBuffer("Matrices")->Bind();
+		vertexArray->GetUniformBuffer(0, "Matrices")->Bind();
 
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, ShaderDataTypeSize(ShaderDataType::Mat4), &viewProjection);
 		glBufferSubData(GL_UNIFORM_BUFFER, ShaderDataTypeSize(ShaderDataType::Mat4), ShaderDataTypeSize(ShaderDataType::Mat4), &transform);
+
+		vertexArray->GetUniformBuffer(0, "Color")->Bind();
+
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, ShaderDataTypeSize(ShaderDataType::Float3), &fragColor);
 
 		vertexArray->Bind();
 		DrawIndexed(vertexArray);

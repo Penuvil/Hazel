@@ -115,5 +115,4 @@ namespace Hazel {
 	{
 		m_IndexBuffer = indexBuffer;
 	}
-
 }

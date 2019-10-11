@@ -114,7 +114,8 @@ public:
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = mats.u_ViewProjection * mats.u_Transform * vec4(a_Position, 1.0);	
+
+				gl_Position = mats.u_ViewProjection * mats.u_Transform * vec4(a_Position, 1.0);
 			}
 		)";
 
@@ -185,7 +186,7 @@ public:
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;				
-				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, instance, transform);
+				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, instance, m_SquareColor, transform);
 				instance++;
 			}
 		}
@@ -193,12 +194,12 @@ public:
 //		auto textureShader = m_ShaderLibrary.Get("Texture");
 
 //		m_Texture->Bind();
-//		Hazel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+//		Hazel::Renderer::Submit(textureShader, m_SquareVA, 0, m_SquareColor,  glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 //		m_ChernoLogoTexture->Bind();
-//		Hazel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+//		Hazel::Renderer::Submit(textureShader, m_SquareVA, 0, m_SquareColor,  glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		// Triangle
-//		Hazel::Renderer::Submit(m_Shader, m_VertexArray, 0);
+		Hazel::Renderer::Submit(m_Shader, m_VertexArray, 0, m_SquareColor);
 
 		Hazel::Renderer::EndScene();
 	}

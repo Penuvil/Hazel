@@ -29,6 +29,15 @@ namespace Hazel {
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
 		glCreateVertexArrays(1, &m_RendererID);
+		Ref<UniformBuffer> matricesUniformBuffer;
+		matricesUniformBuffer.reset(UniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
+
+		Ref<UniformBuffer> colorUniformBuffer;
+		colorUniformBuffer.reset(UniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float3), 1));
+
+		m_UniformBuffers.reserve(2);
+		m_UniformBuffers[matricesUniformBuffer->GetName()] = matricesUniformBuffer;
+		m_UniformBuffers[colorUniformBuffer->GetName()] = colorUniformBuffer;
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
@@ -75,11 +84,6 @@ namespace Hazel {
 		indexBuffer->Bind();
 
 		m_IndexBuffer = indexBuffer;
-	}
-
-	Ref<UniformBuffer> OpenGLVertexArray::GetUniformBuffer(uint32_t instance, std::string name)
-	{
-		return Ref<UniformBuffer>();
 	}
 
 }
