@@ -192,17 +192,20 @@ namespace Hazel
 
 	void VulkanSwapChain::CreateDescriptorPool()
 	{
-		VkDescriptorPoolSize descriptorPoolSize = {};
-		descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorPoolSize.descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 403);
+		std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
+		descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorPoolSizes[0].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 403);
+
+		descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorPoolSizes[1].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 403);
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.pNext = NULL;
 		descriptorPoolCreateInfo.flags = 0;
 		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 403);
-		descriptorPoolCreateInfo.poolSizeCount = 1;
-		descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
+		descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
+		descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
 		VkResult result = vkCreateDescriptorPool(m_Device, &descriptorPoolCreateInfo, nullptr, &m_DescriptorPool);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool! " + result);
@@ -224,7 +227,14 @@ namespace Hazel
 		colorUboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		colorUboLayoutBinding.pImmutableSamplers = nullptr;
 
-		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings = { matricesUboLayoutBinding, colorUboLayoutBinding };
+		VkDescriptorSetLayoutBinding textureLayoutBinding = {};
+		textureLayoutBinding.binding = 2;
+		textureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		textureLayoutBinding.descriptorCount = 1;
+		textureLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		textureLayoutBinding.pImmutableSamplers = nullptr;
+
+		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings = { matricesUboLayoutBinding, colorUboLayoutBinding, textureLayoutBinding };
 
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
 		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
