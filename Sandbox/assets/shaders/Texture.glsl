@@ -27,7 +27,7 @@ layout(location = 0) out vec4 color;
 
 layout(location = 0) in vec2 v_TexCoord;
 
-uniform sampler2D u_Texture;
+layout(binding = 2) uniform sampler2D u_Texture;
 
 void main()
 {

@@ -8,10 +8,34 @@
 
 namespace Hazel {
 
-	
 	VulkanShader::VulkanShader(const std::string & filepath, const BufferLayout& vertexBufferLayout)
 	{
-	
+		std::string source = ReadFile(filepath);
+		std::unordered_map<shaderc_shader_kind, std::string> shaderSources;
+
+		const char* typeToken = "#type";
+		size_t typeTokenLength = strlen(typeToken);
+		size_t pos = source.find(typeToken, 0);
+		while (pos != std::string::npos)
+		{
+			size_t eol = source.find_first_of("\r\n", pos);
+			HZ_CORE_ASSERT(eol != std::string::npos, "Syntax error");
+			size_t begin = pos + typeTokenLength + 1;
+			std::string type = source.substr(begin, eol - begin);
+			HZ_CORE_ASSERT(type == "vertex" || type == "fragment", "Invalid shader type specified");
+
+			size_t nextLinePos = source.find_first_not_of("\r\n", eol);
+			pos = source.find(typeToken, nextLinePos);
+			if (type == "vertex") {
+				shaderSources[shaderc_vertex_shader] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+			}
+			else
+			{
+				shaderSources[shaderc_fragment_shader] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+
+			}
+		}
+		CreateGraphicsPipeline(shaderSources[shaderc_vertex_shader], shaderSources[shaderc_fragment_shader], vertexBufferLayout);
 	}
 
 	VulkanShader::VulkanShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSource, const BufferLayout& vertexBufferLayout)

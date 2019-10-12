@@ -1,7 +1,6 @@
 #include "hzpch.h"
 #include "OpenGLShader.h"
 
-#include <fstream>
 #include <glad/glad.h>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -47,7 +46,7 @@ namespace Hazel {
 		glDeleteProgram(m_RendererID);
 	}
 
-	std::string OpenGLShader::ReadFile(const std::string& filepath)
+/*	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
 		std::string result;
 		std::ifstream in(filepath, std::ios::in | std::ios::binary);
@@ -65,7 +64,7 @@ namespace Hazel {
 		}
 
 		return result;
-	}
+	}*/
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
