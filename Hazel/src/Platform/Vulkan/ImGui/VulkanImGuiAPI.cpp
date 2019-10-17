@@ -116,7 +116,7 @@ namespace Hazel {
 		imGUiImplVulkanInitInfo.Allocator = nullptr;
 		imGUiImplVulkanInitInfo.CheckVkResultFn = CheckVkResult;
 
-		ImGui_ImplVulkan_Init(&imGUiImplVulkanInitInfo, *vulkanContext->GetSwapChain()->GetRenderPass());
+		ImGui_ImplVulkan_Init(&imGUiImplVulkanInitInfo, vulkanContext->GetSwapChain()->GetRenderPass("NoClear"));
 		UploadFonts();
 		CreateRenderPass();
 	}

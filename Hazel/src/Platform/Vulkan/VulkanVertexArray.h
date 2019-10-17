@@ -24,6 +24,7 @@ namespace Hazel {
 		virtual const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() const { return m_VertexBuffers; }
 		virtual const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer; }
 		virtual Ref<UniformBuffer> GetUniformBuffer(uint32_t instance, std::string name) override { return m_UniformBuffers[instance].find(name)->second; }
+		VkDescriptorSet GetDescriptorSet(uint32_t instance, uint32_t swapIndex) { return m_DecsriptorSets[instance][swapIndex]; }
 	private:
 		std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
 		std::shared_ptr<IndexBuffer> m_IndexBuffer;

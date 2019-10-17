@@ -38,4 +38,18 @@ namespace Hazel {
 		RenderCommand::Submit(shader, vertexArray, instanceId, fragColor, transform, s_SceneData->ViewProjectionMatrix);
 	}
 
+	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec3 & fragColor, const glm::mat4 & transform)
+	{
+		RenderCommand::Submit(shader, vertexArray, texture, instanceId, fragColor, transform, s_SceneData->ViewProjectionMatrix);
+	}
+
+	void Renderer::BeginRender()
+	{
+		RenderCommand::BeginRender();
+	}
+
+	void Renderer::EndRender()
+	{
+		RenderCommand::EndRender();
+	}
 }

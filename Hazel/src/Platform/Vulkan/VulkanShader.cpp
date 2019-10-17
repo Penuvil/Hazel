@@ -36,6 +36,12 @@ namespace Hazel {
 			}
 		}
 		CreateGraphicsPipeline(shaderSources[shaderc_vertex_shader], shaderSources[shaderc_fragment_shader], vertexBufferLayout);
+
+		auto lastSlash = filepath.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = filepath.rfind('.');
+		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+		m_Name = filepath.substr(lastSlash, count);
 	}
 
 	VulkanShader::VulkanShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSource, const BufferLayout& vertexBufferLayout)
@@ -192,8 +198,8 @@ namespace Hazel {
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = swapChainExtent->width;
-		viewport.height = swapChainExtent->height;
+		viewport.width = static_cast<uint32_t>(swapChainExtent->width);
+		viewport.height = static_cast<uint32_t>(swapChainExtent->height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
@@ -237,7 +243,7 @@ namespace Hazel {
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
 		VkPipelineColorBlendAttachmentState colorBlendAttachmentState = {};
-		colorBlendAttachmentState.blendEnable = VK_FALSE;
+		colorBlendAttachmentState.blendEnable = VK_TRUE;
 		colorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 		colorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 		colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
@@ -301,7 +307,7 @@ namespace Hazel {
 		pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		pipelineCreateInfo.layout = m_PipelineLayout;
-		pipelineCreateInfo.renderPass = *VulkanContext::GetContext()->GetSwapChain()->GetRenderPass();
+		pipelineCreateInfo.renderPass = VulkanContext::GetContext()->GetSwapChain()->GetRenderPass("NoClear");
 		pipelineCreateInfo.subpass = 0;
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineCreateInfo.basePipelineIndex = -1;

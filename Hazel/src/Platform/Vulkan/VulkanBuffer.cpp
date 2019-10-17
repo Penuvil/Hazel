@@ -123,7 +123,7 @@ namespace Hazel {
 		VulkanUtility::CreateBuffer(requiredSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Buffers, m_BufferMemory);
 
-		if (m_BufferSize < requiredSize) m_BufferSize = requiredSize;
+		if (m_BufferSize < requiredSize) m_BufferSize = static_cast<uint32_t>(requiredSize);
 /*		VkDescriptorSetLayoutBinding matricesUboLayoutBinding = {};
 		matricesUboLayoutBinding.binding = 0;
 		matricesUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

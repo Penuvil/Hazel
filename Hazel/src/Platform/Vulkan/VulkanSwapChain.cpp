@@ -85,35 +85,18 @@ namespace Hazel
 
 	void VulkanSwapChain::CreateImageViews()
 	{
-		VkResult result;
 		m_SwapChainImageViews.resize(m_SwapChainImages.size());
 
 		for (size_t i = 0; i < m_SwapChainImages.size(); i++)
 		{
-			VkImageViewCreateInfo imageViewCreateInfo = {};
-			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			imageViewCreateInfo.pNext = NULL;
-			imageViewCreateInfo.flags = 0;
-			imageViewCreateInfo.image = m_SwapChainImages[i];
-			imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			imageViewCreateInfo.format = m_SwapChainImageFormat;
-			imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-			imageViewCreateInfo.subresourceRange.levelCount = 1;
-			imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-			imageViewCreateInfo.subresourceRange.layerCount = 1;
-
-			result = vkCreateImageView(m_Device, &imageViewCreateInfo, nullptr, &m_SwapChainImageViews[i]);
-			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create image views! {0}", result);
+			m_SwapChainImageViews[i] = VulkanUtility::CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat);
 		}
 	}
 
 	void VulkanSwapChain::CreateRenderPass()
 	{
+		m_RenderPasses.reserve(2);
+
 		VkAttachmentDescription colorAttachment = {};
 		colorAttachment.flags = 0;
 		colorAttachment.format = m_SwapChainImageFormat;
@@ -161,7 +144,21 @@ namespace Hazel
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &subpassDependency;
 
-		VkResult result = vkCreateRenderPass(m_Device, &renderPassCreateInfo, nullptr, &m_RenderPass);
+		VkResult result = vkCreateRenderPass(m_Device, &renderPassCreateInfo, nullptr, &m_RenderPasses["Clear"]);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
+
+		colorAttachment = {};
+		colorAttachment.flags = 0;
+		colorAttachment.format = m_SwapChainImageFormat;
+		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		result = vkCreateRenderPass(m_Device, &renderPassCreateInfo, nullptr, &m_RenderPasses["NoClear"]);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
 	}
 
@@ -178,7 +175,7 @@ namespace Hazel
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferCreateInfo.pNext = NULL;
 			framebufferCreateInfo.flags = 0;
-			framebufferCreateInfo.renderPass = m_RenderPass;
+			framebufferCreateInfo.renderPass = m_RenderPasses["Clear"];
 			framebufferCreateInfo.attachmentCount = 1;
 			framebufferCreateInfo.pAttachments = &attachment;
 			framebufferCreateInfo.width = m_SwapChainExtent.width;
@@ -194,17 +191,17 @@ namespace Hazel
 	{
 		std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
 		descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorPoolSizes[0].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 403);
+		descriptorPoolSizes[0].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 404);
 
 		descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorPoolSizes[1].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 403);
+		descriptorPoolSizes[1].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 404);
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.pNext = NULL;
 		descriptorPoolCreateInfo.flags = 0;
-		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 403);
-		descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
+		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 404);
+		descriptorPoolCreateInfo.poolSizeCount = static_cast<uint32_t>(descriptorPoolSizes.size());
 		descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
 		VkResult result = vkCreateDescriptorPool(m_Device, &descriptorPoolCreateInfo, nullptr, &m_DescriptorPool);
@@ -240,7 +237,7 @@ namespace Hazel
 		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		descriptorSetLayoutCreateInfo.pNext = NULL;
 		descriptorSetLayoutCreateInfo.flags = 0;
-		descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
+		descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32_t>(descriptorSetLayoutBindings.size());
 		descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
 
 		VkResult result;
@@ -304,7 +301,7 @@ namespace Hazel
 			int width = 0;
 			int height = 0;
 			glfwGetWindowSize(m_WindowHandle, &width, &height);
-			VkExtent2D actualExtent = { width, height };
+			VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 
 			actualExtent.width = std::max(capabilities.minImageExtent.width, 
 				std::min(capabilities.maxImageExtent.width, actualExtent.width));
@@ -324,7 +321,7 @@ namespace Hazel
 			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
 		}
 
-		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
+//		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 
 		for (auto imageview : m_SwapChainImageViews) 
 		{

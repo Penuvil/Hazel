@@ -48,9 +48,24 @@ namespace Hazel {
 			s_RendererAPI->Submit(shader, vertexArray, instanceId, fragColor, transform, viewProjection);
 		}
 
+		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection)
+		{
+			s_RendererAPI->Submit(shader, vertexArray, texture, instanceId, fragColor, transform, viewProjection);
+		}
+
 		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
 		{
 			s_RendererAPI->DrawIndexed(vertexArray);
+		}
+
+		inline static void BeginRender()
+		{
+			s_RendererAPI->BeginRender();
+		}
+
+		inline static void EndRender()
+		{
+			s_RendererAPI->EndRender();
 		}
 	private:
 		static RendererAPI* s_RendererAPI;

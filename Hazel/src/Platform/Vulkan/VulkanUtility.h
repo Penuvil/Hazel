@@ -32,6 +32,12 @@ namespace Hazel
 		static uint32_t FindMemoryTypeIndex(uint32_t typeFilter, VkMemoryPropertyFlags memoryProperties);
 		static void CreateBuffer(VkDeviceSize& size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, VkBuffer& buffer, VkDeviceMemory &bufferMemory);
 		static void CreateBuffer(VkDeviceSize& size, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags propertyFlags, std::vector<VkBuffer>& buffer, VkDeviceMemory & bufferMemory);
+		static VkCommandBuffer BeginTransientCommand();
+		static void EndTransientCommand(VkCommandBuffer commandBuffer);
 		static void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		static void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+		static void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage & image, VkDeviceMemory & memory);
+		static void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout startingLayout, VkImageLayout newLayout);
+		static VkImageView CreateImageView(VkImage image, VkFormat format);
 	};
 }

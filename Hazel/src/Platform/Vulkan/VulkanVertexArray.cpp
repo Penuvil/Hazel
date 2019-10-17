@@ -89,7 +89,7 @@ namespace Hazel {
 
 			std::array<VkWriteDescriptorSet, 2> writeDescriptorSets[] = { matricesWriteDescriptorSet, colorWriteDescriptorSet };
 
-			vkUpdateDescriptorSets(*context->GetDevice(), writeDescriptorSets->size(), writeDescriptorSets->data(), 0, nullptr);
+			vkUpdateDescriptorSets(*context->GetDevice(), static_cast<uint32_t>(writeDescriptorSets->size()), writeDescriptorSets->data(), 0, nullptr);
 		}
 
 	}

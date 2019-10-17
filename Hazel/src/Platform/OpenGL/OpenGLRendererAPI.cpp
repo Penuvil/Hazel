@@ -1,5 +1,7 @@
 #include "hzpch.h"
 #include "OpenGLRendererAPI.h"
+
+#include "Platform/OpenGL/OpenGLTexture.h"
 //#include "Hazel/Renderer/Buffer.h"
 
 
@@ -45,6 +47,21 @@ namespace Hazel {
 
 		vertexArray->Bind();
 		DrawIndexed(vertexArray);
+	}
+
+	void OpenGLRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec3 & fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
+	{
+
+		std::static_pointer_cast<OpenGLTexture2D>(texture)->Bind(0);
+		Submit(shader, vertexArray, instanceId, fragColor, transform, viewProjection);
+	}
+
+	void OpenGLRendererAPI::BeginRender()
+	{
+	}
+
+	void OpenGLRendererAPI::EndRender()
+	{
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)

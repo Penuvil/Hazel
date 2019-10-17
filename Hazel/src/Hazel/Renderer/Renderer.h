@@ -21,6 +21,10 @@ namespace Hazel {
 		static void SetClearColor(const glm::vec4 & color);
 		static void Clear();
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4& transform = glm::mat4(1.0f));
+		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4& transform = glm::mat4(1.0f));
+		static void BeginRender();
+		static void EndRender();
+
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 	private:

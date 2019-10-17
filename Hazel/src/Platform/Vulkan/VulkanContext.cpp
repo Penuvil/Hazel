@@ -243,6 +243,15 @@ namespace Hazel {
 			score = 0;
 			return score;
 		}
+
+		VkPhysicalDeviceFeatures physicalDeviceFeatures;
+		vkGetPhysicalDeviceFeatures(device, &physicalDeviceFeatures);
+		if (!physicalDeviceFeatures.samplerAnisotropy) 
+		{
+			score = 0;
+			return score;
+		}
+
 		for (const auto& surfaceFormat : swapChainSupportDetails.surfaceFormats)
 		{
 			if (surfaceFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
@@ -252,6 +261,7 @@ namespace Hazel {
 				break;
 			}
 		}
+
 		for (const auto& presentMode : swapChainSupportDetails.presentModes)
 		{
 			if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -314,6 +324,7 @@ namespace Hazel {
 		}
 
 		VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
+		physicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
 
 		VkDeviceCreateInfo deviceCreateInfo = {};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

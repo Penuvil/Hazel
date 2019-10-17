@@ -4,6 +4,7 @@
 
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 namespace Hazel {
 	
@@ -22,7 +23,9 @@ namespace Hazel {
 		virtual void Clear() = 0;
 //		virtual void AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer) = 0;
 		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection) = 0;
-
+		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection) = 0;
+		virtual void BeginRender() = 0;
+		virtual void EndRender() = 0;
 		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray) = 0;
 
 		inline static API GetAPI() { return s_API; }

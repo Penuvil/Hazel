@@ -12,7 +12,7 @@ namespace Hazel
 		inline uint32_t GetImageCount() { return static_cast<uint32_t>(m_SwapChainImages.size()); }
 		inline const VkSwapchainKHR* GetSwapChain() { return &m_SwapChain; }
 		inline const VkExtent2D* GetExtent2D() { return &m_SwapChainExtent; }
-		inline const VkRenderPass* GetRenderPass() { return &m_RenderPass; }
+		inline const VkRenderPass GetRenderPass(std::string name) { return m_RenderPasses[name]; }
 		inline const VulkanUtility::QueueFamilyIndices* GetQueueFamilyIndices() { return &m_QueueFamilyIndices; }
 		inline const VkDescriptorPool* GetDescriptorPool() { return &m_DescriptorPool; }
 		inline VkDescriptorSetLayout* GetDescriptorSetLayout() { return &m_DescriptorSetLayout; }
@@ -45,7 +45,7 @@ namespace Hazel
 		VkFormat m_SwapChainImageFormat;
 		VkExtent2D m_SwapChainExtent;
 		std::vector<VkImageView> m_SwapChainImageViews;
-		VkRenderPass m_RenderPass;
+		std::unordered_map<std::string, VkRenderPass> m_RenderPasses;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		VkDescriptorPool m_DescriptorPool;
 		VkDescriptorSetLayout m_DescriptorSetLayout;
