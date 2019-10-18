@@ -33,7 +33,7 @@ namespace Hazel {
 		matricesUniformBuffer.reset(UniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
 
 		Ref<UniformBuffer> colorUniformBuffer;
-		colorUniformBuffer.reset(UniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float3), 1));
+		colorUniformBuffer.reset(UniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float4), 1));
 
 		m_UniformBuffers.reserve(2);
 		m_UniformBuffers[matricesUniformBuffer->GetName()] = matricesUniformBuffer;
