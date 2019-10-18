@@ -20,7 +20,7 @@ namespace Hazel {
 		virtual const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const = 0;
 		virtual Ref<UniformBuffer> GetUniformBuffer(uint32_t instance, std::string name) = 0;
 
-		static VertexArray* Create(uint32_t numberOfInstances);
+		static Ref<VertexArray> Create(uint32_t numberOfInstances);
 	};
 
 }

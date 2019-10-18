@@ -6,7 +6,7 @@
 
 
 
-#include "Hazel/Application.h"
+#include "Hazel/Core/Application.h"
 
 static void CheckVkResult(VkResult result)
 {

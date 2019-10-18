@@ -314,6 +314,9 @@ namespace Hazel
 
 	void VulkanSwapChain::Destroy()
 	{
+
+		vkDeviceWaitIdle(m_Device);
+		vkDestroyDescriptorSetLayout(m_Device, m_DescriptorSetLayout, nullptr);
 		vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
 
 		for (auto framebuffer : m_Framebuffers)
@@ -325,7 +328,6 @@ namespace Hazel
 		for (auto renderPass : m_RenderPasses)
 		{
 			vkDestroyRenderPass(m_Device, renderPass.second, nullptr);
-			m_RenderPasses.erase(renderPass.first);
 		}
 
 		for (auto imageview : m_SwapChainImageViews) 
@@ -335,9 +337,35 @@ namespace Hazel
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
 	}
+
 	void VulkanSwapChain::RecreateSwapChain()
 	{
-		Destroy();
-		Init();
+		uint32_t currentImageCount = m_SwapChainImages.size();
+
+		vkDeviceWaitIdle(m_Device);
+		for(auto framebuffer : m_Framebuffers)
+		{
+			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
+		}
+
+		for (auto renderPass : m_RenderPasses)
+		{
+			vkDestroyRenderPass(m_Device, renderPass.second, nullptr);
+		}
+		m_RenderPasses.clear();
+
+		for (auto imageview : m_SwapChainImageViews)
+		{
+			vkDestroyImageView(m_Device, imageview, nullptr);
+		}
+
+		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+
+		CreateSwapChain();
+		CreateImageViews();
+		CreateRenderPass();
+		CreateFramebuffers();
+
+		HZ_CORE_ASSERT(currentImageCount == m_SwapChainImages.size(), "Unsupported change in swap change image count!");
 	}
 }

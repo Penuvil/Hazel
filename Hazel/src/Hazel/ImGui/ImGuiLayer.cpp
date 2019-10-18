@@ -1,10 +1,12 @@
 #include "hzpch.h"
 #include "ImGuiLayer.h"
 
-#include "Hazel/Application.h"
+
+#include "Hazel/Core/Application.h"
 #include "Hazel/Renderer/RendererAPI.h"
 #include "Platform/OpenGL/ImGui/OpenGLImGuiAPI.h"
 #include "Platform/Vulkan/ImGui/VulkanImGuiAPI.h"
+#include "imgui.h"
 
 
 namespace Hazel {

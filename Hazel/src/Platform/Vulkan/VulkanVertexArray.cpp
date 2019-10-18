@@ -18,7 +18,7 @@ namespace Hazel {
 			Ref<UniformBuffer> uniformBuffer;
 			uniformBuffer.reset(VulkanUniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
 			m_UniformBuffers.at(i).insert({ uniformBuffer->GetName(), uniformBuffer });
-			uniformBuffer.reset(VulkanUniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float3), 0));
+			uniformBuffer.reset(VulkanUniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float4), 0));
 			m_UniformBuffers.at(i).insert({ uniformBuffer->GetName(), uniformBuffer });
 
 			CreateDescriptorSets(i);

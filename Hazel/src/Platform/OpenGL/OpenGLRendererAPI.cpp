@@ -23,6 +23,11 @@ namespace Hazel {
 	{
 	}
 
+		void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+	{
+		glViewport(x, y, width, height);
+	}
+
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
 	{
 		glClearColor(color.r, color.g, color.b, color.a);
@@ -33,7 +38,7 @@ namespace Hazel {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
+	void OpenGLRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
 	{
 		shader->Bind();
 		vertexArray->GetUniformBuffer(0, "Matrices")->Bind();
@@ -43,13 +48,13 @@ namespace Hazel {
 
 		vertexArray->GetUniformBuffer(0, "Color")->Bind();
 
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, ShaderDataTypeSize(ShaderDataType::Float3), &fragColor);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, ShaderDataTypeSize(ShaderDataType::Float4), &fragColor);
 
 		vertexArray->Bind();
 		DrawIndexed(vertexArray);
 	}
 
-	void OpenGLRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec3 & fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
+	void OpenGLRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec4 & fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
 	{
 
 		std::static_pointer_cast<OpenGLTexture2D>(texture)->Bind(0);

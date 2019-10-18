@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Hazel/Layer.h"
+#include "Hazel/Core/Layer.h"
 #include "Hazel/ImGui/ImGuiAPI.h"
+#include "Hazel/Core/Layer.h"
 
 #include "Hazel/Events/ApplicationEvent.h"
 #include "Hazel/Events/KeyEvent.h"

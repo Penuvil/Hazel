@@ -127,33 +127,38 @@ namespace Hazel {
 		vertexInputBindingDescription.stride = vertexBufferLayout.GetStride();
 		vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-		std::array<VkVertexInputAttributeDescription, 2> vertexInputAttributeDescriptions;
-		vertexInputAttributeDescriptions[0].location = 0;
-		vertexInputAttributeDescriptions[0].binding = 0;
-		switch (vertexBufferLayout.GetElements()[0].GetComponentCount())
+		uint32_t attributeCount = vertexBufferLayout.GetElements().size();
+		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
+		vertexInputAttributeDescriptions.resize(attributeCount);
+		
+		for (uint32_t i = 0; i < attributeCount; i++)
 		{
-		case 1:
-			vertexInputAttributeDescriptions[0].format = VK_FORMAT_R32_SFLOAT;
-			break;
-		case 2:
-			vertexInputAttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-			break;
-		case 3:
-			vertexInputAttributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-			break;
-		case 4:
-			vertexInputAttributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-			break;
-		case 9:
-			vertexInputAttributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-			break;
-		case 16:
-			vertexInputAttributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-			break;
+			vertexInputAttributeDescriptions[i].location = i;
+			vertexInputAttributeDescriptions[i].binding = 0;
+			switch (vertexBufferLayout.GetElements()[i].GetComponentCount())
+			{
+			case 1:
+				vertexInputAttributeDescriptions[i].format = VK_FORMAT_R32_SFLOAT;
+				break;
+			case 2:
+				vertexInputAttributeDescriptions[i].format = VK_FORMAT_R32G32_SFLOAT;
+				break;
+			case 3:
+				vertexInputAttributeDescriptions[i].format = VK_FORMAT_R32G32B32_SFLOAT;
+				break;
+			case 4:
+				vertexInputAttributeDescriptions[i].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+				break;
+			case 9:
+				vertexInputAttributeDescriptions[i].format = VK_FORMAT_R32G32B32_SFLOAT;
+				break;
+			case 16:
+				vertexInputAttributeDescriptions[i].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+				break;
+			}
+			vertexInputAttributeDescriptions[i].offset = vertexBufferLayout.GetElements()[i].Offset;
 		}
-		vertexInputAttributeDescriptions[0].offset = vertexBufferLayout.GetElements()[0].Offset;
-
-		vertexInputAttributeDescriptions[1].location = 1;
+/*		vertexInputAttributeDescriptions[1].location = 1;
 		vertexInputAttributeDescriptions[1].binding = 0;
 		switch (vertexBufferLayout.GetElements()[1].GetComponentCount())
 		{
@@ -177,7 +182,7 @@ namespace Hazel {
 			break;
 		}
 		vertexInputAttributeDescriptions[1].offset = vertexBufferLayout.GetElements()[1].Offset;
-
+*/
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {};
 		vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputStateCreateInfo.pNext = NULL;

@@ -14,10 +14,10 @@ namespace Hazel {
 			switch (RendererAPI::GetAPI())
 			{
 			case RendererAPI::API::OpenGL:
-				s_RendererAPI = new OpenGLRendererAPI();
+				s_RendererAPI = std::make_unique<OpenGLRendererAPI>();
 				break;
 			case RendererAPI::API::Vulkan:
-				s_RendererAPI = new VulkanRendererAPI();
+				s_RendererAPI = std::make_unique<VulkanRendererAPI>();
 				break;
 			}
 			s_RendererAPI->Init();
@@ -33,6 +33,11 @@ namespace Hazel {
 			s_RendererAPI->EndScene();
 		}
 
+		inline static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+		{
+			s_RendererAPI->SetViewport(x, y, width, height);
+		}
+
 		inline static void SetClearColor(const glm::vec4& color)
 		{
 			s_RendererAPI->SetClearColor(color);
@@ -43,12 +48,12 @@ namespace Hazel {
 			s_RendererAPI->Clear();
 		}
 
-		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection)
+		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection)
 		{
 			s_RendererAPI->Submit(shader, vertexArray, instanceId, fragColor, transform, viewProjection);
 		}
 
-		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec3& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection)
+		inline static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection)
 		{
 			s_RendererAPI->Submit(shader, vertexArray, texture, instanceId, fragColor, transform, viewProjection);
 		}
@@ -68,7 +73,7 @@ namespace Hazel {
 			s_RendererAPI->EndRender();
 		}
 	private:
-		static RendererAPI* s_RendererAPI;
+		static Scope<RendererAPI> s_RendererAPI;
 	};
 
 }

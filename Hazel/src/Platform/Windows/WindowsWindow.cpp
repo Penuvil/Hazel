@@ -60,13 +60,13 @@ namespace Hazel {
 
 		if (api == RendererAPI::API::OpenGL)
 		{
-			m_Context = new OpenGLContext(m_Window);
+			m_Context = CreateScope<OpenGLContext>(m_Window);
 			m_Context->Init();
 			SetVSync(true);
 		}
 		else
 		{
-			m_Context = new VulkanContext(m_Window);
+			m_Context = CreateScope<VulkanContext>(m_Window);
 			m_Context->Init();
 		}
 	

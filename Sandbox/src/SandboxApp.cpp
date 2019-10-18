@@ -1,4 +1,5 @@
 #include <Hazel.h>
+#include <Hazel/Core/EntryPoint.h>
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -7,13 +8,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Sandbox2D.h"
+
 class ExampleLayer : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
+		: Layer("Example"), m_CameraController(1280.0f / 720.0f)
 	{
-		m_VertexArray.reset(Hazel::VertexArray::Create(1));
+		m_VertexArray = Hazel::VertexArray::Create(1);
 
 		float vertices[3 * 7] = {
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -35,7 +38,7 @@ public:
 		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
-		m_SquareVA.reset(Hazel::VertexArray::Create(20 * 20 + 2));
+		m_SquareVA = Hazel::VertexArray::Create(20 * 20 + 2);
 
 		float squareVertices[5 * 4] = {
 			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -154,28 +157,13 @@ public:
 
 	void OnUpdate(Hazel::Timestep ts) override
 	{
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT))
-			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
-		else if (Hazel::Input::IsKeyPressed(HZ_KEY_RIGHT))
-			m_CameraPosition.x += m_CameraMoveSpeed * ts;
-
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_UP))
-			m_CameraPosition.y += m_CameraMoveSpeed * ts;
-		else if (Hazel::Input::IsKeyPressed(HZ_KEY_DOWN))
-			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
-
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
-			m_CameraRotation += m_CameraRotationSpeed * ts;
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
-			m_CameraRotation -= m_CameraRotationSpeed * ts;
+		// Update
+		m_CameraController.OnUpdate(ts);
 
 		Hazel::Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		Hazel::Renderer::Clear();
 
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(m_CameraRotation);
-
-		Hazel::Renderer::BeginScene(m_Camera);
+		Hazel::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -191,7 +179,7 @@ public:
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;				
-				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, instance, m_SquareColor, transform);
+				Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVA, instance, glm::vec4(m_SquareColor, 1.0f), transform);
 				instance++;
 			}
 		}
@@ -201,13 +189,13 @@ public:
 
 //		m_Texture->Bind();
 		Hazel::Renderer::BeginRender();
-		Hazel::Renderer::Submit(textureShader, m_SquareVA, m_Texture, instance, m_SquareColor,  glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Hazel::Renderer::Submit(textureShader, m_SquareVA, m_Texture, instance, glm::vec4(m_SquareColor, 1.0f),  glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		Hazel::Renderer::EndRender();
 
 //		m_ChernoLogoTexture->Bind();
 		instance++;
 		Hazel::Renderer::BeginRender();
-		Hazel::Renderer::Submit(textureShader, m_SquareVA, m_ChernoLogoTexture, instance, m_SquareColor,  glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Hazel::Renderer::Submit(textureShader, m_SquareVA, m_ChernoLogoTexture, instance, glm::vec4(m_SquareColor, 1.0f),  glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		Hazel::Renderer::EndRender();
 
 		// Triangle
@@ -222,8 +210,9 @@ public:
 		ImGui::End();
 	}
 
-	void OnEvent(Hazel::Event& event) override
+	void OnEvent(Hazel::Event& e) override
 	{
+		m_CameraController.OnEvent(e);
 	}
 private:
 	Hazel::ShaderLibrary m_ShaderLibrary;
@@ -235,13 +224,7 @@ private:
 
 	Hazel::Ref<Hazel::Texture2D> m_Texture, m_ChernoLogoTexture;
 
-	Hazel::OrthographicCamera m_Camera;
-	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 5.0f;
-
-	float m_CameraRotation = 0.0f;
-	float m_CameraRotationSpeed = 180.0f;
-
+	Hazel::OrthographicCameraController m_CameraController;
 	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };
 
@@ -251,14 +234,13 @@ public:
 	Sandbox(Hazel::RendererAPI::API api)
 		:Hazel::Application(api)
 	{
-		PushLayer(new ExampleLayer());
+		//PushLayer(new ExampleLayer());
+		PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox()
 	{
-
 	}
-
 };
 
 Hazel::Application* Hazel::CreateApplication()
