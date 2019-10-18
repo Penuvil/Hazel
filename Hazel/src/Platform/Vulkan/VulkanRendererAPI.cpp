@@ -57,7 +57,14 @@ namespace Hazel {
 		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
 		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
 		
-		vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
+		result = vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+		{
+			vulkanSwapChain->RecreateSwapChain();
+			result = vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
+		}
+
 
 		s_CurrentFrame->imageIndex = imageIndex;
 		s_CurrentFrame->frameIndex = m_FrameIndex;

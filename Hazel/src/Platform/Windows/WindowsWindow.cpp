@@ -69,11 +69,8 @@ namespace Hazel {
 			m_Context = new VulkanContext(m_Window);
 			m_Context->Init();
 		}
-		
-
+	
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-		
-		
 
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)

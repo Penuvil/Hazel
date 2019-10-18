@@ -322,6 +322,11 @@ namespace Hazel
 		}
 
 //		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
+		for (auto renderPass : m_RenderPasses)
+		{
+			vkDestroyRenderPass(m_Device, renderPass.second, nullptr);
+			m_RenderPasses.erase(renderPass.first);
+		}
 
 		for (auto imageview : m_SwapChainImageViews) 
 		{
@@ -329,5 +334,10 @@ namespace Hazel
 		}
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+	}
+	void VulkanSwapChain::RecreateSwapChain()
+	{
+		Destroy();
+		Init();
 	}
 }
