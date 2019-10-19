@@ -16,6 +16,7 @@ namespace Hazel {
 			None = 0, OpenGL = 1, Vulkan = 2
 		};
 	public:
+		virtual ~RendererAPI() = default;
 		virtual void Init() = 0;
 
 		virtual void BeginScene() = 0;

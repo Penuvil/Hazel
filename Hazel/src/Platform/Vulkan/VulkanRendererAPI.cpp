@@ -13,6 +13,11 @@ namespace Hazel {
 
 	Ref<VulkanRendererAPI::FrameInfo> VulkanRendererAPI::s_CurrentFrame = nullptr;
 
+	VulkanRendererAPI::~VulkanRendererAPI()
+	{
+
+	}
+
 	void VulkanRendererAPI::Init()
 	{
 		VkResult result;
@@ -327,6 +332,27 @@ namespace Hazel {
 
 	void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
 	{
+	}
+
+	void VulkanRendererAPI::Cleanup()
+	{
+				VkDevice* device = VulkanContext::GetContext()->GetDevice();
+		for (auto semaphore : m_ImageAvailableSemaphores)
+		{
+			vkDestroySemaphore(*device, semaphore, nullptr);
+		}
+		for (auto semaphore : m_RenderFinishedSemaphores)
+		{
+			vkDestroySemaphore(*device, semaphore, nullptr);
+		}
+		for (auto semaphore : m_LayerCompleteSemaphores)
+		{
+			vkDestroySemaphore(*device, semaphore, nullptr);
+		}
+		for (auto fence : m_InFlightFences)
+		{
+			vkDestroyFence(*device, fence, nullptr);
+		}
 	}
 
 }

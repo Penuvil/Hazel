@@ -9,6 +9,9 @@ namespace Hazel {
 	class VulkanRendererAPI : public RendererAPI
 	{
 	public:
+
+		virtual ~VulkanRendererAPI();
+
 		struct FrameInfo {
 			uint32_t imageIndex;
 			size_t frameIndex;
@@ -34,6 +37,8 @@ namespace Hazel {
 		virtual void BeginRender() override;
 		virtual void EndRender() override;
 		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray) override;
+
+		void Cleanup();
 	private:
 		const int MAX_FRAMES_IN_FLIGHT = 3;
 		size_t m_FrameIndex = 0;

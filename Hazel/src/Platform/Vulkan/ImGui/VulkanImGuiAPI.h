@@ -20,8 +20,6 @@ namespace Hazel {
 		VulkanImGuiAPI();
 		~VulkanImGuiAPI() = default;
 
-		void CreateRenderPass();
-
 		// Inherited via ImGuiAPI
 		virtual void Init() override;
 		void UploadFonts();
@@ -33,7 +31,6 @@ namespace Hazel {
 
 	private:
 		float m_Time = 0.0f;
-		VkRenderPass m_RenderPass;
 		std::vector<VkCommandBuffer>* m_CommandBuffers;
 	};
 }

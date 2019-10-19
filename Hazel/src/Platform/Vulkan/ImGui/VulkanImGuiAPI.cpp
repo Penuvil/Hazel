@@ -19,59 +19,6 @@ namespace Hazel {
 	{
 	}
 
-	void VulkanImGuiAPI::CreateRenderPass()
-	{
-		VkAttachmentDescription colorAttachment = {};
-		colorAttachment.flags = 0;
-		colorAttachment.format = *VulkanContext::GetContext()->GetSwapChain()->GetSwapChainImageFormat();
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-		VkAttachmentReference colorAttachmentRef = {};
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		VkSubpassDescription subpassDescription = {};
-		subpassDescription.flags = 0;
-		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpassDescription.inputAttachmentCount = 0;
-		subpassDescription.pInputAttachments = nullptr;
-		subpassDescription.colorAttachmentCount = 1;
-		subpassDescription.pColorAttachments = &colorAttachmentRef;
-		subpassDescription.pResolveAttachments = nullptr;
-		subpassDescription.pDepthStencilAttachment = nullptr;
-		subpassDescription.preserveAttachmentCount = 0;
-		subpassDescription.pPreserveAttachments = nullptr;
-
-		VkSubpassDependency subpassDependency = {};
-		subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		subpassDependency.dstSubpass = 0;
-		subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		subpassDependency.srcAccessMask = 0;
-		subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		subpassDependency.dependencyFlags = 0;
-
-		VkRenderPassCreateInfo renderPassCreateInfo = {};
-		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassCreateInfo.pNext = NULL;
-		renderPassCreateInfo.flags = 0;
-		renderPassCreateInfo.attachmentCount = 1;
-		renderPassCreateInfo.pAttachments = &colorAttachment;
-		renderPassCreateInfo.subpassCount = 1;
-		renderPassCreateInfo.pSubpasses = &subpassDescription;
-		renderPassCreateInfo.dependencyCount = 1;
-		renderPassCreateInfo.pDependencies = &subpassDependency;
-
-		VkResult result = vkCreateRenderPass(*VulkanContext::GetContext()->GetDevice(), &renderPassCreateInfo, nullptr, &m_RenderPass);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
-	}
-
 	void VulkanImGuiAPI::Init()
 	{
 		m_CommandBuffers = VulkanContext::GetContext()->GetSwapChain()->GetImGuiCommandBuffer();
@@ -118,7 +65,7 @@ namespace Hazel {
 
 		ImGui_ImplVulkan_Init(&imGUiImplVulkanInitInfo, vulkanContext->GetSwapChain()->GetRenderPass("NoClear"));
 		UploadFonts();
-		CreateRenderPass();
+//		CreateRenderPass();
 	}
 
 	void VulkanImGuiAPI::UploadFonts()
@@ -219,7 +166,7 @@ namespace Hazel {
 		VkRenderPassBeginInfo renderPassBeginInfo = {};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.pNext = NULL;
-		renderPassBeginInfo.renderPass = m_RenderPass;
+		renderPassBeginInfo.renderPass = vulkanSwapChain->GetRenderPass("NoClear");
 		renderPassBeginInfo.framebuffer = vulkanSwapChain->GetFramebuffers()->at(frameInfo->imageIndex);
 		renderPassBeginInfo.renderArea.offset = { 0,0 };
 		renderPassBeginInfo.renderArea.extent = *vulkanSwapChain->GetExtent2D();

@@ -183,6 +183,12 @@ namespace Hazel {
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
 	{
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
+		for (auto buffer : m_Buffers)
+		{
+			vkDestroyBuffer(*device, buffer, nullptr);
+		}
+		vkFreeMemory(*device, m_BufferMemory, nullptr);
 	}
 
 	void VulkanUniformBuffer::Bind()

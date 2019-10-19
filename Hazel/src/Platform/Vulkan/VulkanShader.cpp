@@ -53,8 +53,8 @@ namespace Hazel {
 	VulkanShader::~VulkanShader()
 	{
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
-//		vkDestroyPipeline(*device, m_GraphicsPipeline, nullptr);
-//		vkDestroyPipelineLayout(*device, m_PipelineLayout, nullptr);
+		vkDestroyPipeline(*device, m_GraphicsPipeline, nullptr);
+		vkDestroyPipelineLayout(*device, m_PipelineLayout, nullptr);
 //		vkDestroyDescriptorSetLayout(*device, m_DescriptorSetLayout, nullptr);
 	}
 
