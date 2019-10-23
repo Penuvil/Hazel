@@ -15,7 +15,7 @@ namespace Hazel {
 
 	VulkanRendererAPI::~VulkanRendererAPI()
 	{
-
+		Shutdown();
 	}
 
 	void VulkanRendererAPI::Init()
@@ -334,9 +334,12 @@ namespace Hazel {
 	{
 	}
 
-	void VulkanRendererAPI::Cleanup()
+	void VulkanRendererAPI::Shutdown()
 	{
-				VkDevice* device = VulkanContext::GetContext()->GetDevice();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
+
+		vkDeviceWaitIdle(*device);
+
 		for (auto semaphore : m_ImageAvailableSemaphores)
 		{
 			vkDestroySemaphore(*device, semaphore, nullptr);

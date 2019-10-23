@@ -38,7 +38,7 @@ namespace Hazel {
 		virtual void EndRender() override;
 		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray) override;
 
-		void Cleanup();
+		void Shutdown();
 	private:
 		const int MAX_FRAMES_IN_FLIGHT = 3;
 		size_t m_FrameIndex = 0;

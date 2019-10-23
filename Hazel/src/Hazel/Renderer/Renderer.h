@@ -25,6 +25,7 @@ namespace Hazel {
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4& transform = glm::mat4(1.0f));
 		static void BeginRender();
 		static void EndRender();
+		static void Shutdown();
 
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }

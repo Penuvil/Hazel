@@ -11,9 +11,16 @@ namespace Hazel {
 	VulkanTexture2D::VulkanTexture2D(const std::string & path)
 		: m_Path(path)
 	{
+		VulkanContext* vulkanContext = VulkanContext::GetContext();
+		VkPhysicalDevice* physicalDevice = vulkanContext->GetPhysicalDevice();
+		VkFormatProperties formatProperties;
+
+		vkGetPhysicalDeviceFormatProperties(*physicalDevice, VK_FORMAT_R8G8B8_UNORM, &formatProperties);
+		int32_t requiredChannels = (formatProperties.optimalTilingFeatures) ? 0 : 4;
+
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
-		stbi_uc* imageData = stbi_load(path.c_str(), &width, &height, &channels, 0);
+		stbi_uc* imageData = stbi_load(path.c_str(), &width, &height, &channels, requiredChannels);
 		HZ_CORE_ASSERT(imageData, "Failed to load image!");
 		m_Width = width;
 		m_Height = height;
@@ -29,7 +36,8 @@ namespace Hazel {
 		}
 		else if (channels == 3)
 		{
-			format = VK_FORMAT_R8G8B8_UNORM;
+			
+			format = (requiredChannels == 0) ? VK_FORMAT_R8G8B8_UNORM : VK_FORMAT_R8G8B8A8_UNORM;
 			anisotrophy = VK_FALSE;
 		}
 
@@ -39,7 +47,7 @@ namespace Hazel {
 
 		VulkanUtility::CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-		VkDevice* device = VulkanContext::GetContext()->GetDevice();
+		VkDevice* device = vulkanContext->GetDevice();
 		void* data;
 		vkMapMemory(*device, stagingBufferMemory, 0, imageSize, 0, &data);
 		memcpy(data, imageData, imageSize);

@@ -76,6 +76,7 @@ namespace Hazel {
 
 			m_Window->OnUpdate();
 		}
+		Renderer::Shutdown();
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

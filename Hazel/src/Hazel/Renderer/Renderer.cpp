@@ -57,4 +57,9 @@ namespace Hazel {
 	{
 		RenderCommand::EndRender();
 	}
+
+	void Renderer::Shutdown()
+	{
+		RenderCommand::Shutdown();
+	}
 }

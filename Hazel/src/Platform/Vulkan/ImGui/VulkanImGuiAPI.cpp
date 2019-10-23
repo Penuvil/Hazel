@@ -127,8 +127,7 @@ namespace Hazel {
 
 	void VulkanImGuiAPI::OnImGuiRender()
 	{
-		static bool show = true;
-		ImGui::ShowDemoWindow(&show);
+
 	}
 
 	void VulkanImGuiAPI::Begin()

@@ -86,8 +86,7 @@ namespace Hazel {
 
 	void OpenGLImGuiAPI::OnImGuiRender()
 	{
-		static bool show = true;
-		ImGui::ShowDemoWindow(&show);
+
 	}
 
 }

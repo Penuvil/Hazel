@@ -72,6 +72,11 @@ namespace Hazel {
 		{
 			s_RendererAPI->EndRender();
 		}
+
+		inline static void Shutdown()
+		{
+			s_RendererAPI.reset();
+		}
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};
