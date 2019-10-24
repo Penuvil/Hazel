@@ -62,6 +62,24 @@ namespace Hazel {
 
 	void VulkanContext::SwapBuffers()
 	{
+		VkResult result;
+		VulkanContext* vulkanContext = VulkanContext::GetContext();
+		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
+		Ref<VulkanRendererAPI::FrameInfo> frameInfo = VulkanRendererAPI::GetFrame();
+		const VkSwapchainKHR* swapChain = vulkanSwapChain->GetSwapChain();
+		VkSemaphore signalSemiphores[] = { *frameInfo->renderFinishedSemaphore };
+
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.pNext = NULL;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemiphores;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChain;
+		presentInfo.pImageIndices = &frameInfo->imageIndex;
+		presentInfo.pResults = nullptr;
+
+		vkQueuePresentKHR(*vulkanContext->GetPresentQueue(), &presentInfo);
 	}
 
 	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanContext::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

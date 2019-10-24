@@ -203,6 +203,7 @@ namespace Hazel {
 
 	void VulkanRendererAPI::Clear()
 	{
+
 	}
 
 	void VulkanRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)

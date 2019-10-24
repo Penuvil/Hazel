@@ -70,51 +70,12 @@ namespace Hazel {
 
 	void VulkanImGuiAPI::UploadFonts()
 	{
-		VkResult result;
-		VkDevice* device = VulkanContext::GetContext()->GetDevice();
-		VkCommandPool* commandPool = VulkanContext::GetContext()->GetCommandPool();
-		VkCommandBuffer commandBuffer;
-		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
-		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		commandBufferAllocateInfo.pNext = NULL;
-		commandBufferAllocateInfo.commandPool = *commandPool;
-		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		commandBufferAllocateInfo.commandBufferCount = 1;
-
-		result = vkAllocateCommandBuffers(*device, &commandBufferAllocateInfo, &commandBuffer);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate command buffer! ", +result);
-		
-		VkCommandBufferBeginInfo commandBuffreBeginInfo = {};
-		commandBuffreBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		commandBuffreBeginInfo.pNext = NULL;
-		commandBuffreBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		commandBuffreBeginInfo.pInheritanceInfo = VK_NULL_HANDLE;
-
-		result = vkBeginCommandBuffer(commandBuffer, &commandBuffreBeginInfo);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer! " + result);
+		VkCommandBuffer commandBuffer = VulkanUtility::BeginTransientCommand();
 
 		ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
 
-		VkSubmitInfo submitInfo = {};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pNext = NULL;
-		submitInfo.waitSemaphoreCount = 0;
-		submitInfo.pWaitSemaphores = nullptr;
-		submitInfo.pWaitDstStageMask = nullptr;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-		submitInfo.signalSemaphoreCount = 0;
-		submitInfo.pSignalSemaphores = nullptr;
+		VulkanUtility::EndTransientCommand(commandBuffer);
 
-		result = vkEndCommandBuffer(commandBuffer);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to end command buffer!" + result);
-
-		VkQueue* graphicsQueue = VulkanContext::GetContext()->GetGraphicsQueue();
-		result = vkQueueSubmit(*graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to subit command buffers to queue! " + result);
-		vkQueueWaitIdle(*graphicsQueue);
-
-		vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer);
 		ImGui_ImplVulkan_InvalidateFontUploadObjects();
 	}
 
@@ -199,21 +160,6 @@ namespace Hazel {
 		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *frameInfo->inFlightFence);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
 
-		const VkSwapchainKHR* swapChain = vulkanSwapChain->GetSwapChain();
-
-		VkPresentInfoKHR presentInfo = {};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.pNext = NULL;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemiphores;
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapChain;
-		presentInfo.pImageIndices = &frameInfo->imageIndex;
-		presentInfo.pResults = nullptr;
-
-		vkQueuePresentKHR(*vulkanContext->GetPresentQueue(), &presentInfo);
-
-
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();
@@ -221,6 +167,7 @@ namespace Hazel {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
+		
 	}
 
 	
