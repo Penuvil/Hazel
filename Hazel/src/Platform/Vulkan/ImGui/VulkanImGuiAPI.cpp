@@ -61,6 +61,8 @@ namespace Hazel {
 		imGUiImplVulkanInitInfo.PipelineCache = VK_NULL_HANDLE;
 		imGUiImplVulkanInitInfo.DescriptorPool = *vulkanContext->GetSwapChain()->GetDescriptorPool();
 		imGUiImplVulkanInitInfo.Allocator = nullptr;
+		imGUiImplVulkanInitInfo.MinImageCount = 2;
+		imGUiImplVulkanInitInfo.ImageCount = vulkanContext->GetSwapChain()->GetSwapImages()->size();
 		imGUiImplVulkanInitInfo.CheckVkResultFn = CheckVkResult;
 
 		ImGui_ImplVulkan_Init(&imGUiImplVulkanInitInfo, vulkanContext->GetSwapChain()->GetRenderPass("NoClear"));
@@ -76,7 +78,7 @@ namespace Hazel {
 
 		VulkanUtility::EndTransientCommand(commandBuffer);
 
-		ImGui_ImplVulkan_InvalidateFontUploadObjects();
+		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
 
 	void VulkanImGuiAPI::Shutdown()
