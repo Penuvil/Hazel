@@ -245,5 +245,5 @@ public:
 
 Hazel::Application* Hazel::CreateApplication()
 {
-	return new Sandbox(Hazel::RendererAPI::API::OpenGL);
+	return new Sandbox(Hazel::RendererAPI::API::Vulkan);
 }

@@ -58,9 +58,9 @@ namespace Hazel {
 			s_RendererAPI->Submit(shader, vertexArray, texture, instanceId, fragColor, transform, viewProjection);
 		}
 
-		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
+		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId)
 		{
-			s_RendererAPI->DrawIndexed(vertexArray);
+			s_RendererAPI->DrawIndexed(vertexArray, instanceId);
 		}
 
 		inline static void BeginRender()

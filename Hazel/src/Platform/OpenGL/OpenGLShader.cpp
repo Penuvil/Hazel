@@ -165,7 +165,7 @@ namespace Hazel {
 		}
 	}
 
-	void OpenGLShader::Bind() const
+	void OpenGLShader::Bind()
 	{
 		glUseProgram(m_RendererID);
 	}

@@ -51,14 +51,28 @@ namespace Hazel {
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
-		std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->Bind();
-		std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->UploadUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-		std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->UploadUniformMat4("u_Transform", glm::mat4(1.0f));
+		RenderCommand::BeginScene();
+		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->Bind();
+		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->UploadUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->UploadUniformMat4("u_Transform", glm::mat4(1.0f));
+		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->Bind();
+		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_Transform", glm::mat4(1.0f));
 	}
 
 	void Renderer2D::EndScene()
 	{
+		RenderCommand::EndScene();
+	}
 
+	void Renderer2D::BeginRender()
+	{
+		RenderCommand::BeginRender();
+	}
+
+	void Renderer2D::EndRender()
+	{
+		RenderCommand::EndRender();
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -68,11 +82,16 @@ namespace Hazel {
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->Bind();
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(s_Data->FlatColorShader)->UploadUniformFloat4("u_Color", color);
+		s_Data->FlatColorShader->Bind();
+		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->Bind();
+
+//		std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->Bind();
+//		std::dynamic_pointer_cast<Hazel::OpenGLShader>(s_Data->FlatColorShader)->UploadUniformFloat4("u_Color", color);
+		s_Data->QuadVertexArray->GetUniformBuffer(0, "Color")->Bind();
+		s_Data->QuadVertexArray->GetUniformBuffer(0, "Color")->UpdateFloat4("u_Color", color);
 
 		s_Data->QuadVertexArray->Bind();
-		RenderCommand::DrawIndexed(s_Data->QuadVertexArray);
+		RenderCommand::DrawIndexed(s_Data->QuadVertexArray, 0);
 	}
 
 }

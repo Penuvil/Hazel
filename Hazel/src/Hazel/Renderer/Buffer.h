@@ -1,5 +1,7 @@
 #pragma once
 
+#include "glm/glm.hpp"
+
 namespace Hazel {
 
 	enum class ShaderDataType
@@ -135,7 +137,12 @@ namespace Hazel {
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
-//		virtual std::variant<unsigned int, VkBuffer> GetBuffer() = 0;
+		virtual const BufferLayout& GetLayout() const = 0;
+		virtual void SetLayout(const BufferLayout& layout) = 0;
+
+		virtual void UpdateMat4(std::string name, glm::mat4 matrix) = 0;
+		virtual void UpdateFloat4(std::string name, glm::vec4 vector) = 0;
+
 		virtual std::string GetName() = 0;
 
 		static UniformBuffer* Create(std::string name, uint32_t size, uint32_t shaderBlock);

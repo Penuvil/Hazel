@@ -22,7 +22,14 @@ namespace Hazel {
 			VkFence* inFlightFence;
 		};
 
+		struct BatchInfo {
+			VkCommandBuffer commandBuffer;
+			Ref<Shader> shader;
+		};
+
 		static inline const Ref<FrameInfo> GetFrame() { return s_CurrentFrame; }
+		static inline const Ref<BatchInfo> GetBatch() { return s_CurrentBatch; }
+		static inline void SetBatchShader(const std::shared_ptr<Shader>& shader) { s_CurrentBatch->shader = shader; }
 
 		// Inherited via RendererAPI
 		virtual void Init() override;
@@ -36,11 +43,11 @@ namespace Hazel {
 		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray,Ref<Texture2D> texture, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection) override;
 		virtual void BeginRender() override;
 		virtual void EndRender() override;
-		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray) override;
+		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId) override;
 
 		void Shutdown();
 	private:
-		const int MAX_FRAMES_IN_FLIGHT = 3;
+		const int MAX_FRAMES_IN_FLIGHT = 5;
 		size_t m_FrameIndex = 0;
 		glm::vec4 m_ClearColor;
 		std::vector<VkSemaphore> m_ImageAvailableSemaphores;
@@ -52,5 +59,6 @@ namespace Hazel {
 
 	private:
 		static Ref<FrameInfo> s_CurrentFrame;
+		static Ref<BatchInfo> s_CurrentBatch;
 	};
 }

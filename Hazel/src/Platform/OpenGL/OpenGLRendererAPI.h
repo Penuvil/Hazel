@@ -22,7 +22,7 @@ namespace Hazel {
 		virtual void EndRender() override;
 
 
-		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray) override;
+		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId) override;
 	private:
 //		std::unordered_map<std::string, Hazel::Ref<UniformBuffer>> m_UniformBuffers;
 	};

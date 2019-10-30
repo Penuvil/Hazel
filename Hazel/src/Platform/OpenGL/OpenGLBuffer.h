@@ -45,12 +45,17 @@ namespace Hazel {
 		virtual void Bind() override;
 		virtual void Unbind() override;
 
-//		inline virtual std::variant<unsigned int, VkBuffer> GetBuffer() override { return m_Buffer; }
+		virtual const BufferLayout& GetLayout() const override { return m_Layout; }
+		virtual void SetLayout(const BufferLayout& layout) override { m_Layout = layout; }
+
+		virtual void UpdateMat4(std::string name, glm::mat4 matrix) override;
+		virtual void UpdateFloat4(std::string name, glm::vec4 vector) override;
+
 		inline virtual std::string GetName() override { return m_Name; }
 	private:
 		std::string m_Name;
 		unsigned int m_Buffer;
 		uint32_t m_ShaderBlock;
-
+		BufferLayout m_Layout;
 	};
 }

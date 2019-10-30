@@ -12,6 +12,7 @@
 namespace Hazel {
 
 	Ref<VulkanRendererAPI::FrameInfo> VulkanRendererAPI::s_CurrentFrame = nullptr;
+	Ref<VulkanRendererAPI::BatchInfo> VulkanRendererAPI::s_CurrentBatch = nullptr;
 
 	VulkanRendererAPI::~VulkanRendererAPI()
 	{
@@ -299,6 +300,9 @@ namespace Hazel {
 
 		vkCmdSetViewport(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &scissor);
+
+		s_CurrentBatch.reset(new BatchInfo);
+		s_CurrentBatch->commandBuffer = commandBuffers->at(s_CurrentFrame->imageIndex);
 	}
 
 	void VulkanRendererAPI::EndRender()
@@ -331,8 +335,9 @@ namespace Hazel {
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
 	}
 
-	void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
+	void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId)
 	{
+		vkCmdDrawIndexed(s_CurrentBatch->commandBuffer, vertexArray->GetIndexBuffer()->GetCount(), 1, 0, 0, 0);
 	}
 
 	void VulkanRendererAPI::Shutdown()
@@ -340,6 +345,9 @@ namespace Hazel {
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 
 		vkDeviceWaitIdle(*device);
+
+		s_CurrentBatch.reset();
+		s_CurrentFrame.reset();
 
 		for (auto semaphore : m_ImageAvailableSemaphores)
 		{

@@ -2,6 +2,7 @@
 
 #include "VulkanBuffer.h"
 #include "VulkanContext.h"
+#include "Platform/Vulkan/VulkanRendererAPI.h"
 
 namespace Hazel {
 
@@ -197,6 +198,45 @@ namespace Hazel {
 
 	void VulkanUniformBuffer::Unbind()
 	{
+	}
+
+	void VulkanUniformBuffer::SetLayout(const BufferLayout & layout)
+	{
+		m_Layout = layout;
+	}
+
+	void VulkanUniformBuffer::UpdateMat4(std::string name, glm::mat4 matrix)
+	{
+		for (auto element : m_Layout.GetElements())
+		{
+			if (element.Name == name)
+			{
+				VulkanContext* vulkanContext = VulkanContext::GetContext();
+				VkDeviceSize offset = m_BufferSize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
+				void* data;
+				vkMapMemory(*vulkanContext->GetDevice(), m_BufferMemory, offset, element.Size, 0, &data);
+				memcpy(data, &matrix, element.Size);
+				vkUnmapMemory(*vulkanContext->GetDevice(), m_BufferMemory);
+				break;
+			}
+		}
+	}
+
+	void VulkanUniformBuffer::UpdateFloat4(std::string name, glm::vec4 vector)
+	{
+		for (auto element : m_Layout.GetElements())
+		{
+			if (element.Name == name)
+			{
+				VulkanContext* vulkanContext = VulkanContext::GetContext();
+				VkDeviceSize offset = m_BufferSize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
+				void* data;
+				vkMapMemory(*vulkanContext->GetDevice(), m_BufferMemory, offset, element.Size, 0, &data);
+				memcpy(data, &vector, element.Size);
+				vkUnmapMemory(*vulkanContext->GetDevice(), m_BufferMemory);
+				break;
+			}
+		}
 	}
 
 	std::string VulkanUniformBuffer::GetName()

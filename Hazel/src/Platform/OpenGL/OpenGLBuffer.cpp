@@ -86,6 +86,30 @@ namespace Hazel {
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
+	void OpenGLUniformBuffer::UpdateMat4(std::string name, glm::mat4 matrix)
+	{
+		for (auto element : m_Layout.GetElements())
+		{
+			if (element.Name == name)
+			{
+				glBufferSubData(GL_UNIFORM_BUFFER, element.Offset, element.Size, &matrix);
+				break;
+			}
+		}
+	}
+
+	void OpenGLUniformBuffer::UpdateFloat4(std::string name, glm::vec4 vector)
+	{
+		for (auto element : m_Layout.GetElements())
+		{
+			if (element.Name == name)
+			{
+				glBufferSubData(GL_UNIFORM_BUFFER, element.Offset, element.Size, &vector);
+				break;
+			}
+		}
+	}
+
 
 
 }

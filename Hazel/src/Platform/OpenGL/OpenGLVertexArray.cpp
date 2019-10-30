@@ -31,9 +31,11 @@ namespace Hazel {
 		glCreateVertexArrays(1, &m_RendererID);
 		Ref<UniformBuffer> matricesUniformBuffer;
 		matricesUniformBuffer.reset(UniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
+		matricesUniformBuffer->SetLayout({ {ShaderDataType::Mat4, "u_ViewProjection"}, {ShaderDataType::Mat4, "u_Transform"} });
 
 		Ref<UniformBuffer> colorUniformBuffer;
 		colorUniformBuffer.reset(UniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float4), 1));
+		colorUniformBuffer->SetLayout({ {ShaderDataType::Float4, "u_Color"} });
 
 		m_UniformBuffers.reserve(2);
 		m_UniformBuffers[matricesUniformBuffer->GetName()] = matricesUniformBuffer;
@@ -45,7 +47,7 @@ namespace Hazel {
 		glDeleteVertexArrays(1, &m_RendererID);
 	}
 
-	void OpenGLVertexArray::Bind() const
+	void OpenGLVertexArray::Bind()
 	{
 		glBindVertexArray(m_RendererID);
 	}

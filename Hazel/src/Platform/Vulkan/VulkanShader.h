@@ -19,7 +19,7 @@ namespace Hazel {
 //		inline std::vector<VkDescriptorSet>* GetDescriptorSets() { return &m_DecsriptorSets; }
 
 		// Inherited via Shader
-		virtual void Bind() const override;
+		virtual void Bind() override;
 		virtual void Unbind() const override;
 
 		virtual const std::string& GetName() const override { return m_Name; }

@@ -62,6 +62,7 @@ namespace Hazel {
 
 	void Renderer::Shutdown()
 	{
+		Renderer2D::Shutdown();
 		RenderCommand::Shutdown();
 	}
 }

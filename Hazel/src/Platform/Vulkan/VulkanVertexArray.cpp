@@ -2,6 +2,7 @@
 
 #include "VulkanVertexArray.h"
 #include "Platform/Vulkan/VulkanContext.h"
+#include "Platform/Vulkan/VulkanRendererAPI.h"
 #include "Hazel/Renderer/Shader.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanBuffer.h"
@@ -17,8 +18,10 @@ namespace Hazel {
 			std::unordered_map<std::string, Ref<UniformBuffer>> buffers;
 			Ref<UniformBuffer> uniformBuffer;
 			uniformBuffer.reset(VulkanUniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
+			uniformBuffer->SetLayout({ {ShaderDataType::Mat4, "u_ViewProjection"}, {ShaderDataType::Mat4, "u_Transform"} });
 			m_UniformBuffers.at(i).insert({ uniformBuffer->GetName(), uniformBuffer });
 			uniformBuffer.reset(VulkanUniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float4), 0));
+			uniformBuffer->SetLayout({ {ShaderDataType::Float4, "u_Color"} });
 			m_UniformBuffers.at(i).insert({ uniformBuffer->GetName(), uniformBuffer });
 
 			CreateDescriptorSets(i);
@@ -27,6 +30,7 @@ namespace Hazel {
 
 	VulkanVertexArray::~VulkanVertexArray()
 	{
+
 	}
 
 	void VulkanVertexArray::CreateDescriptorSets(uint32_t instanceIndex)
@@ -94,8 +98,17 @@ namespace Hazel {
 
 	}
 
-	void VulkanVertexArray::Bind() const
+	void VulkanVertexArray::Bind()
 	{
+		std::vector<VkCommandBuffer>* commandBuffers = VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers();
+
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), 0, 1, std::static_pointer_cast<VulkanVertexBuffer>(GetVertexBuffers().at(0))->GetBuffer(), offsets);
+		vkCmdBindIndexBuffer(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), *std::static_pointer_cast<VulkanIndexBuffer>(GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+		const std::vector<VkDescriptorSet>* descriptorSets = GetDescriptorSets(0);
+		vkCmdBindDescriptorSets(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS,  *std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(),
+			0, 1, &descriptorSets->at(VulkanRendererAPI::GetFrame()->imageIndex), 0, nullptr);
 	}
 
 	void VulkanVertexArray::Unbind() const

@@ -1,6 +1,7 @@
 #include "hzpch.h"
 
 #include "Platform/Vulkan/VulkanContext.h"
+#include "Platform/Vulkan/VulkanRendererAPI.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanBuffer.h"
 
@@ -324,8 +325,11 @@ namespace Hazel {
 		vkDestroyShaderModule(*device, fragmentShaderModule, nullptr);
 	}
 
-	void VulkanShader::Bind() const
+	void VulkanShader::Bind()
 	{
+		std::vector<VkCommandBuffer>* commandBuffers = VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers();
+		vkCmdBindPipeline(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+		VulkanRendererAPI::SetBatchShader(shared_from_this());
 	}
 
 	void VulkanShader::Unbind() const
