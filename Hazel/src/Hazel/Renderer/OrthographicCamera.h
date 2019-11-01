@@ -7,21 +7,24 @@ namespace Hazel {
 	class OrthographicCamera
 	{
 	public:
-		OrthographicCamera(float left, float right, float bottom, float top);
+		virtual ~OrthographicCamera() = default;
 
-		void SetProjection(float left, float right, float bottom, float top);
+		virtual void SetProjection(float left, float right, float bottom, float top) = 0;
 
-		const glm::vec3& GetPosition() const { return m_Position; }
-		void SetPosition(const glm::vec3& position) { m_Position = position; RecalculateViewMatrix(); }
+		virtual const glm::vec3& GetPosition() const = 0;
+		virtual void SetPosition(const glm::vec3& position) = 0;
 
-		float GetRotation() const { return m_Rotation; }
-		void SetRotation(float rotation) { m_Rotation = rotation; RecalculateViewMatrix(); }
+		virtual float GetRotation() const = 0;
+		virtual void SetRotation(float rotation) = 0;
 
-		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
-		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
-		const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
+		virtual const glm::mat4& GetProjectionMatrix() const = 0;
+		virtual const glm::mat4& GetViewMatrix() const = 0;
+		virtual const glm::mat4& GetViewProjectionMatrix() const = 0;
+
+		static Ref<OrthographicCamera> Create(float left, float right, float bottom, float top);
+
 	private:
-		void RecalculateViewMatrix();
+		virtual void RecalculateViewMatrix() = 0;
 	private:
 		glm::mat4 m_ProjectionMatrix;
 		glm::mat4 m_ViewMatrix;

@@ -1,28 +1,23 @@
 #include "hzpch.h"
 #include "OrthographicCamera.h"
+#include "Hazel/Renderer/Renderer.h"
+#include "Platform/OpenGL/OpenGLCamera.h"
+#include "Platform/Vulkan/VulkanCamera.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Hazel {
 
-	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top)
-		: m_ProjectionMatrix(glm::ortho(left, right, bottom, top, -1.0f, 1.0f)), m_ViewMatrix(1.0f)
-	{
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
-	}
+	Ref<OrthographicCamera> OrthographicCamera::Create(float left, float right, float bottom, float top)
+	{		
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::None:    HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+		case RendererAPI::API::OpenGL:  return std::make_shared<OpenGLOrthographicCamera>(left, right, bottom, top);
+		case RendererAPI::API::Vulkan:	return std::make_shared<VulkanOrthographicCamera>(left, right, bottom, top);
+		}
 
-	void OrthographicCamera::SetProjection(float left, float right, float bottom, float top)
-	{
-		m_ProjectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
-	}
-
-	void OrthographicCamera::RecalculateViewMatrix()
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position);
-		transform =	glm::rotate(transform, glm::radians(m_Rotation), glm::vec3(0, 0, 1));
-
-		m_ViewMatrix = glm::inverse(transform);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+		HZ_CORE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
 	}
 }

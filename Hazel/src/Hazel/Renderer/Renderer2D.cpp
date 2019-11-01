@@ -49,14 +49,14 @@ namespace Hazel {
 		delete s_Data;
 	}
 
-	void Renderer2D::BeginScene(const OrthographicCamera& camera)
+	void Renderer2D::BeginScene(const Ref<OrthographicCamera> camera)
 	{
 		RenderCommand::BeginScene();
 		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->Bind();
 		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->UploadUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->UploadUniformMat4("u_Transform", glm::mat4(1.0f));
 		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->Bind();
-		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
 		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_Transform", glm::mat4(1.0f));
 	}
 
