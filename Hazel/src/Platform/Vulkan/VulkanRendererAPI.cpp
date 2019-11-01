@@ -209,43 +209,17 @@ namespace Hazel {
 
 	void VulkanRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
 	{
-		VkResult result;
-		VulkanContext* vulkanContext = VulkanContext::GetContext();
-		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
-		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
-		std::vector<std::shared_ptr<VertexBuffer>> vertexBuffers = vertexArray->GetVertexBuffers();
 		Ref<VulkanUniformBuffer> matricesBuffer = std::static_pointer_cast<VulkanUniformBuffer>(vertexArray->GetUniformBuffer(instanceId, "Matrices"));
 		Ref<VulkanUniformBuffer> colorBuffer = std::static_pointer_cast<VulkanUniformBuffer>(vertexArray->GetUniformBuffer(instanceId, "Color"));
-		struct Matrices
-		{
-			glm::mat4 viewProjection;
-			glm::mat4 transform;
-		} matrices = { viewProjection, transform };
-		void* data;
-		vkMapMemory(*vulkanContext->GetDevice(), *matricesBuffer->GetBufferMemory(), *matricesBuffer->GetBufferSize() * s_CurrentFrame->imageIndex, *matricesBuffer->GetBufferSize(), 0, &data);
-		memcpy(data, &matrices, *matricesBuffer->GetBufferSize());
-		vkUnmapMemory(*vulkanContext->GetDevice(), *matricesBuffer->GetBufferMemory());
 
-		struct Color
-		{
-			glm::vec4 color;
-		} color = { fragColor };
-		vkMapMemory(*vulkanContext->GetDevice(), *colorBuffer->GetBufferMemory(), *colorBuffer->GetBufferSize() * s_CurrentFrame->imageIndex, *colorBuffer->GetBufferSize(), 0, &data);
-		memcpy(data, &color, *colorBuffer->GetBufferSize());
-		vkUnmapMemory(*vulkanContext->GetDevice(), *colorBuffer->GetBufferMemory());
+		matricesBuffer->UpdateMat4("u_ViewProjection", viewProjection);
+		matricesBuffer->UpdateMat4("u_Transform", transform);
+		colorBuffer->UpdateFloat4("u_Color", fragColor);
 
-
+		shader->Bind();
+		vertexArray->Bind(instanceId);
 		
-		vkCmdBindPipeline(commandBuffers->at(s_CurrentFrame->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, *std::static_pointer_cast<VulkanShader>(shader)->GetGraphicsPipeline());
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, std::static_pointer_cast<VulkanVertexBuffer>(vertexArray->GetVertexBuffers().at(0))->GetBuffer(), offsets);
-		vkCmdBindIndexBuffer(commandBuffers->at(s_CurrentFrame->imageIndex), *std::static_pointer_cast<VulkanIndexBuffer>(vertexArray->GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-
-		const std::vector<VkDescriptorSet>* descriptorSets = std::static_pointer_cast<VulkanVertexArray>(vertexArray)->GetDescriptorSets(instanceId);
-		vkCmdBindDescriptorSets(commandBuffers->at(s_CurrentFrame->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, *std::static_pointer_cast<VulkanShader>(shader)->GetGraphicsPipelineLayout(),
-			0, 1, &descriptorSets->at(s_CurrentFrame->imageIndex), 0, nullptr);
-
-		vkCmdDrawIndexed(commandBuffers->at(s_CurrentFrame->imageIndex), vertexArray->GetIndexBuffer()->GetCount(), 1, 0, 0, 0);
+		DrawIndexed(vertexArray, instanceId);
 	}
 
 	void VulkanRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec4 & fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
