@@ -90,7 +90,7 @@ namespace Hazel {
 		s_Data->QuadVertexArray->GetUniformBuffer(0, "Color")->Bind();
 		s_Data->QuadVertexArray->GetUniformBuffer(0, "Color")->UpdateFloat4("u_Color", color);
 
-		s_Data->QuadVertexArray->Bind();
+		s_Data->QuadVertexArray->Bind(0);
 		RenderCommand::DrawIndexed(s_Data->QuadVertexArray, 0);
 	}
 

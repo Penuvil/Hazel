@@ -47,7 +47,7 @@ namespace Hazel {
 		glDeleteVertexArrays(1, &m_RendererID);
 	}
 
-	void OpenGLVertexArray::Bind()
+	void OpenGLVertexArray::Bind(uint32_t instanceID)
 	{
 		glBindVertexArray(m_RendererID);
 	}

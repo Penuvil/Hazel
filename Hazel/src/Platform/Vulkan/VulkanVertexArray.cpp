@@ -98,7 +98,7 @@ namespace Hazel {
 
 	}
 
-	void VulkanVertexArray::Bind()
+	void VulkanVertexArray::Bind(uint32_t instanceID)
 	{
 		std::vector<VkCommandBuffer>* commandBuffers = VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers();
 
@@ -106,7 +106,7 @@ namespace Hazel {
 		vkCmdBindVertexBuffers(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), 0, 1, std::static_pointer_cast<VulkanVertexBuffer>(GetVertexBuffers().at(0))->GetBuffer(), offsets);
 		vkCmdBindIndexBuffer(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), *std::static_pointer_cast<VulkanIndexBuffer>(GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-		const std::vector<VkDescriptorSet>* descriptorSets = GetDescriptorSets(0);
+		const std::vector<VkDescriptorSet>* descriptorSets = GetDescriptorSets(instanceID);
 		vkCmdBindDescriptorSets(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS,  *std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(),
 			0, 1, &descriptorSets->at(VulkanRendererAPI::GetFrame()->imageIndex), 0, nullptr);
 	}

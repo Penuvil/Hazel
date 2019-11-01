@@ -10,7 +10,7 @@ namespace Hazel {
 	public:
 		virtual ~VertexArray() {}
 
-		virtual void Bind() = 0;
+		virtual void Bind(uint32_t instanceId) = 0;
 		virtual void Unbind() const = 0;
 
 		virtual void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) = 0;

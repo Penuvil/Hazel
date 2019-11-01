@@ -15,7 +15,7 @@ namespace Hazel {
 		inline const std::vector<VkDescriptorSet>* GetDescriptorSets(uint32_t instance) { return &m_DecsriptorSets[instance]; }
 
 		// Inherited via VertexArray
-		virtual void Bind() override;
+		virtual void Bind(uint32_t instanceID) override;
 		virtual void Unbind() const override;
 
 		virtual void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) override;

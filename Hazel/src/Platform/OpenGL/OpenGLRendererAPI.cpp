@@ -50,7 +50,7 @@ namespace Hazel {
 
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, ShaderDataTypeSize(ShaderDataType::Float4), &fragColor);
 
-		vertexArray->Bind();
+		vertexArray->Bind(instanceId);
 		DrawIndexed(vertexArray, 0);
 	}
 
