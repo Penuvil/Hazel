@@ -75,23 +75,23 @@ namespace Hazel {
 		RenderCommand::EndRender();
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const uint32_t instanceID, const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, color);
+		DrawQuad( instanceID, { position.x, position.y, 0.0f }, size, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const uint32_t instanceID, const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
 		s_Data->FlatColorShader->Bind();
-		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->Bind();
+		s_Data->QuadVertexArray->GetUniformBuffer(instanceID, "Matrices")->Bind();
 
 //		std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->Bind();
 //		std::dynamic_pointer_cast<Hazel::OpenGLShader>(s_Data->FlatColorShader)->UploadUniformFloat4("u_Color", color);
-		s_Data->QuadVertexArray->GetUniformBuffer(0, "Color")->Bind();
-		s_Data->QuadVertexArray->GetUniformBuffer(0, "Color")->UpdateFloat4("u_Color", color);
+		s_Data->QuadVertexArray->GetUniformBuffer(instanceID, "Color")->Bind();
+		s_Data->QuadVertexArray->GetUniformBuffer(instanceID, "Color")->UpdateFloat4("u_Color", color);
 
-		s_Data->QuadVertexArray->Bind(0);
-		RenderCommand::DrawIndexed(s_Data->QuadVertexArray, 0);
+		s_Data->QuadVertexArray->Bind(instanceID);
+		RenderCommand::DrawIndexed(s_Data->QuadVertexArray, instanceID);
 	}
 
 }

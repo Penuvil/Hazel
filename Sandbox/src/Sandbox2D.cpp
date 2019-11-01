@@ -31,7 +31,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 
 	Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
 	Hazel::Renderer2D::BeginRender();
-	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+	Hazel::Renderer2D::DrawQuad(0, { 0.0f, 0.0f }, { 1.0f, 1.0f }, { 0.8f, 0.2f, 0.3f, 1.0f });
 	Hazel::Renderer2D::EndRender();
 	Hazel::Renderer2D::EndScene();
 
