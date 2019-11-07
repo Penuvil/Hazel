@@ -125,61 +125,7 @@ namespace Hazel {
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Buffers, m_BufferMemory);
 
 		if (m_BufferSize < requiredSize) m_BufferSize = static_cast<uint32_t>(requiredSize);
-/*		VkDescriptorSetLayoutBinding matricesUboLayoutBinding = {};
-		matricesUboLayoutBinding.binding = 0;
-		matricesUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		matricesUboLayoutBinding.descriptorCount = 1;
-		matricesUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		matricesUboLayoutBinding.pImmutableSamplers = nullptr;
 
-		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
-		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorSetLayoutCreateInfo.pNext = NULL;
-		descriptorSetLayoutCreateInfo.flags = 0;
-		descriptorSetLayoutCreateInfo.bindingCount = 1;
-		descriptorSetLayoutCreateInfo.pBindings = &matricesUboLayoutBinding;
-
-		VkResult result;
-		VkDevice* device = VulkanContext::GetContext()->GetDevice();
-		result = vkCreateDescriptorSetLayout(*device, &descriptorSetLayoutCreateInfo, nullptr, &m_DescriptorSetLayout);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor sey layout! " + result);
-
-		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(swapImageCount, m_DescriptorSetLayout);
-
-		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {};
-		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocateInfo.pNext = NULL;
-		descriptorSetAllocateInfo.descriptorPool = *VulkanContext::GetContext()->GetSwapChain()->GetDescriptorPool();
-		descriptorSetAllocateInfo.descriptorSetCount = swapImageCount;
-		descriptorSetAllocateInfo.pSetLayouts = descriptorSetLayouts.data();
-
-		m_DecsriptorSets.resize(swapImageCount);
-
-		result = vkAllocateDescriptorSets(*device, &descriptorSetAllocateInfo, m_DecsriptorSets.data());
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets! ");
-
-		for (uint32_t i = 0; i < swapImageCount; i++)
-		{
-			VkDescriptorBufferInfo descriptorBufferInfo = {};
-			descriptorBufferInfo.buffer = m_Buffers[i];
-			descriptorBufferInfo.offset = 0;
-			descriptorBufferInfo.range = ShaderDataTypeSize(ShaderDataType::Mat4) * 2;
-
-			VkWriteDescriptorSet writeDescriptorSet = {};
-			writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			writeDescriptorSet.pNext = NULL;
-			writeDescriptorSet.dstSet = m_DecsriptorSets[i];
-			writeDescriptorSet.dstBinding = 0;
-			writeDescriptorSet.dstArrayElement = 0;
-			writeDescriptorSet.descriptorCount = 1;
-			writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			writeDescriptorSet.pImageInfo = nullptr;
-			writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
-			writeDescriptorSet.pTexelBufferView = nullptr;
-
-			vkUpdateDescriptorSets(*device, 1, &writeDescriptorSet, 0, nullptr);
-		}
-	*/
 	}
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
