@@ -231,18 +231,32 @@ namespace Hazel
 		textureLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		textureLayoutBinding.pImmutableSamplers = nullptr;
 
-		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings = { matricesUboLayoutBinding, colorUboLayoutBinding, textureLayoutBinding };
+		std::vector<VkDescriptorSetLayoutBinding> uniformDescriptorSetLayoutBindings = { matricesUboLayoutBinding, colorUboLayoutBinding };
+		std::vector<VkDescriptorSetLayoutBinding> textureDescriptorSetLayoutBindings = { textureLayoutBinding };
+
+		VkDescriptorSetLayout uniformDescriptorSetLayout;
+		VkDescriptorSetLayout textureDescriptorSetLayout;
 
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
 		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		descriptorSetLayoutCreateInfo.pNext = NULL;
 		descriptorSetLayoutCreateInfo.flags = 0;
-		descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32_t>(descriptorSetLayoutBindings.size());
-		descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
+		descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32_t>(uniformDescriptorSetLayoutBindings.size());
+		descriptorSetLayoutCreateInfo.pBindings = uniformDescriptorSetLayoutBindings.data();
 
 		VkResult result;
-		result = vkCreateDescriptorSetLayout(m_Device, &descriptorSetLayoutCreateInfo, nullptr, &m_DescriptorSetLayout);
+		result = vkCreateDescriptorSetLayout(m_Device, &descriptorSetLayoutCreateInfo, nullptr, &uniformDescriptorSetLayout);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout! " + result);
+
+		descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32_t>(textureDescriptorSetLayoutBindings.size());
+		descriptorSetLayoutCreateInfo.pBindings = textureDescriptorSetLayoutBindings.data();
+
+		result = vkCreateDescriptorSetLayout(m_Device, &descriptorSetLayoutCreateInfo, nullptr, &textureDescriptorSetLayout);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout! " + result);
+
+		m_DescriptorSetLayouts.reserve(2);
+		m_DescriptorSetLayouts.push_back(uniformDescriptorSetLayout);
+		m_DescriptorSetLayouts.push_back(textureDescriptorSetLayout);
 	}
 
 	void VulkanSwapChain::AllocateCommandBuffers()
@@ -316,7 +330,12 @@ namespace Hazel
 	{
 
 		vkDeviceWaitIdle(m_Device);
-		vkDestroyDescriptorSetLayout(m_Device, m_DescriptorSetLayout, nullptr);
+
+		for (auto layout : m_DescriptorSetLayouts) 
+		{
+			vkDestroyDescriptorSetLayout(m_Device, layout, nullptr);
+		}
+
 		vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
 
 		for (auto framebuffer : m_Framebuffers)

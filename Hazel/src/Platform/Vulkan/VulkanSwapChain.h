@@ -16,7 +16,7 @@ namespace Hazel
 		inline const VkRenderPass GetRenderPass(std::string name) { return m_RenderPasses[name]; }
 		inline const VulkanUtility::QueueFamilyIndices* GetQueueFamilyIndices() { return &m_QueueFamilyIndices; }
 		inline const VkDescriptorPool* GetDescriptorPool() { return &m_DescriptorPool; }
-		inline VkDescriptorSetLayout* GetDescriptorSetLayout() { return &m_DescriptorSetLayout; }
+		inline std::vector<VkDescriptorSetLayout>* GetDescriptorSetLayouts() { return &m_DescriptorSetLayouts; }
 		inline std::vector<VkFramebuffer>* GetFramebuffers() { return &m_Framebuffers;  }
 		inline std::vector<VkCommandBuffer>* GetCommandBuffers() { return &m_CommandBuffers; }
 		inline std::vector<VkCommandBuffer>* GetImGuiCommandBuffer() { return &m_ImGuiCommandBuffers; }
@@ -49,7 +49,7 @@ namespace Hazel
 		std::unordered_map<std::string, VkRenderPass> m_RenderPasses;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		VkDescriptorPool m_DescriptorPool;
-		VkDescriptorSetLayout m_DescriptorSetLayout;
+		std::vector<VkDescriptorSetLayout> m_DescriptorSetLayouts;
 		std::vector<VkCommandBuffer> m_CommandBuffers;
 		std::vector<VkCommandBuffer> m_ImGuiCommandBuffers;
 	};

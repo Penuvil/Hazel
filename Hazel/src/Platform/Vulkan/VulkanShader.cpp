@@ -285,12 +285,14 @@ namespace Hazel {
 
 		VkResult result;
 
+		std::vector<VkDescriptorSetLayout>* descriptorSetLayouts = VulkanContext::GetContext()->GetSwapChain()->GetDescriptorSetLayouts();
+
 		VkPipelineLayoutCreateInfo layoutCreateInfo = {};
 		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		layoutCreateInfo.pNext = NULL;
 		layoutCreateInfo.flags = 0;
-		layoutCreateInfo.setLayoutCount = 1;
-		layoutCreateInfo.pSetLayouts = VulkanContext::GetContext()->GetSwapChain()->GetDescriptorSetLayout();
+		layoutCreateInfo.setLayoutCount = (uint32_t) descriptorSetLayouts->size();
+		layoutCreateInfo.pSetLayouts = descriptorSetLayouts->data();
 		layoutCreateInfo.pushConstantRangeCount = 0;
 		layoutCreateInfo.pPushConstantRanges = nullptr;
 

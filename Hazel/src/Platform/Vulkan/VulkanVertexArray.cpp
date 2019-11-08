@@ -41,7 +41,7 @@ namespace Hazel {
 		uint32_t swapImageCount = swapChain->GetImageCount();
 		std::vector<VkBuffer>* matricesBuffers = std::static_pointer_cast<VulkanUniformBuffer>(m_UniformBuffers[instanceIndex].find("Matrices")->second)->GetBuffers();
 		std::vector<VkBuffer>* colorBuffers = std::static_pointer_cast<VulkanUniformBuffer>(m_UniformBuffers[instanceIndex].find("Color")->second)->GetBuffers();;
-		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(swapImageCount, *swapChain->GetDescriptorSetLayout());
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(swapImageCount, swapChain->GetDescriptorSetLayouts()->at(0));
 
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {};
 		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
