@@ -132,8 +132,8 @@ namespace Hazel {
 		renderPassBeginInfo.framebuffer = vulkanSwapChain->GetFramebuffers()->at(frameInfo->imageIndex);
 		renderPassBeginInfo.renderArea.offset = { 0,0 };
 		renderPassBeginInfo.renderArea.extent = *vulkanSwapChain->GetExtent2D();
-		renderPassBeginInfo.clearValueCount = 1;
-		renderPassBeginInfo.pClearValues = frameInfo->clearColor;
+		renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(frameInfo->clearColors.size());
+		renderPassBeginInfo.pClearValues = frameInfo->clearColors.data();
 
 		vkCmdBeginRenderPass(m_CommandBuffers->at(frameInfo->imageIndex), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 

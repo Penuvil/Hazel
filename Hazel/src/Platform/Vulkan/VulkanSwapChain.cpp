@@ -16,7 +16,8 @@ namespace Hazel
 	{
 		CreateSwapChain();
 		CreateImageViews();
-		CreateRenderPass();
+		CreateDepthResources();
+		CreateRenderPass();		
 		CreateFramebuffers();
 		CreateDescriptorPool();
 		CreateDescriptorSetLayout();
@@ -89,7 +90,7 @@ namespace Hazel
 
 		for (size_t i = 0; i < m_SwapChainImages.size(); i++)
 		{
-			m_SwapChainImageViews[i] = VulkanUtility::CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat);
+			m_SwapChainImageViews[i] = VulkanUtility::CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
 		}
 	}
 
@@ -112,6 +113,21 @@ namespace Hazel
 		colorAttachmentRef.attachment = 0;
 		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+		VkAttachmentDescription depthAttachment = {};
+		depthAttachment.flags = 0;
+		depthAttachment.format = m_DepthImageFormat;
+		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		VkAttachmentReference depthAttachmentRef = {};
+		depthAttachmentRef.attachment = 1;
+		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 		VkSubpassDescription subpassDescription = {};
 		subpassDescription.flags = 0;
 		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -120,46 +136,65 @@ namespace Hazel
 		subpassDescription.colorAttachmentCount = 1;
 		subpassDescription.pColorAttachments = &colorAttachmentRef;
 		subpassDescription.pResolveAttachments = nullptr;
-		subpassDescription.pDepthStencilAttachment = nullptr;
+		subpassDescription.pDepthStencilAttachment = &depthAttachmentRef;
 		subpassDescription.preserveAttachmentCount = 0;
 		subpassDescription.pPreserveAttachments = nullptr;
 
-		VkSubpassDependency subpassDependency = {};
-		subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		subpassDependency.dstSubpass = 0;
-		subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		subpassDependency.srcAccessMask = 0;
-		subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		subpassDependency.dependencyFlags = 0;
+		std::array<VkSubpassDependency, 2> dependencies;
 
+		dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependencies[0].dstSubpass = 0;
+		dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+		dependencies[1].srcSubpass = 0;
+		dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+		dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+		std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
 		VkRenderPassCreateInfo renderPassCreateInfo = {};
 		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassCreateInfo.pNext = NULL;
 		renderPassCreateInfo.flags = 0;
-		renderPassCreateInfo.attachmentCount = 1;
-		renderPassCreateInfo.pAttachments = &colorAttachment;
+		renderPassCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		renderPassCreateInfo.pAttachments = attachments.data();
 		renderPassCreateInfo.subpassCount = 1;
 		renderPassCreateInfo.pSubpasses = &subpassDescription;
-		renderPassCreateInfo.dependencyCount = 1;
-		renderPassCreateInfo.pDependencies = &subpassDependency;
+		renderPassCreateInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+		renderPassCreateInfo.pDependencies = dependencies.data();
 
 		VkResult result = vkCreateRenderPass(m_Device, &renderPassCreateInfo, nullptr, &m_RenderPasses["Clear"]);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
-
-		colorAttachment = {};
-		colorAttachment.flags = 0;
-		colorAttachment.format = m_SwapChainImageFormat;
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+				
 		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+		attachments = { colorAttachment, depthAttachment };
+		
 		result = vkCreateRenderPass(m_Device, &renderPassCreateInfo, nullptr, &m_RenderPasses["NoClear"]);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create render pass! " + result);
+	}
+
+	void VulkanSwapChain::CreateDepthResources()
+	{
+		m_DepthImageFormat = VulkanUtility::FindSupportedFormat({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
+		VulkanUtility::CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, m_DepthImageFormat, VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
+
+		m_DepthImageView = VulkanUtility::CreateImageView(m_DepthImage, m_DepthImageFormat, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
+		VulkanUtility::TransitionImageLayout(m_DepthImage, m_DepthImageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	}
 
 	void VulkanSwapChain::CreateFramebuffers()
@@ -169,15 +204,15 @@ namespace Hazel
 		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
 		{
 			VkResult result;
-			VkImageView attachment = m_SwapChainImageViews[i];
+			std::array<VkImageView, 2> attachments = { m_SwapChainImageViews[i], m_DepthImageView };
 
 			VkFramebufferCreateInfo framebufferCreateInfo = {};
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferCreateInfo.pNext = NULL;
 			framebufferCreateInfo.flags = 0;
 			framebufferCreateInfo.renderPass = m_RenderPasses["Clear"];
-			framebufferCreateInfo.attachmentCount = 1;
-			framebufferCreateInfo.pAttachments = &attachment;
+			framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+			framebufferCreateInfo.pAttachments = attachments.data();
 			framebufferCreateInfo.width = m_SwapChainExtent.width;
 			framebufferCreateInfo.height = m_SwapChainExtent.height;
 			framebufferCreateInfo.layers = 1;
@@ -191,7 +226,7 @@ namespace Hazel
 	{
 		std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
 		descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorPoolSizes[0].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 405);
+		descriptorPoolSizes[0].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 2 * 500);
 
 		descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorPoolSizes[1].descriptorCount = static_cast<uint32_t>(m_SwapChainImages.size() * 405);
@@ -200,7 +235,7 @@ namespace Hazel
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.pNext = NULL;
 		descriptorPoolCreateInfo.flags = 0;
-		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 405);
+		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 500);
 		descriptorPoolCreateInfo.poolSizeCount = static_cast<uint32_t>(descriptorPoolSizes.size());
 		descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
@@ -343,11 +378,14 @@ namespace Hazel
 			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
 		}
 
-//		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 		for (auto renderPass : m_RenderPasses)
 		{
 			vkDestroyRenderPass(m_Device, renderPass.second, nullptr);
 		}
+
+		vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
+		vkDestroyImage(m_Device, m_DepthImage, nullptr);
+		vkFreeMemory(m_Device, m_DepthImageMemory, nullptr);
 
 		for (auto imageview : m_SwapChainImageViews) 
 		{
@@ -359,7 +397,7 @@ namespace Hazel
 
 	void VulkanSwapChain::RecreateSwapChain()
 	{
-		uint32_t currentImageCount = m_SwapChainImages.size();
+		uint32_t currentImageCount = static_cast<uint32_t>(m_SwapChainImages.size());
 
 		vkDeviceWaitIdle(m_Device);
 		for(auto framebuffer : m_Framebuffers)
@@ -373,6 +411,10 @@ namespace Hazel
 		}
 		m_RenderPasses.clear();
 
+		vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
+		vkDestroyImage(m_Device, m_DepthImage, nullptr);
+		vkFreeMemory(m_Device, m_DepthImageMemory, nullptr);
+
 		for (auto imageview : m_SwapChainImageViews)
 		{
 			vkDestroyImageView(m_Device, imageview, nullptr);
@@ -382,6 +424,7 @@ namespace Hazel
 
 		CreateSwapChain();
 		CreateImageViews();
+		CreateDepthResources();
 		CreateRenderPass();
 		CreateFramebuffers();
 

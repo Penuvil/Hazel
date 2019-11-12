@@ -299,6 +299,22 @@ namespace Hazel {
 		result = vkCreatePipelineLayout(*device, &layoutCreateInfo, nullptr, &m_PipelineLayout);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed tp create pipeline layout! " + result);
 
+		VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo = {};
+		depthStencilCreateInfo.sType= VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencilCreateInfo.pNext = nullptr;
+		depthStencilCreateInfo.flags = 0;
+		depthStencilCreateInfo.depthTestEnable = VK_TRUE;
+		depthStencilCreateInfo.depthWriteEnable = VK_TRUE;
+		depthStencilCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+		depthStencilCreateInfo.depthBoundsTestEnable = VK_FALSE;
+		depthStencilCreateInfo.stencilTestEnable = VK_FALSE;	
+		depthStencilCreateInfo.back.failOp = VK_STENCIL_OP_KEEP;
+		depthStencilCreateInfo.back.passOp = VK_STENCIL_OP_KEEP;
+		depthStencilCreateInfo.back.compareOp = VK_COMPARE_OP_ALWAYS;
+		depthStencilCreateInfo.front = depthStencilCreateInfo.back;
+		depthStencilCreateInfo.minDepthBounds = 0.0f;
+		depthStencilCreateInfo.maxDepthBounds = 1.0f;
+
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipelineCreateInfo.pNext = NULL;
@@ -311,7 +327,7 @@ namespace Hazel {
 		pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
 		pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 		pipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
-		pipelineCreateInfo.pDepthStencilState = nullptr;
+		pipelineCreateInfo.pDepthStencilState = &depthStencilCreateInfo;
 		pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		pipelineCreateInfo.layout = m_PipelineLayout;

@@ -38,6 +38,7 @@ namespace Hazel
 		static void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 		static void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage & image, VkDeviceMemory & memory);
 		static void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout startingLayout, VkImageLayout newLayout);
-		static VkImageView CreateImageView(VkImage image, VkFormat format);
+		static VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+		static VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 	};
 }

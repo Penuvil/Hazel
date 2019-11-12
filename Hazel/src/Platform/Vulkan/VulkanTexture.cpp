@@ -22,7 +22,7 @@ namespace Hazel {
 		VulkanUtility::CreateImage(m_Width, m_Height, m_Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_Image, m_Memory);
 
-		m_ImageView = VulkanUtility::CreateImageView(m_Image, m_Format);
+		m_ImageView = VulkanUtility::CreateImageView(m_Image, m_Format, VK_IMAGE_ASPECT_COLOR_BIT);
 
 		VkSamplerCreateInfo samplerCreateInfo = {};
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -105,7 +105,7 @@ namespace Hazel {
 		vkDestroyBuffer(*device, stagingBuffer, nullptr);
 		vkFreeMemory(*device, stagingBufferMemory, nullptr);
 
-		m_ImageView = VulkanUtility::CreateImageView(m_Image, m_Format);
+		m_ImageView = VulkanUtility::CreateImageView(m_Image, m_Format, VK_IMAGE_ASPECT_COLOR_BIT);
 
 		VkSamplerCreateInfo samplerCreateInfo = {};
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -217,25 +217,4 @@ namespace Hazel {
 			1, 1, &GetDescriptorSets().at(VulkanRendererAPI::GetFrame()->imageIndex), 0, nullptr);
 	}
 
-	void VulkanTexture2D::Bind(VkDescriptorSet descriptorSet) const
-	{
-		VkDescriptorImageInfo imageInfo = {};
-		imageInfo.sampler = m_Sampler;
-		imageInfo.imageView = m_ImageView;
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-		VkWriteDescriptorSet writeDescriptorSet = {};
-		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeDescriptorSet.pNext = 0;
-		writeDescriptorSet.dstSet = descriptorSet;
-		writeDescriptorSet.dstBinding = 2;
-		writeDescriptorSet.dstArrayElement = 0;
-		writeDescriptorSet.descriptorCount = 1;
-		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		writeDescriptorSet.pImageInfo = &imageInfo;
-		writeDescriptorSet.pBufferInfo = nullptr;
-		writeDescriptorSet.pTexelBufferView = nullptr;
-
-		vkUpdateDescriptorSets(*VulkanContext::GetContext()->GetDevice(), 1, &writeDescriptorSet, 0, nullptr);
-	}
 }

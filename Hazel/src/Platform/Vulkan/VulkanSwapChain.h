@@ -27,6 +27,7 @@ namespace Hazel
 		void CreateSwapChain();
 		void CreateImageViews();
 		void CreateRenderPass();
+		void CreateDepthResources();
 		void CreateFramebuffers();
 		void CreateDescriptorPool();
 		void CreateDescriptorSetLayout();
@@ -43,9 +44,13 @@ namespace Hazel
 		VulkanUtility::QueueFamilyIndices m_QueueFamilyIndices;
 		VkSwapchainKHR m_SwapChain;
 		std::vector<VkImage> m_SwapChainImages;
+		std::vector<VkImageView> m_SwapChainImageViews;
 		VkFormat m_SwapChainImageFormat;
 		VkExtent2D m_SwapChainExtent;
-		std::vector<VkImageView> m_SwapChainImageViews;
+		VkImage m_DepthImage;
+		VkDeviceMemory m_DepthImageMemory;
+		VkImageView m_DepthImageView;
+		VkFormat m_DepthImageFormat;
 		std::unordered_map<std::string, VkRenderPass> m_RenderPasses;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		VkDescriptorPool m_DescriptorPool;

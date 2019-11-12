@@ -23,7 +23,6 @@ namespace Hazel {
 
 
 		virtual void Bind(uint32_t slot = 0) const override;
-		void Bind(VkDescriptorSet descriptorSet) const;
 
 	private:
 		std::string m_Path;

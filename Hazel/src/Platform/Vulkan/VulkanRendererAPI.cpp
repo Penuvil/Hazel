@@ -25,7 +25,7 @@ namespace Hazel {
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 		const VkExtent2D* swapChainExtent = VulkanContext::GetContext()->GetSwapChain()->GetExtent2D();
 
-		s_CurrentFrame.reset(new FrameInfo);
+		s_CurrentFrame = CreateRef<FrameInfo>();
 
 		m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		m_LayerCompleteSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -62,7 +62,6 @@ namespace Hazel {
 	{
 		uint32_t imageIndex;
 		VkResult result;
-		VkClearValue clearColor = { m_ClearColor.r, m_ClearColor.g, m_ClearColor.b, m_ClearColor.a };
 		VulkanContext* vulkanContext = VulkanContext::GetContext();
 		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
 		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
@@ -79,7 +78,8 @@ namespace Hazel {
 
 		s_CurrentFrame->imageIndex = imageIndex;
 		s_CurrentFrame->frameIndex = m_FrameIndex;
-		s_CurrentFrame->clearColor = &clearColor;
+		s_CurrentFrame->clearColors[0].color = { m_ClearColor.r, m_ClearColor.g, m_ClearColor.b, m_ClearColor.a };
+		s_CurrentFrame->clearColors[1].depthStencil = { 1.0f, 0 };
 		s_CurrentFrame->imageAvailableSemaphore = &m_ImageAvailableSemaphores[m_FrameIndex];
 		s_CurrentFrame->layerCompleteSemaphore = &m_LayerCompleteSemaphores[m_FrameIndex];
 		s_CurrentFrame->renderFinishedSemaphore = &m_RenderFinishedSemaphores[m_FrameIndex];
@@ -104,8 +104,8 @@ namespace Hazel {
 		renderPassBeginInfo.framebuffer = vulkanSwapChain->GetFramebuffers()->at(imageIndex);
 		renderPassBeginInfo.renderArea.offset = { 0,0 };
 		renderPassBeginInfo.renderArea.extent = *vulkanSwapChain->GetExtent2D();
-		renderPassBeginInfo.clearValueCount = 1;
-		renderPassBeginInfo.pClearValues = &clearColor;
+		renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(s_CurrentFrame->clearColors.size());
+		renderPassBeginInfo.pClearValues = s_CurrentFrame->clearColors.data();
 
 		vkCmdBeginRenderPass(commandBuffers->at(imageIndex), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 		const VkExtent2D* swapChainExtent = vulkanSwapChain->GetExtent2D();
@@ -224,8 +224,9 @@ namespace Hazel {
 
 	void VulkanRendererAPI::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec4 & fragColor, const glm::mat4 & transform, const glm::mat4 & viewProjection)
 	{
-		std::static_pointer_cast<VulkanTexture2D>(texture)->Bind(std::static_pointer_cast<VulkanVertexArray>(vertexArray)->GetDescriptorSet(instanceId, s_CurrentFrame->imageIndex));
-		Submit(shader, vertexArray, instanceId, fragColor, transform, viewProjection);
+		shader->Bind();
+		texture->Bind();
+		Submit(shader, vertexArray, instanceId, glm::vec4(1.0f), transform, viewProjection);
 	}
 
 	void VulkanRendererAPI::BeginRender()
@@ -254,8 +255,8 @@ namespace Hazel {
 		renderPassBeginInfo.framebuffer = vulkanSwapChain->GetFramebuffers()->at(s_CurrentFrame->imageIndex);
 		renderPassBeginInfo.renderArea.offset = { 0,0 };
 		renderPassBeginInfo.renderArea.extent = *vulkanSwapChain->GetExtent2D();
-		renderPassBeginInfo.clearValueCount = 1;
-		renderPassBeginInfo.pClearValues = s_CurrentFrame->clearColor;
+		renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(s_CurrentFrame->clearColors.size());
+		renderPassBeginInfo.pClearValues = s_CurrentFrame->clearColors.data();
 
 		vkCmdBeginRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 		const VkExtent2D* swapChainExtent = vulkanSwapChain->GetExtent2D();

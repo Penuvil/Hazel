@@ -321,7 +321,17 @@ namespace Hazel {
 		imageMemBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		imageMemBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		imageMemBarrier.image = image;
-		imageMemBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+			imageMemBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+			if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT)
+			{
+				imageMemBarrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+			}
+		}
+		else
+		{
+			imageMemBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		}
 		imageMemBarrier.subresourceRange.baseMipLevel = 0;
 		imageMemBarrier.subresourceRange.levelCount = 1;
 		imageMemBarrier.subresourceRange.baseArrayLayer = 0;
@@ -343,6 +353,14 @@ namespace Hazel {
 			sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+		{
+			imageMemBarrier.srcAccessMask = 0;
+			imageMemBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		}
 		else
 		{
 			HZ_CORE_ASSERT(0, "Unsupported layout transition!");
@@ -353,7 +371,7 @@ namespace Hazel {
 		EndTransientCommand(commandBuffer);
 	}
 
-	VkImageView VulkanUtility::CreateImageView(VkImage image, VkFormat format)
+	VkImageView VulkanUtility::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
 	{
 		VkResult result;
 		VkImageView imageView;
@@ -370,7 +388,7 @@ namespace Hazel {
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageViewCreateInfo.subresourceRange.aspectMask = aspectFlags;
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.levelCount = 1;
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -380,5 +398,24 @@ namespace Hazel {
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create image views! {0}", result);
 
 		return imageView;
+	}
+	VkFormat VulkanUtility::FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+	{
+		for (auto format : candidates)
+		{
+			VkFormatProperties formatProperties;
+			vkGetPhysicalDeviceFormatProperties(*VulkanContext::GetContext()->GetPhysicalDevice(), format, &formatProperties);
+
+			if (tiling == VK_IMAGE_TILING_LINEAR && (formatProperties.linearTilingFeatures & features) == features)
+			{
+				return format;
+			}
+			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (formatProperties.optimalTilingFeatures & features) == features)
+			{
+				return format;
+			}
+
+			HZ_CORE_ASSERT(0, "Failed to find supported format!");
+		}
 	}
 }

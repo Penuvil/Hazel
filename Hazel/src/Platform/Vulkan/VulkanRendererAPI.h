@@ -15,7 +15,7 @@ namespace Hazel {
 		struct FrameInfo {
 			uint32_t imageIndex;
 			size_t frameIndex;
-			VkClearValue* clearColor;
+			std::array<VkClearValue, 2> clearColors;
 			VkSemaphore* imageAvailableSemaphore;
 			VkSemaphore* layerCompleteSemaphore;
 			VkSemaphore* renderFinishedSemaphore;
