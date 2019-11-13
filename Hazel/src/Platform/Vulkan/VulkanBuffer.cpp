@@ -18,23 +18,24 @@ namespace Hazel {
 			m_Vertices[i] = *(vertices + i);
 		}
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
-		VkDeviceSize bufferSize = sizeof(m_Vertices[0]) * m_Vertices.size();
+		size_t actualSize = sizeof(m_Vertices[0]) * m_Vertices.size();
+		m_BufferMemorySize = actualSize;
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
 
-		VulkanUtility::CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VulkanUtility::CreateBuffer(m_BufferMemorySize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
 		void* data;
-		vkMapMemory(*device, stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, m_Vertices.data(), (size_t)bufferSize);
+		vkMapMemory(*device, stagingBufferMemory, 0, actualSize, 0, &data);
+		memcpy(data, m_Vertices.data(), actualSize);
 		vkUnmapMemory(*device, stagingBufferMemory);
 
-		VulkanUtility::CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		VulkanUtility::CreateBuffer(m_BufferMemorySize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_Buffer, m_BufferMemory);
 
-		VulkanUtility::CopyBuffer(stagingBuffer, m_Buffer, bufferSize);
+		VulkanUtility::CopyBuffer(stagingBuffer, m_Buffer, actualSize);
 
 		vkDestroyBuffer(*device, stagingBuffer, nullptr);
 		vkFreeMemory(*device, stagingBufferMemory, nullptr);
@@ -74,22 +75,23 @@ namespace Hazel {
 			m_Indices[i] = *(indices + i);
 		}
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
-		VkDeviceSize bufferSize = sizeof(m_Indices[0]) * m_Indices.size();
+		size_t actualSize = sizeof(m_Indices[0]) * m_Indices.size();
+		m_BufferMemorySize = actualSize;
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
-		VulkanUtility::CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VulkanUtility::CreateBuffer(m_BufferMemorySize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
 		void* data;
-		vkMapMemory(*device, stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, m_Indices.data(), (size_t)bufferSize);
+		vkMapMemory(*device, stagingBufferMemory, 0, actualSize, 0, &data);
+		memcpy(data, m_Indices.data(), actualSize);
 		vkUnmapMemory(*device, stagingBufferMemory);
 
-		VulkanUtility::CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+		VulkanUtility::CreateBuffer(m_BufferMemorySize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_Buffer, m_BufferMemory);
 
-		VulkanUtility::CopyBuffer(stagingBuffer, m_Buffer, bufferSize);
+		VulkanUtility::CopyBuffer(stagingBuffer, m_Buffer, actualSize);
 
 		vkDestroyBuffer(*device, stagingBuffer, nullptr);
 		vkFreeMemory(*device, stagingBufferMemory, nullptr);
@@ -115,7 +117,7 @@ namespace Hazel {
 	/////////////////////////////////////////////////////////////////////////////
 
 	VulkanUniformBuffer::VulkanUniformBuffer(std::string name, uint32_t size, uint32_t shaderBlock)
-		:m_Name(name), m_BufferSize(size)
+		:m_Name(name), m_BufferMemorySize(size)
 	{
 		uint32_t swapImageCount = VulkanContext::GetContext()->GetSwapChain()->GetImageCount();
 
@@ -124,7 +126,7 @@ namespace Hazel {
 		VulkanUtility::CreateBuffer(requiredSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Buffers, m_BufferMemory);
 
-		if (m_BufferSize < requiredSize) m_BufferSize = static_cast<uint32_t>(requiredSize);
+		if (m_BufferMemorySize < requiredSize) m_BufferMemorySize = static_cast<uint32_t>(requiredSize);
 
 	}
 
@@ -158,7 +160,7 @@ namespace Hazel {
 			if (element.Name == name)
 			{
 				VulkanContext* vulkanContext = VulkanContext::GetContext();
-				VkDeviceSize offset = m_BufferSize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
+				VkDeviceSize offset = m_BufferMemorySize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
 				void* data;
 				vkMapMemory(*vulkanContext->GetDevice(), m_BufferMemory, offset, element.Size, 0, &data);
 				memcpy(data, &matrix, element.Size);
@@ -175,7 +177,7 @@ namespace Hazel {
 			if (element.Name == name)
 			{
 				VulkanContext* vulkanContext = VulkanContext::GetContext();
-				VkDeviceSize offset = m_BufferSize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
+				VkDeviceSize offset = m_BufferMemorySize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
 				void* data;
 				vkMapMemory(*vulkanContext->GetDevice(), m_BufferMemory, offset, element.Size, 0, &data);
 				memcpy(data, &vector, element.Size);

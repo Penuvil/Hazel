@@ -194,7 +194,7 @@ namespace Hazel {
 		vertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = {};
-		inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		inputAssemblyStateCreateInfo.pNext = NULL;
 		inputAssemblyStateCreateInfo.flags = 0;
 		inputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

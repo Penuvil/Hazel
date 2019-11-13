@@ -24,7 +24,8 @@ namespace Hazel {
 		std::vector<float> m_Vertices;
 		BufferLayout m_Layout;
 		VkBuffer m_Buffer;
-		VkDeviceMemory m_BufferMemory;		
+		VkDeviceMemory m_BufferMemory;	
+		VkDeviceSize m_BufferMemorySize;
 	};
 
 	class VulkanIndexBuffer : public IndexBuffer
@@ -44,6 +45,7 @@ namespace Hazel {
 		std::vector<uint32_t> m_Indices;
 		VkBuffer m_Buffer;
 		VkDeviceMemory m_BufferMemory;
+		VkDeviceSize m_BufferMemorySize;
 	};
 
 	class VulkanUniformBuffer : public UniformBuffer
@@ -52,7 +54,7 @@ namespace Hazel {
 		VulkanUniformBuffer(std::string name, uint32_t size, uint32_t shaderBlock);
 		virtual ~VulkanUniformBuffer();
 
-		inline uint32_t* GetBufferSize() { return &m_BufferSize; }
+//		inline VkDeviceSize* GetBufferSize() { return &m_BufferMemorySize; }
 		inline std::vector<VkBuffer>* GetBuffers() { return &m_Buffers; }
 		inline VkDeviceMemory* GetBufferMemory() { return &m_BufferMemory; }
 
@@ -69,7 +71,7 @@ namespace Hazel {
 		virtual std::string GetName() override;
 	private:
 		std::string m_Name;
-		uint32_t m_BufferSize;
+		VkDeviceSize m_BufferMemorySize;
 		std::vector<VkBuffer> m_Buffers;
 		VkDeviceMemory m_BufferMemory;
 		BufferLayout m_Layout;

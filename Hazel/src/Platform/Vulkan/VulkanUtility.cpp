@@ -107,7 +107,7 @@ namespace Hazel {
 		VkMemoryRequirements memoryRequirements;
 		vkGetBufferMemoryRequirements(*device, buffer, &memoryRequirements);
 
-		if (memoryRequirements.size > size) size = memoryRequirements.size;
+//		if (memoryRequirements.size > size) size = memoryRequirements.size;
 		
 		uint32_t memoryTypeIndex = UINT32_MAX;
 		memoryTypeIndex = VulkanUtility::FindMemoryTypeIndex(memoryRequirements.memoryTypeBits, propertyFlags);
