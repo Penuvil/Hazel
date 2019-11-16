@@ -179,7 +179,7 @@ namespace Hazel {
 				VulkanContext* vulkanContext = VulkanContext::GetContext();
 				VkDeviceSize offset = m_BufferMemorySize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
 				void* data;
-				vkMapMemory(*vulkanContext->GetDevice(), m_BufferMemory, offset, element.Size, 0, &data);
+				vkMapMemory(*vulkanContext->GetDevice(), m_BufferMemory, offset, m_BufferMemorySize, 0, &data);
 				memcpy(data, &vector, element.Size);
 				vkUnmapMemory(*vulkanContext->GetDevice(), m_BufferMemory);
 				break;
