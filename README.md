@@ -10,6 +10,7 @@ Visual Studio 2017 or 2019 is recommended, Hazel is officially untested on other
 You can clone the repository to a local destination using git:
 
 `git clone --recursive https://github.com/Penuvil/Hazel`
+
 `git checkout vulkan`
 
 Make sure that you do a `--recursive` clone to fetch all of the submodules!
@@ -17,12 +18,15 @@ Make sure that you do a `--recursive` clone to fetch all of the submodules!
 Download and install [CMake](https://cmake.org/download/)
 
 Download and install [LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home)
+
 Reboot and verify the %VULKAN_SDK% environment variables is correct for your install.
 
 `echo %VULKAN_SDK%`
 
 Run the scripts
+
 `Hazel/scripts/Shaderc-Debug-Build.bat`
+
 `Hazel/scripts/Win-GenProjects.bat`
 
 Open in Visual Studio and build
