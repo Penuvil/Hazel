@@ -79,6 +79,7 @@ namespace Hazel {
 		presentInfo.pImageIndices = &frameInfo->imageIndex;
 		presentInfo.pResults = nullptr;
 
+//		HZ_CORE_WARN("MAIN FRAME PRESENT");
 		vkQueuePresentKHR(*vulkanContext->GetPresentQueue(), &presentInfo);
 	}
 

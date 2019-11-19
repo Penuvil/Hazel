@@ -71,12 +71,7 @@ project "Hazel"
 		"%{IncludeDir.stb_image}",
 		"$(VULKAN_SDK)/include"
 	}
-
-	libdirs
-	{
-		"$(VULKAN_SDK)/Lib/Debug"
-	}
-
+	
 	links 
 	{ 
 		"GLFW",
@@ -124,15 +119,31 @@ project "Hazel"
 		runtime "Debug"
 		symbols "on"
 
+		libdirs
+		{
+			"$(VULKAN_SDK)/Lib/Debug"
+		}
+
+
 	filter "configurations:Release"
 		defines "HZ_RELEASE"
 		runtime "Release"
 		optimize "on"
 
+		libdirs
+		{
+			"$(VULKAN_SDK)/Lib"
+		}
+
 	filter "configurations:Dist"
 		defines "HZ_DIST"
 		runtime "Release"
 		optimize "on"
+
+		libdirs
+		{
+			"$(VULKAN_SDK)/Lib"
+		}
 
 project "Sandbox"
 	location "Sandbox"

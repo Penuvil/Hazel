@@ -85,8 +85,8 @@ namespace Hazel {
 		s_CurrentFrame->renderFinishedSemaphore = &m_RenderFinishedSemaphores[m_FrameIndex];
 		s_CurrentFrame->inFlightFence = &m_InFlightFences[m_FrameIndex];
 
-		vkWaitForFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_FrameIndex], VK_TRUE, UINT64_MAX);
-		vkResetFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_FrameIndex]);
+		vkWaitForFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence);
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo = {};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -137,7 +137,7 @@ namespace Hazel {
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = waitSemaphores;
 
-		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_FrameIndex]);
+		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *s_CurrentFrame->inFlightFence);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
 	}
 
@@ -147,8 +147,8 @@ namespace Hazel {
 		VulkanContext* vulkanContext = VulkanContext::GetContext();
 		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
 
-		vkWaitForFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_FrameIndex], VK_TRUE, UINT64_MAX);
-		vkResetFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_FrameIndex]);
+		vkWaitForFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence);
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo = {};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -179,8 +179,23 @@ namespace Hazel {
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemiphores;
 
-		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_FrameIndex]);
+		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *s_CurrentFrame->inFlightFence);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
+
+//		const VkSwapchainKHR* swapChain =  vulkanContext->GetSwapChain()->GetSwapChain();
+//
+//		VkPresentInfoKHR presentInfo = {};
+//		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+//		presentInfo.pNext = NULL;
+//		presentInfo.waitSemaphoreCount = 1;
+//		presentInfo.pWaitSemaphores = signalSemiphores;
+//		presentInfo.swapchainCount = 1;
+//		presentInfo.pSwapchains = swapChain;
+//		presentInfo.pImageIndices = &s_CurrentFrame->imageIndex;
+//		presentInfo.pResults = nullptr;
+//		
+//		HZ_CORE_WARN("MAIN FRAME PRESENT");
+//		vkQueuePresentKHR(*vulkanContext->GetPresentQueue(), &presentInfo);
 
 		m_FrameIndex = (m_FrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
@@ -236,8 +251,8 @@ namespace Hazel {
 		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
 		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
 
-		vkWaitForFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_FrameIndex], VK_TRUE, UINT64_MAX);
-		vkResetFences(*vulkanContext->GetDevice(), 1, &m_InFlightFences[m_FrameIndex]);
+		vkWaitForFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence);
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo = {};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -306,7 +321,7 @@ namespace Hazel {
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = waitSemaphores;
 
-		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_FrameIndex]);
+		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *s_CurrentFrame->inFlightFence);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
 	}
 

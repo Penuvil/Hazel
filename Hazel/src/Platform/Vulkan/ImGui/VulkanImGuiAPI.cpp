@@ -162,6 +162,9 @@ namespace Hazel {
 		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *frameInfo->inFlightFence);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
 
+		vkWaitForFences(*VulkanContext::GetContext()->GetDevice(), 1, frameInfo->inFlightFence, VK_TRUE, UINT64_MAX);
+//		vkResetFences(*VulkanContext::GetContext()->GetDevice(), 1, frameInfo->inFlightFence);
+
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();
