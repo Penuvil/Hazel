@@ -2,9 +2,9 @@
 
 #include <glm/glm.hpp>
 
-#include "VertexArray.h"
-#include "Shader.h"
-#include "Texture.h"
+#include "Hazel/Renderer/VertexArray.h"
+#include "Hazel/Renderer/Shader.h"
+#include "Hazel/Renderer/Texture.h"
 
 namespace Hazel {
 	
@@ -26,7 +26,7 @@ namespace Hazel {
 
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
-//		virtual void AddUniformBuffer(Hazel::Ref<UniformBuffer> buffer) = 0;
+
 		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection) = 0;
 		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, Ref<Texture2D> texture, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection) = 0;
 		virtual void BeginRender() = 0;
@@ -35,6 +35,9 @@ namespace Hazel {
 
 		inline static API GetAPI() { return s_API; }
 		static void SetAPI(API api);
+
+		static Scope<RendererAPI> Create();
+
 	private:
 		static API s_API;
 	};

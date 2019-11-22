@@ -17,10 +17,10 @@ namespace Hazel {
 		for (uint32_t i = 0; i < numberOfInstances; i++) {
 			std::unordered_map<std::string, Ref<UniformBuffer>> buffers;
 			Ref<UniformBuffer> uniformBuffer;
-			uniformBuffer.reset(VulkanUniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0));
+			uniformBuffer = VulkanUniformBuffer::Create("Matrices", 2 * ShaderDataTypeSize(ShaderDataType::Mat4), 0);
 			uniformBuffer->SetLayout({ {ShaderDataType::Mat4, "u_ViewProjection"}, {ShaderDataType::Mat4, "u_Transform"} });
 			m_UniformBuffers.at(i).insert({ uniformBuffer->GetName(), uniformBuffer });
-			uniformBuffer.reset(VulkanUniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float4), 0));
+			uniformBuffer = VulkanUniformBuffer::Create("Color", ShaderDataTypeSize(ShaderDataType::Float4), 0);
 			uniformBuffer->SetLayout({ {ShaderDataType::Float4, "u_Color"} });
 			m_UniformBuffers.at(i).insert({ uniformBuffer->GetName(), uniformBuffer });
 

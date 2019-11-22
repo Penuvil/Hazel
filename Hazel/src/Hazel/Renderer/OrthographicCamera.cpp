@@ -1,5 +1,6 @@
 #include "hzpch.h"
-#include "OrthographicCamera.h"
+
+#include "Hazel/Renderer/OrthographicCamera.h"
 #include "Hazel/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLCamera.h"
 #include "Platform/Vulkan/VulkanCamera.h"

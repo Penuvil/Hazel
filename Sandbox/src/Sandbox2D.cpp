@@ -1,5 +1,5 @@
 #include "Sandbox2D.h"
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -20,29 +20,55 @@ void Sandbox2D::OnDetach()
 
 void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 {
+	HZ_PROFILE_FUNCTION();
+
 	// Update
-	m_CameraController.OnUpdate(ts);
+	{
+		HZ_PROFILE_SCOPE("CameraController::OnUpdate");
+		m_CameraController.OnUpdate(ts);
+	}
 
 	// Render
-	Hazel::Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-	Hazel::Renderer::Clear();
 
-	Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	{
+		HZ_PROFILE_SCOPE("Renderer Prep");
+		Hazel::Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		Hazel::Renderer::Clear();
+	}
 
-	Hazel::Renderer2D::BeginRender();
-	Hazel::Renderer2D::DrawQuad(0, { -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-	Hazel::Renderer2D::DrawQuad(1, { 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
-	Hazel::Renderer2D::EndRender();
-	
-	Hazel::Renderer2D::BeginRender();
-	Hazel::Renderer2D::DrawQuad(2, { 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture);
-	Hazel::Renderer2D::EndRender();
+	{
+		HZ_PROFILE_SCOPE("Renderer Scene");
+		{
+			HZ_PROFILE_SCOPE("Renderer Begin Scene");
+			Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
+		}
 
-	Hazel::Renderer2D::EndScene();
+		{
+			HZ_PROFILE_SCOPE("Renderer Draw");
+			Hazel::Renderer2D::BeginRender();
+			Hazel::Renderer2D::DrawQuad(0, { -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+			Hazel::Renderer2D::DrawQuad(1, { 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
+			Hazel::Renderer2D::EndRender();
+
+
+			Hazel::Renderer2D::BeginRender();
+			Hazel::Renderer2D::DrawQuad(2, { 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture);
+			Hazel::Renderer2D::EndRender();
+		}
+
+		{
+			HZ_PROFILE_SCOPE("End Scene");
+			Hazel::Renderer2D::EndScene();
+		}
+		
+	}
+
 }
 
 void Sandbox2D::OnImGuiRender()
 {
+	HZ_PROFILE_FUNCTION();
+
 	ImGui::Begin("Settings");
 	ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
 	ImGui::End();

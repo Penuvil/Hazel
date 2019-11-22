@@ -1,6 +1,5 @@
 #include "hzpch.h"
-#include "ImGuiLayer.h"
-
+#include "Hazel/ImGui/ImGuiLayer.h"
 
 #include "Hazel/Core/Application.h"
 #include "Hazel/Renderer/RendererAPI.h"
@@ -46,9 +45,9 @@ namespace Hazel {
 		s_ImGuiAIP->End();
 	}
 
-	void ImGuiLayer::OnImGuiRender()
-	{
-		s_ImGuiAIP->OnImGuiRender();
-	}
+//	void ImGuiLayer::OnImGuiRender()
+//	{
+//		s_ImGuiAIP->OnImGuiRender();
+//	}
 
 }

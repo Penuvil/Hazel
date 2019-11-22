@@ -2,10 +2,8 @@
 
 #include <fstream>
 
-#include "Shader.h"
-
-#include "Renderer.h"
-
+#include "Hazel/Renderer/Shader.h"
+#include "Hazel/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/Vulkan/VulkanShader.h"
 

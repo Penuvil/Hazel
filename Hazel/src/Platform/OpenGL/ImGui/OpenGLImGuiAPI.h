@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Hazel/ImGui/ImGuiAPI.h"
-
 #include "Hazel/Events/ApplicationEvent.h"
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
 namespace Hazel {
 
-	class HAZEL_API OpenGLImGuiAPI : public ImGuiAPI
+	class OpenGLImGuiAPI : public ImGuiAPI
 	{
 	public:
 		OpenGLImGuiAPI();

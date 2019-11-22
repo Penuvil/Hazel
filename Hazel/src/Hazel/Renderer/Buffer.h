@@ -113,7 +113,7 @@ namespace Hazel {
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
-		static VertexBuffer* Create(float* vertices, uint32_t size);
+		static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
 	};
 
 	class IndexBuffer
@@ -126,7 +126,7 @@ namespace Hazel {
 
 		virtual uint32_t GetCount() const = 0;
 
-		static IndexBuffer* Create(uint32_t* indices, uint32_t size);
+		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t size);
 	};
 
 	class UniformBuffer
@@ -145,7 +145,7 @@ namespace Hazel {
 
 		virtual std::string GetName() = 0;
 
-		static UniformBuffer* Create(std::string name, uint32_t size, uint32_t shaderBlock);
+		static Ref<UniformBuffer> Create(std::string name, uint32_t size, uint32_t shaderBlock);
 	};
 
 }

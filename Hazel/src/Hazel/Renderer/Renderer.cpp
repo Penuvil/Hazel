@@ -1,8 +1,9 @@
 #include "hzpch.h"
-#include "Renderer.h"
-#include "RenderCommand.h"
+
+#include "Hazel/Renderer/Renderer.h"
+#include "Hazel/Renderer/RenderCommand.h"
 #include "Platform/OpenGL/OpenGLShader.h"
-#include "Renderer2D.h"
+#include "Hazel/Renderer/Renderer2D.h"
 
 namespace Hazel {
 
@@ -12,6 +13,12 @@ namespace Hazel {
 	{
 		RenderCommand::Init();
 		Renderer2D::Init();
+	}
+
+	void Renderer::Shutdown()
+	{
+		Renderer2D::Shutdown();
+		RenderCommand::Shutdown();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
@@ -60,9 +67,4 @@ namespace Hazel {
 		RenderCommand::EndRender();
 	}
 
-	void Renderer::Shutdown()
-	{
-		Renderer2D::Shutdown();
-		RenderCommand::Shutdown();
-	}
 }

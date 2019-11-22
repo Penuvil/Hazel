@@ -1,5 +1,5 @@
 #include "hzpch.h"
-#include "WindowsWindow.h"
+#include "Platform/Windows/WindowsWindow.h"
 
 #include "Hazel/Events/ApplicationEvent.h"
 #include "Hazel/Events/MouseEvent.h"
@@ -17,9 +17,10 @@ namespace Hazel {
 		HZ_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 
-	Window* Window::Create(RendererAPI::API api, const WindowProps& props)
+
+	Scope<Window> Window::Create(RendererAPI::API api, const WindowProps& props)
 	{
-		return new WindowsWindow(api, props);
+		return CreateScope<WindowsWindow>(api, props);
 	}
 
 	WindowsWindow::WindowsWindow(RendererAPI::API api, const WindowProps& props)
@@ -42,7 +43,6 @@ namespace Hazel {
 
 		if (s_GLFWWindowCount == 0)
 		{
-			HZ_CORE_INFO("Initializing GLFW");
 			int success = glfwInit();
 			HZ_CORE_ASSERT(success, "Could not intialize GLFW!");
 			glfwSetErrorCallback(GLFWErrorCallback);
@@ -69,7 +69,7 @@ namespace Hazel {
 			m_Context = CreateScope<VulkanContext>(m_Window);
 			m_Context->Init();
 		}
-	
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 
 		// Set GLFW callbacks
@@ -166,10 +166,10 @@ namespace Hazel {
 	void WindowsWindow::Shutdown()
 	{
 		glfwDestroyWindow(m_Window);
+		--s_GLFWWindowCount;
 
-		if (--s_GLFWWindowCount == 0)
+		if (s_GLFWWindowCount == 0)
 		{
-			HZ_CORE_INFO("Terminating GLFW");
 			glfwTerminate();
 		}
 	}
