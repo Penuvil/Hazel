@@ -8,6 +8,7 @@
 	#ifdef _WIN64
 		/* Windows x64  */
 		#define HZ_PLATFORM_WINDOWS
+		#define DEBUG_BREAK __debugbreak();
 	#else
 		/* Windows x86 */
 		#error "x86 Builds are not supported!"
@@ -37,39 +38,12 @@
 	#error "Android is not supported!"
 #elif defined(__linux__)
 	#define HZ_PLATFORM_LINUX
+	#include <csignal>
+	#define DEBUG_BREAK raise(SIGTRAP);
 #else
 	/* Unknown compiler/platform */
 	#error "Unknown platform!"
 #endif // End of platform detection
-
-
-// DLL support
-#ifdef HZ_PLATFORM_WINDOWS
-	#if HZ_DYNAMIC_LINK
-		#ifdef HZ_BUILD_DLL
-			#define HAZEL_API __declspec(dllexport)
-		#else
-			#define HAZEL_API __declspec(dllimport)
-		#endif
-	#else
-		#define HAZEL_API
-	#endif
-#define DEBUG_BREAK __debugbreak();
-#elif defined HZ_PLATFORM_LINUX
-	#if HZ_DYNAMIC_LINK
-		#ifdef HZ_BUILD_DLL
-			#define HAZEL_API __attribute__((visibility("default")))
-		#else
-			#define HAZEL_API
-		#endif
-	#else
-    	#define HAZEL_API
-	#endif
-#include <csignal>
-#define DEBUG_BREAK raise(SIGTRAP);
-#else
-	#error Hazel only supports Windows!
-#endif // End of DLL support
 
 #ifdef HZ_DEBUG
 	#define HZ_ENABLE_ASSERTS
