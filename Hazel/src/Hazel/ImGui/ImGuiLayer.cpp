@@ -10,7 +10,7 @@
 
 namespace Hazel {
 
-	ImGuiAPI* ImGuiLayer::s_ImGuiAIP = nullptr;
+	ImGuiAPI* ImGuiLayer::s_ImGuiAPI = nullptr;
 
 	ImGuiLayer::ImGuiLayer()
 		: Layer("ImGuiLayer")
@@ -18,36 +18,37 @@ namespace Hazel {
 		switch (RendererAPI::GetAPI())
 		{
 		case RendererAPI::API::OpenGL:
-			s_ImGuiAIP = new OpenGLImGuiAPI();
+			s_ImGuiAPI = new OpenGLImGuiAPI();
 			break;
 		case RendererAPI::API::Vulkan:
-			s_ImGuiAIP = new VulkanImGuiAPI();
+			s_ImGuiAPI = new VulkanImGuiAPI();
 		}
 	}
 
 	void ImGuiLayer::OnAttach()
 	{
-		s_ImGuiAIP->Init();
-	}
+		HZ_PROFILE_FUNCTION();
+		s_ImGuiAPI->Init();
+		}
 
 	void ImGuiLayer::OnDetach()
 	{
-		s_ImGuiAIP->Shutdown();
+		HZ_PROFILE_FUNCTION();
+
+		s_ImGuiAPI->Shutdown();
 	}
 	
 	void ImGuiLayer::Begin()
 	{
-		s_ImGuiAIP->Begin();
+		HZ_PROFILE_FUNCTION();
+
+		s_ImGuiAPI->Begin();
 	}
 
 	void ImGuiLayer::End()
 	{
-		s_ImGuiAIP->End();
+		HZ_PROFILE_FUNCTION();
+
+		s_ImGuiAPI->End();
 	}
-
-//	void ImGuiLayer::OnImGuiRender()
-//	{
-//		s_ImGuiAIP->OnImGuiRender();
-//	}
-
 }

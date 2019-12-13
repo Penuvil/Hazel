@@ -21,6 +21,8 @@ namespace Hazel {
 
 	void Renderer2D::Init()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		s_Data = new Renderer2DStorage();
 		s_Data->QuadVertexArray = VertexArray::Create(3);
 
@@ -53,25 +55,25 @@ namespace Hazel {
 
 	void Renderer2D::Shutdown()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		delete s_Data;
 	}
 
 	void Renderer2D::BeginScene(const Ref<OrthographicCamera> camera)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		RenderCommand::BeginScene();
-		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->Bind();
-		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->UploadUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-		//std::dynamic_pointer_cast<OpenGLShader>(s_Data->FlatColorShader)->UploadUniformMat4("u_Transform", glm::mat4(1.0f));
 
 		s_Data->Camera = camera;
-		
-//		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->Bind();
-//		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-//		s_Data->QuadVertexArray->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_Transform", glm::mat4(1.0f));
+
 	}
 
 	void Renderer2D::EndScene()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		RenderCommand::EndScene();
 	}
 
@@ -94,6 +96,8 @@ namespace Hazel {
 
 	void Renderer2D::DrawQuad(const uint32_t instanceID, const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		s_Data->WhiteTexture->Bind();
 
 		s_Data->QuadVertexArray->GetUniformBuffer(instanceID, "Matrices")->Bind();
@@ -120,6 +124,9 @@ namespace Hazel {
 
 	void Renderer2D::DrawQuad(const uint32_t instanceID, const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture)
 	{
+
+		HZ_PROFILE_FUNCTION();
+
 		texture->Bind();
 		s_Data->QuadVertexArray->GetUniformBuffer(instanceID, "Matrices")->Bind();
 		s_Data->QuadVertexArray->GetUniformBuffer(instanceID, "Matrices")->UpdateMat4("u_ViewProjection", s_Data->Camera->GetViewProjectionMatrix());

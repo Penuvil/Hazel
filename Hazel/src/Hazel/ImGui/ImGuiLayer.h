@@ -23,7 +23,7 @@ namespace Hazel {
 		virtual void End();
 	private:
 		float m_Time = 0.0f;
-		static ImGuiAPI* s_ImGuiAIP;
+		static ImGuiAPI* s_ImGuiAPI;
 	};
 
 }
