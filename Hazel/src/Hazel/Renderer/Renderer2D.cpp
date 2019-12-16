@@ -49,8 +49,7 @@ namespace Hazel {
 		s_Data->WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
 		s_Data->TextureShader = Shader::Create("assets/shaders/Texture.glsl", squareVB->GetLayout());
-//		s_Data->TextureShader->Bind();
-//		s_Data->TextureShader->SetInt("u_Texture", 0);
+
 	}
 
 	void Renderer2D::Shutdown()
@@ -67,6 +66,8 @@ namespace Hazel {
 		RenderCommand::BeginScene();
 
 		s_Data->Camera = camera;
+		s_Data->TextureShader->Bind();
+		s_Data->TextureShader->SetInt("u_Texture", 0);
 
 	}
 
@@ -75,18 +76,6 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		RenderCommand::EndScene();
-	}
-
-	void Renderer2D::BeginRender()
-	{
-		RenderCommand::BeginRender();
-		s_Data->TextureShader->Bind();
-		s_Data->TextureShader->SetInt("u_Texture", 0);
-	}
-
-	void Renderer2D::EndRender()
-	{
-		RenderCommand::EndRender();
 	}
 
 	void Renderer2D::DrawQuad(const uint32_t instanceID, const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)

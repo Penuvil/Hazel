@@ -65,14 +65,6 @@ namespace Hazel {
 		Submit(shader, vertexArray, instanceId, fragColor, transform, viewProjection);
 	}
 
-	void OpenGLRendererAPI::BeginRender()
-	{
-	}
-
-	void OpenGLRendererAPI::EndRender()
-	{
-	}
-
 	void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId)
 	{
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);

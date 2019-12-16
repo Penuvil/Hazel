@@ -74,6 +74,7 @@ namespace Hazel {
 		VkDeviceSize m_BufferMemorySize;
 		std::vector<VkBuffer> m_Buffers;
 		VkDeviceMemory m_BufferMemory;
+		void* m_MappedMemory;
 		BufferLayout m_Layout;
 	};
 }

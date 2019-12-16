@@ -14,8 +14,6 @@ namespace Hazel {
 
 		static void BeginScene(const Ref<OrthographicCamera> camera);
 		static void EndScene();
-		static void BeginRender();
-		static void EndRender();
 
 		// Primitives
 

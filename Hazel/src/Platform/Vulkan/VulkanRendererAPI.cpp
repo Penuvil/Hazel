@@ -120,28 +120,8 @@ namespace Hazel {
 		vkCmdSetViewport(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &m_Viewport);
 		vkCmdSetScissor(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &scissor);
 		
-		vkCmdEndRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex));
-
-		result = vkEndCommandBuffer(commandBuffers->at(s_CurrentFrame->imageIndex));
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to en command buffer! " + result);
-
-		VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_FrameIndex] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		VkSemaphore signalSemiphores[] = { m_LayerCompleteSemaphores[m_FrameIndex] };
-
-		VkSubmitInfo submitInfo = {};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pNext = NULL;
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffers->at(s_CurrentFrame->imageIndex);
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = waitSemaphores;
-
-		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *s_CurrentFrame->inFlightFence);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
+		s_CurrentBatch.reset(new BatchInfo);
+		s_CurrentBatch->commandBuffer = commandBuffers->at(s_CurrentFrame->imageIndex);
 	}
 
 	void VulkanRendererAPI::EndScene()
@@ -150,19 +130,7 @@ namespace Hazel {
 		VulkanContext* vulkanContext = VulkanContext::GetContext();
 		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
 
-		vkWaitForFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence);
-
-		VkCommandBufferBeginInfo commandBufferBeginInfo = {};
-		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		commandBufferBeginInfo.pNext = NULL;
-		commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		commandBufferBeginInfo.pInheritanceInfo = nullptr;
-
-		result = vkBeginCommandBuffer(commandBuffers->at(s_CurrentFrame->imageIndex), &commandBufferBeginInfo);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer! " + result);
-
-//		vkCmdEndRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex));
+		vkCmdEndRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex));
 
 		result = vkEndCommandBuffer(commandBuffers->at(s_CurrentFrame->imageIndex));
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to en command buffer! " + result);
@@ -184,21 +152,6 @@ namespace Hazel {
 
 		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *s_CurrentFrame->inFlightFence);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
-
-//		const VkSwapchainKHR* swapChain =  vulkanContext->GetSwapChain()->GetSwapChain();
-//
-//		VkPresentInfoKHR presentInfo = {};
-//		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-//		presentInfo.pNext = NULL;
-//		presentInfo.waitSemaphoreCount = 1;
-//		presentInfo.pWaitSemaphores = signalSemiphores;
-//		presentInfo.swapchainCount = 1;
-//		presentInfo.pSwapchains = swapChain;
-//		presentInfo.pImageIndices = &s_CurrentFrame->imageIndex;
-//		presentInfo.pResults = nullptr;
-//		
-//		HZ_CORE_WARN("MAIN FRAME PRESENT");
-//		vkQueuePresentKHR(*vulkanContext->GetPresentQueue(), &presentInfo);
 
 		m_FrameIndex = (m_FrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
@@ -245,87 +198,6 @@ namespace Hazel {
 		shader->Bind();
 		texture->Bind();
 		Submit(shader, vertexArray, instanceId, glm::vec4(1.0f), transform, viewProjection);
-	}
-
-	void VulkanRendererAPI::BeginRender()
-	{
-		VkResult result;
-		VulkanContext* vulkanContext = VulkanContext::GetContext();
-		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
-		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
-
-		vkWaitForFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(*vulkanContext->GetDevice(), 1, s_CurrentFrame->inFlightFence);
-
-		VkCommandBufferBeginInfo commandBufferBeginInfo = {};
-		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		commandBufferBeginInfo.pNext = NULL;
-		commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		commandBufferBeginInfo.pInheritanceInfo = nullptr;
-
-		result = vkBeginCommandBuffer(commandBuffers->at(s_CurrentFrame->imageIndex), &commandBufferBeginInfo);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer! " + result);
-
-		VkRenderPassBeginInfo renderPassBeginInfo = {};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.pNext = NULL;
-		renderPassBeginInfo.renderPass = vulkanSwapChain->GetRenderPass("NoClear");
-		renderPassBeginInfo.framebuffer = vulkanSwapChain->GetFramebuffers()->at(s_CurrentFrame->imageIndex);
-		renderPassBeginInfo.renderArea.offset = { 0,0 };
-		renderPassBeginInfo.renderArea.extent = *vulkanSwapChain->GetExtent2D();
-		renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(s_CurrentFrame->clearColors.size());
-		renderPassBeginInfo.pClearValues = s_CurrentFrame->clearColors.data();
-
-		vkCmdBeginRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-		const VkExtent2D* swapChainExtent = vulkanSwapChain->GetExtent2D();
-
-		VkViewport viewport = {};
-		viewport.x = 0.0f;
-		viewport.y = (float)swapChainExtent->height;
-		viewport.width = (float)swapChainExtent->width;
-		viewport.height = -((float)swapChainExtent->height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-
-		VkRect2D scissor = {};
-		scissor.offset = { 0, 0 };
-		scissor.extent = *swapChainExtent;
-
-		vkCmdSetViewport(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &viewport);
-		vkCmdSetScissor(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &scissor);
-
-		s_CurrentBatch.reset(new BatchInfo);
-		s_CurrentBatch->commandBuffer = commandBuffers->at(s_CurrentFrame->imageIndex);
-	}
-
-	void VulkanRendererAPI::EndRender()
-	{
-		VkResult result;
-		VulkanContext* vulkanContext = VulkanContext::GetContext();
-		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
-
-		vkCmdEndRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex));
-
-		result = vkEndCommandBuffer(commandBuffers->at(s_CurrentFrame->imageIndex));
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to en command buffer! " + result);
-
-		VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_FrameIndex] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		VkSemaphore signalSemiphores[] = { m_LayerCompleteSemaphores[m_FrameIndex] };
-
-		VkSubmitInfo submitInfo = {};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pNext = NULL;
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffers->at(s_CurrentFrame->imageIndex);
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = waitSemaphores;
-
-		result = vkQueueSubmit(*vulkanContext->GetGraphicsQueue(), 1, &submitInfo, *s_CurrentFrame->inFlightFence);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command queue!");
 	}
 
 	void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId)

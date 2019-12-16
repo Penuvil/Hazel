@@ -41,13 +41,11 @@ namespace Hazel {
 		virtual void Clear() override;
 		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection) override;
 		virtual void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray,Ref<Texture2D> texture, uint32_t instanceId, const glm::vec4& fragColor, const glm::mat4& transform, const glm::mat4& viewProjection) override;
-		virtual void BeginRender() override;
-		virtual void EndRender() override;
 		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId) override;
 
 		void Shutdown();
 	private:
-		const int MAX_FRAMES_IN_FLIGHT = 5;
+		const int MAX_FRAMES_IN_FLIGHT = 3;
 		size_t m_FrameIndex = 0;
 		glm::vec4 m_ClearColor;
 		std::vector<VkSemaphore> m_ImageAvailableSemaphores;

@@ -136,8 +136,6 @@ ExampleLayer::ExampleLayer()
 	m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 	m_ChernoLogoTexture = Hazel::Texture2D::Create("assets/textures/ChernoLogo.png");
 
-	//textureShader->Bind();
-	//extureShader->SetInt("u_Texture", 0);
 }
 
 void ExampleLayer::OnAttach()
@@ -161,7 +159,6 @@ void ExampleLayer::OnUpdate(Hazel::Timestep ts)
 	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
 	uint32_t instance = 0;
-	Hazel::Renderer::BeginRender();
 
 	m_FlatColorShader->Bind();
 	m_FlatColorShader->SetFloat3("u_Color", m_SquareColor);
@@ -177,25 +174,20 @@ void ExampleLayer::OnUpdate(Hazel::Timestep ts)
 			instance++;
 		}
 	}
-	Hazel::Renderer::EndRender();
 
 	auto textureShader = m_ShaderLibrary.Get("Texture");
 	textureShader->SetInt("u_Texture", 0);
 
 
 	//		m_Texture->Bind();
-	Hazel::Renderer::BeginRender();
 	Hazel::Renderer::Submit(textureShader, m_SquareVA, m_Texture, instance, glm::vec4(m_SquareColor, 1.0f), glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-	Hazel::Renderer::EndRender();
 
 	//		m_ChernoLogoTexture->Bind();
 	instance++;
-	Hazel::Renderer::BeginRender();
 	Hazel::Renderer::Submit(textureShader, m_SquareVA, m_ChernoLogoTexture, instance, glm::vec4(m_SquareColor, 1.0f), glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-	Hazel::Renderer::EndRender();
 
 	// Triangle
-//
+
 	Hazel::Renderer::EndScene();
 }
 

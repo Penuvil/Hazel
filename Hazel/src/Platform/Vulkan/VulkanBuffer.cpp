@@ -120,6 +120,7 @@ namespace Hazel {
 		:m_Name(name), m_BufferMemorySize(size)
 	{
 		uint32_t swapImageCount = VulkanContext::GetContext()->GetSwapChain()->GetImageCount();
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 
 		m_Buffers.resize(swapImageCount);
 		VkDeviceSize requiredSize = size;
@@ -128,11 +129,15 @@ namespace Hazel {
 
 		if (m_BufferMemorySize < requiredSize) m_BufferMemorySize = static_cast<uint32_t>(requiredSize);
 
+		vkMapMemory(*device, m_BufferMemory, 0, m_BufferMemorySize, 0, &m_MappedMemory);
+
 	}
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
 	{
 		VkDevice* device = VulkanContext::GetContext()->GetDevice();
+		vkUnmapMemory(*device, m_BufferMemory);
+
 		for (auto buffer : m_Buffers)
 		{
 			vkDestroyBuffer(*device, buffer, nullptr);
@@ -155,16 +160,13 @@ namespace Hazel {
 
 	void VulkanUniformBuffer::UpdateMat4(std::string name, glm::mat4 matrix)
 	{
+		HZ_PROFILE_FUNCTION();
 		for (auto element : m_Layout.GetElements())
 		{
 			if (element.Name == name)
 			{
-				VulkanContext* vulkanContext = VulkanContext::GetContext();
 				VkDeviceSize offset = m_BufferMemorySize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
-				void* data;
-				vkMapMemory(*vulkanContext->GetDevice(), m_BufferMemory, offset, element.Size, 0, &data);
-				memcpy(data, &matrix, element.Size);
-				vkUnmapMemory(*vulkanContext->GetDevice(), m_BufferMemory);
+				memcpy((char*)m_MappedMemory + offset, &matrix, element.Size);
 				break;
 			}
 		}
@@ -172,16 +174,13 @@ namespace Hazel {
 
 	void VulkanUniformBuffer::UpdateFloat4(std::string name, glm::vec4 vector)
 	{
+		HZ_PROFILE_FUNCTION();
 		for (auto element : m_Layout.GetElements())
 		{
 			if (element.Name == name)
 			{
-				VulkanContext* vulkanContext = VulkanContext::GetContext();
 				VkDeviceSize offset = m_BufferMemorySize * VulkanRendererAPI::GetFrame()->imageIndex + element.Offset;
-				void* data;
-				vkMapMemory(*vulkanContext->GetDevice(), m_BufferMemory, offset, m_BufferMemorySize, 0, &data);
-				memcpy(data, &vector, element.Size);
-				vkUnmapMemory(*vulkanContext->GetDevice(), m_BufferMemory);
+				memcpy((char*)m_MappedMemory + offset, &vector, element.Size);
 				break;
 			}
 		}

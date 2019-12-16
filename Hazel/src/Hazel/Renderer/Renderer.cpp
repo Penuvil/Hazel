@@ -59,14 +59,4 @@ namespace Hazel {
 		RenderCommand::Submit(shader, vertexArray, texture, instanceId, fragColor, transform, s_SceneData->ViewProjectionMatrix);
 	}
 
-	void Renderer::BeginRender()
-	{
-		RenderCommand::BeginRender();
-	}
-
-	void Renderer::EndRender()
-	{
-		RenderCommand::EndRender();
-	}
-
 }

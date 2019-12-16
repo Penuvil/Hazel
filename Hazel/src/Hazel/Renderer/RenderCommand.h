@@ -65,16 +65,6 @@ namespace Hazel {
 			s_RendererAPI->DrawIndexed(vertexArray, instanceId);
 		}
 
-		inline static void BeginRender()
-		{
-			s_RendererAPI->BeginRender();
-		}
-
-		inline static void EndRender()
-		{
-			s_RendererAPI->EndRender();
-		}
-
 		inline static void Shutdown()
 		{
 			s_RendererAPI.reset();
