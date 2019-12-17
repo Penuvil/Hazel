@@ -14,5 +14,4 @@ jobs:
       uses: actions/checkout@v2
     - name: Run Win-GenProjects.bat
       run: ./scripts/Win-GenProjects.bat
-      working-directory: ./Hazel
     
