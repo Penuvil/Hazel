@@ -7,9 +7,16 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
-    - name: Run Win-GenProjects.bat
-      run: scripts/Win-GenProjects.bat
+    - name: Chaekout master branch
+      uses: actions/checkout@v2
+    - name: Checkout submodules for master branch
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Run Win-GenProjects.bat on master branch
+      run: ./scripts/Win-GenProjects.bat
     
