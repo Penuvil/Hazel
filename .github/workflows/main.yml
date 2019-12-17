@@ -18,6 +18,6 @@ jobs:
       run: ./scripts/Win-GenProjects.bat
     - name: Build master branch
       env:
-        MSBUILD: 'c:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe'
-      run: & $MSBUILD Sandbox/Sandbox.vcxproj
+        MSBUILD: c:/Program` Files` `(x86`)/Microsoft` Visual` Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe
+      run: $MSBUILD
       
