@@ -11,5 +11,5 @@ jobs:
 
     steps:
     - name: Run Win-GenProjects.bat
-      run: ./scripts/Win-GenProjects.bat
+      run: .\scripts\Win-GenProjects.bat
     
