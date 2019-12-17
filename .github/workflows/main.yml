@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Chaekout master branch
+    - name: Checkout master branch
       uses: actions/checkout@v2
     - name: Checkout submodules for master branch
       run: |
