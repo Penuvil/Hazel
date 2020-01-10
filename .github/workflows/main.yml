@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: master
+
+jobs:
+  build_master_windows:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout master branch
+      uses: actions/checkout@v2
+    - name: Checkout submodules for master branch
+      run: git submodule update --init
+    - name: Run Win-GenProjects.bat on master branch
+      run: ./scripts/Win-GenProjects.bat
+    - name: Build master branch
+      run: c:/Program` Files` `(x86`)/Microsoft` Visual` Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe
+      
