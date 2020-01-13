@@ -21,13 +21,8 @@ namespace Hazel {
 		HZ_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 
-
-	Scope<Window> Window::Create(RendererAPI::API api, const WindowProps& props)
-	{
-		return CreateScope<WindowsWindow>(api, props);
-	}
-
 	WindowsWindow::WindowsWindow(RendererAPI::API api, const WindowProps& props)
+
 	{
 		HZ_PROFILE_FUNCTION();
 
