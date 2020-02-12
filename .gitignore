@@ -17,6 +17,9 @@ Makefile
 !vendor/bin/premake/
 bin-int/
 
+# Hazel files
+*.log
+
 # Visual Studio files and folder
 .vs/
 **.sln
