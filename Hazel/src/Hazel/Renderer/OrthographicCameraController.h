@@ -13,7 +13,7 @@ namespace Hazel {
 	public:
 		OrthographicCameraController(float aspectRatio, bool rotation = false);
 
-		void OnUpdate(Timestep ts);
+		void OnUpdate(Hazel::Timestep ts);
 		void OnEvent(Event& e);
 
 		OrthographicCamera& GetCamera() { return m_Camera; }

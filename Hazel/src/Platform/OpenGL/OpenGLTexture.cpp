@@ -2,6 +2,7 @@
 #include "Platform/OpenGL/OpenGLTexture.h"
 
 #include <stb_image.h>
+#include <Hazel/Core/Application.h>
 
 namespace Hazel {
 
@@ -12,7 +13,18 @@ namespace Hazel {
 
 		m_InternalFormat = GL_RGBA8;
 		m_DataFormat = GL_RGBA;
+#ifdef HZ_PLATFORM_ANDROID
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		glTexStorage2D(GL_TEXTURE_2D, 1, m_InternalFormat, m_Width, m_Height);
 
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+#else
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
 
@@ -21,6 +33,7 @@ namespace Hazel {
 
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#endif
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
@@ -31,10 +44,26 @@ namespace Hazel {
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = nullptr;
+#ifdef HZ_PLATFORM_ANDROID
+		AAsset* asset = AAssetManager_open(Application::s_AndroidAppState->androidApp->activity->assetManager, path.c_str(), AASSET_MODE_STREAMING);
+		if (asset)
+		{
+            HZ_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std:string&)");
+            size_t size = AAsset_getLength(asset);
+            if (size > 0)
+            {
+                uint8_t fileData[size];
+                AAsset_read(asset, fileData, size);
+                AAsset_close(asset);
+                data = stbi_load_from_memory(fileData, size, &width, &height, &channels, 0);
+            }
+		}
+#else
 		{
 			HZ_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std:string&)");
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		}
+#endif
 		HZ_CORE_ASSERT(data, "Failed to load image!");
 		m_Width = width;
 		m_Height = height;
@@ -56,6 +85,20 @@ namespace Hazel {
 
 		HZ_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!");
 
+#ifdef HZ_PLATFORM_ANDROID
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		glTexStorage2D(GL_TEXTURE_2D, 1, m_InternalFormat, m_Width, m_Height);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
+
+#else
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 		glTextureStorage2D(m_RendererID, 1, internalFormat, m_Width, m_Height);
 
@@ -66,6 +109,7 @@ namespace Hazel {
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
+#endif
 
 		stbi_image_free(data);
 	}
@@ -83,13 +127,22 @@ namespace Hazel {
 
 		uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3;
 		HZ_CORE_ASSERT(size == m_Width * m_Height * bpp, "Data must be entire texture!");
+
+#ifdef HZ_PLATFORM_ANDROID
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+#else
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+#endif
 	}
 
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
 		HZ_PROFILE_FUNCTION();
-
+#ifdef HZ_PLATFORM_ANDROID
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+#else
 		glBindTextureUnit(slot, m_RendererID);
+#endif
 	}
 }

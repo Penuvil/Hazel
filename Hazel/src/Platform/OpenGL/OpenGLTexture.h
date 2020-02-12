@@ -2,7 +2,12 @@
 
 #include "Hazel/Renderer/Texture.h"
 
+#ifdef HZ_PLATFORM_ANDROID
+#include <GLES3/gl32.h>
+#else
 #include <glad/glad.h>
+#endif // HZ_PLATFORM_ANDROID
+
 
 namespace Hazel {
 

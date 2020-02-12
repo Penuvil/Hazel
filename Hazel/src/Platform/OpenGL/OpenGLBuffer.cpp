@@ -1,7 +1,11 @@
 #include "hzpch.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
+#ifdef HZ_PLATFORM_ANDROID
+#include <GLES3/gl32.h>
+#else
 #include <glad/glad.h>
+#endif // HZ_PLATFORM_ANDROID
 
 namespace Hazel {
 
@@ -13,7 +17,12 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
+#ifdef HZ_PLATFORM_ANDROID
+		glGenBuffers(1, &m_RendererID);
+#else
 		glCreateBuffers(1, &m_RendererID);
+#endif // HZ_PLATFORM_ANDROID
+
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 	}
@@ -48,7 +57,12 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
+#ifdef HZ_PLATFORM_ANDROID
+		glGenBuffers(1, &m_RendererID);
+#else
 		glCreateBuffers(1, &m_RendererID);
+#endif // HZ_PLATFORM_ANDROID
+
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 	}

@@ -1,7 +1,11 @@
 #include "hzpch.h"
 #include "Platform/OpenGL/OpenGLRendererAPI.h"
 
+#ifdef HZ_PLATFORM_ANDROID
+#include <GLES3/gl32.h>
+#else
 #include <glad/glad.h>
+#endif // HZ_PLATFORM_ANDROID
 
 namespace Hazel {
 	
@@ -28,8 +32,7 @@ namespace Hazel {
 	void OpenGLRendererAPI::Init()
 	{
 		HZ_PROFILE_FUNCTION();
-
-	#ifdef HZ_DEBUG
+	#if  defined(HZ_DEBUG) && !defined(HZ_PLATFORM_ANDROID)
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(OpenGLMessageCallback, nullptr);

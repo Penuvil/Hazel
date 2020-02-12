@@ -1,13 +1,19 @@
 #pragma once
 #include "Hazel/Core/Core.h"
 
-#ifdef HZ_PLATFORM_WINDOWS
-
 extern Hazel::Application* Hazel::CreateApplication();
 
+#ifdef HZ_PLATFORM_WINDOWS
 int main(int argc, char** argv)
+#elif defined(HZ_PLATFORM_ANDROID)
+void android_main(android_app* state)
+#endif
 {
 	Hazel::Log::Init();
+
+#ifdef HZ_PLATFORM_ANDROID
+    Hazel::Application::s_AndroidAppState->androidApp = state;
+#endif
 
 	HZ_PROFILE_BEGIN_SESSION("Startup", "HazelProfile-Startup.json");
 	auto app = Hazel::CreateApplication();
@@ -22,4 +28,3 @@ int main(int argc, char** argv)
 	HZ_PROFILE_END_SESSION();
 }
 
-#endif

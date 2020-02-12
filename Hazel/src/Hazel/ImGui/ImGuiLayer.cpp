@@ -2,14 +2,17 @@
 #include "Hazel/ImGui/ImGuiLayer.h"
 
 #include <imgui.h>
+#ifndef HZ_PLATFORM_ANDROID
 #include <examples/imgui_impl_glfw.h>
+// TEMPORARY
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
+#endif
 #include <examples/imgui_impl_opengl3.h>
 
 #include "Hazel/Core/Application.h"
 
-// TEMPORARY
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
+
 
 namespace Hazel {
 
@@ -46,10 +49,12 @@ namespace Hazel {
 		}
 
 		Application& app = Application::Get();
+#ifndef HZ_PLATFORM_ANDROID
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
 		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
+#endif // !HZ_PLATFORM_ANDROID
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
@@ -58,7 +63,10 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		ImGui_ImplOpenGL3_Shutdown();
+#ifndef HZ_PLATFORM_ANDROID
 		ImGui_ImplGlfw_Shutdown();
+#endif // !HZ_PLATFORM_ANDROID
+
 		ImGui::DestroyContext();
 	}
 	
@@ -67,7 +75,10 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		ImGui_ImplOpenGL3_NewFrame();
+#ifndef HZ_PLATFORM_ANDROID
 		ImGui_ImplGlfw_NewFrame();
+#endif // !HZ_PLATFORM_ANDROID
+
 		ImGui::NewFrame();
 	}
 
@@ -85,10 +96,16 @@ namespace Hazel {
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
+#ifndef HZ_PLATFORM_ANDROID
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+#endif // !HZ_PLATFORM_ANDROID
+
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
+#ifndef HZ_PLATFORM_ANDROID
 			glfwMakeContextCurrent(backup_current_context);
+#endif // !HZ_PLATFORM_ANDROID
+
 		}
 	}
 

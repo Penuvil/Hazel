@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "Hazel/Core/Core.h"
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Events/Event.h"

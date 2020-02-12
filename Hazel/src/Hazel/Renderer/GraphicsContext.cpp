@@ -11,7 +11,11 @@ namespace Hazel {
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None:    HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+#ifdef HZ_PLATFORM_ANDROID
+			case RendererAPI::API::OpenGL:  return CreateScope<OpenGLContext>(static_cast<ANativeWindow*>(window));
+#else
 			case RendererAPI::API::OpenGL:  return CreateScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
+#endif
 		}
 
 		HZ_CORE_ASSERT(false, "Unknown RendererAPI!");

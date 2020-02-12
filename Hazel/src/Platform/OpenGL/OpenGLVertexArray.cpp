@@ -1,7 +1,12 @@
 #include "hzpch.h"
 #include "Platform/OpenGL/OpenGLVertexArray.h"
 
+#ifdef HZ_PLATFORM_ANDROID
+#include <GLES3/gl32.h>
+#else
 #include <glad/glad.h>
+#endif // HZ_PLATFORM_ANDROID
+
 
 namespace Hazel {
 
@@ -29,8 +34,12 @@ namespace Hazel {
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
 		HZ_PROFILE_FUNCTION();
-
+#ifdef HZ_PLATFORM_ANDROID
+		glGenVertexArrays(1, &m_RendererID);
+#else
 		glCreateVertexArrays(1, &m_RendererID);
+#endif // HZ_PLATFORM_ANDROID
+
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()

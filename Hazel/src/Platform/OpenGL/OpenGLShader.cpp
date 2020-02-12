@@ -2,9 +2,15 @@
 #include "Platform/OpenGL/OpenGLShader.h"
 
 #include <fstream>
+
+#ifdef HZ_PLATFORM_ANDROID
+#include <GLES3/gl32.h>
+#else
 #include <glad/glad.h>
+#endif // HZ_PLATFORM_ANDROID
 
 #include <glm/gtc/type_ptr.hpp>
+#include <Hazel/Core/Application.h>
 
 namespace Hazel {
 
@@ -58,6 +64,21 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		std::string result;
+#ifdef HZ_PLATFORM_ANDROID
+		AAsset *asset = AAssetManager_open(Application::s_AndroidAppState->androidApp->activity->assetManager, filepath.c_str(), AASSET_MODE_STREAMING);
+		if (asset)
+        {
+		    size_t size = AAsset_getLength(asset);
+		    if (size > 0)
+            {
+		        char* code = new char[size];
+		        AAsset_read(asset, code, size);
+		        result = code;
+		        AAsset_close(asset);
+		        delete[] code;
+            }
+
+#else
 		std::ifstream in(filepath, std::ios::in | std::ios::binary);
 		if (in)
 		{
@@ -70,6 +91,7 @@ namespace Hazel {
 				in.read(&result[0], size);
 				in.close();
 			}
+#endif
 			else
 			{
 				HZ_CORE_ERROR("Could not read from file '{0}'", filepath);

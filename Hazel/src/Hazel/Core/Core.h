@@ -8,6 +8,7 @@
 	#ifdef _WIN64
 		/* Windows x64  */
 		#define HZ_PLATFORM_WINDOWS
+		#define DEBUG_BREAK __debugbreak();
 	#else
 		/* Windows x86 */
 		#error "x86 Builds are not supported!"
@@ -34,7 +35,13 @@
  * it has __linux__ defined */
 #elif defined(__ANDROID__)
 	#define HZ_PLATFORM_ANDROID
-	#error "Android is not supported!"
+	#include <EGL/egl.h>
+	#include <android/native_activity.h>
+	#include <android/asset_manager.h>
+	#include <android_native_app_glue.h>
+	#include <android/log.h>
+	#include <csignal>
+	#define DEBUG_BREAK raise(SIGTRAP);
 #elif defined(__linux__)
 	#define HZ_PLATFORM_LINUX
 	#error "Linux is not supported!"
@@ -48,8 +55,8 @@
 #endif
 
 #ifdef HZ_ENABLE_ASSERTS
-	#define HZ_ASSERT(x, ...) { if(!(x)) { HZ_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
-	#define HZ_CORE_ASSERT(x, ...) { if(!(x)) { HZ_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#define HZ_ASSERT(x, ...) { if(!(x)) { HZ_ERROR("Assertion Failed: {0}", __VA_ARGS__); DEBUG_BREAK } }
+	#define HZ_CORE_ASSERT(x, ...) { if(!(x)) { HZ_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); DEBUG_BREAK } }
 #else
 	#define HZ_ASSERT(x, ...)
 	#define HZ_CORE_ASSERT(x, ...)
