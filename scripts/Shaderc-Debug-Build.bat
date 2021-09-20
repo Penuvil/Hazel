@@ -5,8 +5,8 @@ pushd %VULKAN_SDK%\shaderc
 
 mkdir build
 pushd %VULKAN_SDK%\shaderc\build
-cmake -G "Visual Studio 15 Win64" ..
-cmake --build . --config Debug
+cmake -G "Visual Studio 16" ..
+cmake --build . --config Debug 
 
 popd
 popd
