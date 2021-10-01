@@ -16,6 +16,7 @@ static void CheckVkResult(VkResult result)
 namespace Hazel {
 
 	VulkanImGuiAPI::VulkanImGuiAPI()
+		:m_CommandBuffers(nullptr)
 	{
 	}
 

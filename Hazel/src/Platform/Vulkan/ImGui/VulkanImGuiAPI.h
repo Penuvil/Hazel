@@ -7,8 +7,9 @@
 #include "Hazel/Events/MouseEvent.h"
 
 #include "imgui.h"
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_vulkan.h"
+#include "backends/imgui_impl_glfw.h"
+//#include "backends/imgui_impl_vulkan.h"
+#include "examples/imgui_impl_vulkan_with_textures.h"
 
 #include <vulkan/vulkan.h>
 
