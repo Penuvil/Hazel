@@ -60,15 +60,22 @@ namespace Hazel {
 			s_RendererAPI->Submit(shader, vertexArray, texture, instanceId, fragColor, transform, viewProjection);
 		}
 
-		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId)
+//		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId)
+//		{
+//			s_RendererAPI->DrawIndexed(vertexArray, instanceId);
+//		}
+
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count = 0)
 		{
-			s_RendererAPI->DrawIndexed(vertexArray, instanceId);
+			s_RendererAPI->DrawIndexed(vertexArray, count);
+			
 		}
 
 		inline static void Shutdown()
 		{
 			s_RendererAPI.reset();
 		}
+		
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

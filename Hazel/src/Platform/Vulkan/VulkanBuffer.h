@@ -9,7 +9,8 @@ namespace Hazel {
 	class VulkanVertexBuffer : public VertexBuffer
 	{
 	public:
-		VulkanVertexBuffer(float* vertices, uint32_t size);
+		VulkanVertexBuffer(uint32_t size);
+		VulkanVertexBuffer(float* vertices, uint32_t size);	
 		virtual ~VulkanVertexBuffer();
 
 		const inline VkBuffer* GetBuffer() { return &m_Buffer; }
@@ -17,6 +18,9 @@ namespace Hazel {
 		// Inherited via VertexBuffer
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
+
+		void SetData(const void* data, uint32_t size);
+
 		virtual const BufferLayout & GetLayout() const override { return m_Layout; }
 		virtual void SetLayout(const BufferLayout & layout) override;
 
