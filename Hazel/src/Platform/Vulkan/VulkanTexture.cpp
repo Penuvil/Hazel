@@ -1,7 +1,6 @@
 #include "hzpch.h"
 
 #include "VulkanTexture.h"
-#include "Platform/Vulkan/VulkanContext.h"
 #include "Platform/Vulkan/VulkanUtility.h"
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 #include "Platform/Vulkan/VulkanShader.h"
@@ -10,8 +9,10 @@
 
 
 namespace Hazel {
+	VulkanTexture2D::TextureDescriptorsSets VulkanTexture2D::s_TextureDescriptorSets = {};
+
 	VulkanTexture2D::VulkanTexture2D(uint32_t width, uint32_t height)
-		:m_Width(width), m_Height(height)
+		:m_Width(width), m_Height(height), m_ImageInfo()
 	{
 		VkResult result;
 		VulkanContext* vulkanContext = VulkanContext::GetContext();
@@ -47,6 +48,8 @@ namespace Hazel {
 		result = vkCreateSampler(*device, &samplerCreateInfo, nullptr, &m_Sampler);
 
 		CreateDescriptorSets();
+
+		s_TextureDescriptorSets.descriptorCount++;
 	}
 
 	VulkanTexture2D::VulkanTexture2D(const std::string & path)
@@ -130,6 +133,8 @@ namespace Hazel {
 		result = vkCreateSampler(*device, &samplerCreateInfo, nullptr, &m_Sampler);
 
 		CreateDescriptorSets();
+
+		s_TextureDescriptorSets.descriptorCount++;
 	}
 
 	VulkanTexture2D::~VulkanTexture2D()
@@ -139,6 +144,13 @@ namespace Hazel {
 		vkDestroyImageView(*device, m_ImageView, nullptr);
 		vkDestroyImage(*device, m_Image, nullptr);
 		vkFreeMemory(*device, m_Memory, nullptr);
+		s_TextureDescriptorSets.descriptorCount--;
+		if (s_TextureDescriptorSets.descriptorCount == 0)
+		{
+			VulkanContext* context = VulkanContext::GetContext();
+			Ref<VulkanSwapChain> swapChain = context->GetSwapChain();
+			vkFreeDescriptorSets(*device, *swapChain->GetDescriptorPool(), s_TextureDescriptorSets.descriptorSets.size(), s_TextureDescriptorSets.descriptorSets.data());
+		}
 	}
 
 	void VulkanTexture2D::SetData(void * data, uint32_t size)
@@ -168,53 +180,74 @@ namespace Hazel {
 
 	void VulkanTexture2D::CreateDescriptorSets()
 	{
-		VkResult result;
-		VulkanContext* context = VulkanContext::GetContext();
-		Ref<VulkanSwapChain> swapChain = context->GetSwapChain();
-		uint32_t swapImageCount = swapChain->GetImageCount();
-		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(swapImageCount, swapChain->GetDescriptorSetLayouts()->at(1));
-
-		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {};
-		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocateInfo.pNext = NULL;
-		descriptorSetAllocateInfo.descriptorPool = *swapChain->GetDescriptorPool();
-		descriptorSetAllocateInfo.descriptorSetCount = swapImageCount;
-		descriptorSetAllocateInfo.pSetLayouts = descriptorSetLayouts.data();
-
-		m_DescriptorSets.resize(swapImageCount);
-
-		result = vkAllocateDescriptorSets(*context->GetDevice(), &descriptorSetAllocateInfo, m_DescriptorSets.data());
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets! ");
-
-		for (uint32_t i = 0; i < swapImageCount; i++)
+		if (s_TextureDescriptorSets.descriptorSets.empty())
 		{
-			VkDescriptorImageInfo imageInfo = {};
-			imageInfo.sampler = m_Sampler;
-			imageInfo.imageView = m_ImageView;
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			VkResult result;
+			VulkanContext* context = VulkanContext::GetContext();
+			Ref<VulkanSwapChain> swapChain = context->GetSwapChain();
+			uint32_t swapImageCount = swapChain->GetImageCount();
+			std::vector<VkDescriptorSetLayout> descriptorSetLayouts(swapImageCount, swapChain->GetDescriptorSetLayouts()->at(1));
 
-			VkWriteDescriptorSet writeDescriptorSet = {};
-			writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			writeDescriptorSet.pNext = 0;
-			writeDescriptorSet.dstSet = m_DescriptorSets[i];
-			writeDescriptorSet.dstBinding = 2;
-			writeDescriptorSet.dstArrayElement = 0;
-			writeDescriptorSet.descriptorCount = 1;
-			writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			writeDescriptorSet.pImageInfo = &imageInfo;
-			writeDescriptorSet.pBufferInfo = nullptr;
-			writeDescriptorSet.pTexelBufferView = nullptr;
+			VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {};
+			descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			descriptorSetAllocateInfo.pNext = NULL;
+			descriptorSetAllocateInfo.descriptorPool = *swapChain->GetDescriptorPool();
+			descriptorSetAllocateInfo.descriptorSetCount = swapImageCount;
+			descriptorSetAllocateInfo.pSetLayouts = descriptorSetLayouts.data();
 
-			vkUpdateDescriptorSets(*VulkanContext::GetContext()->GetDevice(), 1, &writeDescriptorSet, 0, nullptr);
+			s_TextureDescriptorSets.descriptorSets.resize(swapImageCount);
+
+			result = vkAllocateDescriptorSets(*context->GetDevice(), &descriptorSetAllocateInfo, s_TextureDescriptorSets.descriptorSets.data());
+			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets! ");
 		}
+
+		m_ImageInfo.sampler = m_Sampler;
+		m_ImageInfo.imageView = m_ImageView;
+		m_ImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	}
+
+	void VulkanTexture2D::UpdateDescriptorSets(uint32_t slot, uint32_t swapImageIndex) const
+	{
+
+		VkWriteDescriptorSet writeDescriptorSet = {};
+		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeDescriptorSet.pNext = 0;
+		writeDescriptorSet.dstSet = s_TextureDescriptorSets.descriptorSets[swapImageIndex];
+		writeDescriptorSet.dstBinding = 2;
+		writeDescriptorSet.dstArrayElement = slot;
+		writeDescriptorSet.descriptorCount = 1;
+		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		writeDescriptorSet.pImageInfo = &m_ImageInfo;
+		writeDescriptorSet.pBufferInfo = nullptr;
+		writeDescriptorSet.pTexelBufferView = nullptr;
+
+		vkUpdateDescriptorSets(*VulkanContext::GetContext()->GetDevice(), 1, &writeDescriptorSet, 0, nullptr);
 	}
 
 	void VulkanTexture2D::Bind(uint32_t slot) const
 	{
+		if (s_TextureDescriptorSets.descriptorImageInfos.at(1).imageView == NULL)
+		{
+//			s_TextureDescriptorSets.descriptorImageInfos.resize(32);
+			s_TextureDescriptorSets.descriptorImageInfos.fill(m_ImageInfo);
+		}
+//		else if (s_TextureDescriptorSets.descriptorImageInfos.size() <= slot )
+//		{
+//			s_TextureDescriptorSets.descriptorImageInfos.push_back(m_ImageInfo);
+//		}
+		else if (s_TextureDescriptorSets.descriptorImageInfos.at(slot).imageView != m_ImageInfo.imageView)
+		{
+			s_TextureDescriptorSets.descriptorImageInfos.at(slot) = m_ImageInfo;
+		}
+
+		/*auto swapImageIndex = VulkanRendererAPI::GetFrame()->imageIndex;
+		if (slot > 0)
+			UpdateDescriptorSets(slot, swapImageIndex);
 		std::vector<VkCommandBuffer>* commandBuffers = VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers();
 
-		vkCmdBindDescriptorSets(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, *std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(),
+		vkCmdBindDescriptorSets(commandBuffers->at(swapImageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, *std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(),
 			1, 1, &GetDescriptorSets().at(VulkanRendererAPI::GetFrame()->imageIndex), 0, nullptr);
+		*/
 	}
 
 }

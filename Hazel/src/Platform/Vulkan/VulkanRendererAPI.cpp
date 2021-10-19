@@ -3,10 +3,11 @@
 #include "Platform/Vulkan/ImGui/VulkanImGuiAPI.h"
 #include "Platform/Vulkan/VulkanContext.h"
 #include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanTexture.h"
 #include "Platform/Vulkan/VulkanBuffer.h"
 #include "Platform/Vulkan/VulkanVertexArray.h"
-#include "Platform/Vulkan/VulkanTexture.h"
 #include "Hazel/Renderer/OrthographicCamera.h"
+
 
 
 namespace Hazel {
@@ -122,6 +123,7 @@ namespace Hazel {
 		
 		s_CurrentBatch.reset(new BatchInfo);
 		s_CurrentBatch->commandBuffer = commandBuffers->at(s_CurrentFrame->imageIndex);
+		
 	}
 
 	void VulkanRendererAPI::EndScene()
@@ -202,6 +204,11 @@ namespace Hazel {
 
 	void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId)
 	{
+		auto* descriptorSets = &VulkanTexture2D::s_TextureDescriptorSets;
+		descriptorSets->UpdateDescriptorSets(s_CurrentFrame->imageIndex);
+		vkCmdBindDescriptorSets(VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers()->at(s_CurrentFrame->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, 
+			*std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(), 
+			1, 1, &descriptorSets->descriptorSets.at(s_CurrentFrame->imageIndex), 0, nullptr);
 		vkCmdDrawIndexed(s_CurrentBatch->commandBuffer, vertexArray->GetIndexBuffer()->GetCount(), 1, 0, 0, 0);
 	}
 

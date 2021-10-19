@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Hazel/Renderer/Texture.h"
+#include "Platform/Vulkan/VulkanContext.h"
 
 #include <vulkan/vulkan.h>
 
@@ -9,6 +10,32 @@ namespace Hazel {
 	class VulkanTexture2D : public Texture2D
 	{
 	public:
+		struct TextureDescriptorsSets
+		{
+			int descriptorCount = 0;
+			std::vector<VkDescriptorSet> descriptorSets;
+			std::array<VkDescriptorImageInfo, 32> descriptorImageInfos;
+
+			void UpdateDescriptorSets(uint32_t swapImageIndex)
+			{
+				VkWriteDescriptorSet writeDescriptorSet = {};
+				writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				writeDescriptorSet.pNext = 0;
+				writeDescriptorSet.dstSet = descriptorSets[swapImageIndex];
+				writeDescriptorSet.dstBinding = 2;
+				writeDescriptorSet.dstArrayElement = 0;
+				writeDescriptorSet.descriptorCount = descriptorImageInfos.size();
+				writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				writeDescriptorSet.pImageInfo = descriptorImageInfos.data();
+				writeDescriptorSet.pBufferInfo = nullptr;
+				writeDescriptorSet.pTexelBufferView = nullptr;
+
+				vkUpdateDescriptorSets(*VulkanContext::GetContext()->GetDevice(), 1, &writeDescriptorSet, 0, nullptr);
+			}
+		};
+
+		static TextureDescriptorsSets s_TextureDescriptorSets;
+
 		VulkanTexture2D(uint32_t width, uint32_t height);
 		VulkanTexture2D(const std::string& path);
 		virtual ~VulkanTexture2D();
@@ -19,10 +46,14 @@ namespace Hazel {
 		virtual void SetData(void* data, uint32_t size) override;
 
 		void CreateDescriptorSets();
-		std::vector<VkDescriptorSet> GetDescriptorSets() const { return m_DescriptorSets; }
-
+		void UpdateDescriptorSets(uint32_t slot, uint32_t swapImageIndex) const;
 
 		virtual void Bind(uint32_t slot = 0) const override;
+
+		virtual bool operator==(const Texture& other) const override
+		{
+			return m_Image == ((VulkanTexture2D&)other).m_Image;
+		}
 
 	private:
 		std::string m_Path;
@@ -32,6 +63,6 @@ namespace Hazel {
 		VkImageView m_ImageView;
 		VkSampler m_Sampler;
 		VkFormat m_Format;
-		std::vector<VkDescriptorSet> m_DescriptorSets;
+		VkDescriptorImageInfo m_ImageInfo;
 	};
 }

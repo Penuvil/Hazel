@@ -234,7 +234,7 @@ namespace Hazel
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.pNext = NULL;
-		descriptorPoolCreateInfo.flags = 0;
+		descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 500);
 		descriptorPoolCreateInfo.poolSizeCount = static_cast<uint32_t>(descriptorPoolSizes.size());
 		descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
@@ -262,7 +262,7 @@ namespace Hazel
 		VkDescriptorSetLayoutBinding textureLayoutBinding = {};
 		textureLayoutBinding.binding = 2;
 		textureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		textureLayoutBinding.descriptorCount = 1;
+		textureLayoutBinding.descriptorCount = 32;
 		textureLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		textureLayoutBinding.pImmutableSamplers = nullptr;
 
