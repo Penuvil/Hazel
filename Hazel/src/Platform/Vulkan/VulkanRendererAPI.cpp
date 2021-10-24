@@ -62,21 +62,27 @@ namespace Hazel {
 	void VulkanRendererAPI::BeginScene()
 	{
 		uint32_t imageIndex;
-		VkResult result;
+		VkResult result = VK_NOT_READY;
 		VulkanContext* vulkanContext = VulkanContext::GetContext();
 		Ref<VulkanSwapChain> vulkanSwapChain = vulkanContext->GetSwapChain();
 		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
 		
 		{
 			HZ_PROFILE_SCOPE("Sync Wait");
-			result = vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
+			while (result != VK_SUCCESS)
+			{
+				result = vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
+			}
 		}
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_ResizeEvent == true)
 		{
 			vulkanSwapChain->RecreateSwapChain();
 			m_ResizeEvent = false;
-			result = vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
+			while (result != VK_SUCCESS)
+			{
+				result = vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
+			}
 		}
 
 
@@ -206,9 +212,9 @@ namespace Hazel {
 	{
 		auto* descriptorSets = &VulkanTexture2D::s_TextureDescriptorSets;
 		descriptorSets->UpdateDescriptorSets(s_CurrentFrame->imageIndex);
-		vkCmdBindDescriptorSets(VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers()->at(s_CurrentFrame->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, 
-			*std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(), 
-			1, 1, &descriptorSets->descriptorSets.at(s_CurrentFrame->imageIndex), 0, nullptr);
+//		vkCmdBindDescriptorSets(VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers()->at(s_CurrentFrame->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, 
+//			*std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(), 
+//			1, 1, &descriptorSets->descriptorSets.at(s_CurrentFrame->imageIndex), 0, nullptr);
 		vkCmdDrawIndexed(s_CurrentBatch->commandBuffer, vertexArray->GetIndexBuffer()->GetCount(), 1, 0, 0, 0);
 	}
 

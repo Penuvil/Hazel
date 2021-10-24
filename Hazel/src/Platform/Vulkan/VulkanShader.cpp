@@ -4,6 +4,7 @@
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanBuffer.h"
+#include "Platform/Vulkan/VulkanTexture.h"
 
 
 
@@ -346,8 +347,15 @@ namespace Hazel {
 	void VulkanShader::Bind()
 	{
 		std::vector<VkCommandBuffer>* commandBuffers = VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers();
+		auto imageIndex = VulkanRendererAPI::GetFrame()->imageIndex;
+		auto* descriptorSets = &VulkanTexture2D::s_TextureDescriptorSets;
+
 		vkCmdBindPipeline(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 		VulkanRendererAPI::SetBatchShader(shared_from_this());
+
+		vkCmdBindDescriptorSets(commandBuffers->at(imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS,
+			*std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(),
+			1, 1, &descriptorSets->descriptorSets.at(imageIndex), 0, nullptr);
 	}
 
 	void VulkanShader::Unbind() const

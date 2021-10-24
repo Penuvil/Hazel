@@ -234,7 +234,7 @@ namespace Hazel
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.pNext = NULL;
-		descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 		descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(m_SwapChainImages.size() * 500);
 		descriptorPoolCreateInfo.poolSizeCount = static_cast<uint32_t>(descriptorPoolSizes.size());
 		descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
@@ -275,7 +275,7 @@ namespace Hazel
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
 		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		descriptorSetLayoutCreateInfo.pNext = NULL;
-		descriptorSetLayoutCreateInfo.flags = 0;
+		descriptorSetLayoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
 		descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32_t>(uniformDescriptorSetLayoutBindings.size());
 		descriptorSetLayoutCreateInfo.pBindings = uniformDescriptorSetLayoutBindings.data();
 
@@ -283,6 +283,14 @@ namespace Hazel
 		result = vkCreateDescriptorSetLayout(m_Device, &descriptorSetLayoutCreateInfo, nullptr, &uniformDescriptorSetLayout);
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout! " + result);
 
+		VkDescriptorSetLayoutBindingFlagsCreateInfo descriptorSetLayoutBindingFlagsCreateInfo = {};
+		descriptorSetLayoutBindingFlagsCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+		descriptorSetLayoutBindingFlagsCreateInfo.pNext = NULL;
+		descriptorSetLayoutBindingFlagsCreateInfo.bindingCount = 1;
+		VkDescriptorBindingFlags descriptorBindingFlags[] = { VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT };
+		descriptorSetLayoutBindingFlagsCreateInfo.pBindingFlags = descriptorBindingFlags;
+
+		descriptorSetLayoutCreateInfo.pNext = &descriptorSetLayoutBindingFlagsCreateInfo;
 		descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32_t>(textureDescriptorSetLayoutBindings.size());
 		descriptorSetLayoutCreateInfo.pBindings = textureDescriptorSetLayoutBindings.data();
 
