@@ -210,7 +210,7 @@ namespace Hazel {
 
 	void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t instanceId)
 	{
-		auto* descriptorSets = &VulkanTexture2D::s_TextureDescriptorSets;
+		auto* descriptorSets = &VulkanTexture2D::s_TextureArrayDescriptorSets;
 		descriptorSets->UpdateDescriptorSets(s_CurrentFrame->imageIndex);
 //		vkCmdBindDescriptorSets(VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers()->at(s_CurrentFrame->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, 
 //			*std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(), 

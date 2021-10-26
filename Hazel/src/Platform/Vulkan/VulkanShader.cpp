@@ -348,7 +348,7 @@ namespace Hazel {
 	{
 		std::vector<VkCommandBuffer>* commandBuffers = VulkanContext::GetContext()->GetSwapChain()->GetCommandBuffers();
 		auto imageIndex = VulkanRendererAPI::GetFrame()->imageIndex;
-		auto* descriptorSets = &VulkanTexture2D::s_TextureDescriptorSets;
+		auto* descriptorSets = &VulkanTexture2D::s_TextureArrayDescriptorSets;
 
 		vkCmdBindPipeline(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 		VulkanRendererAPI::SetBatchShader(shared_from_this());

@@ -4,13 +4,14 @@
 #include "Platform/Vulkan/VulkanContext.h"
 
 #include <vulkan/vulkan.h>
+#include <examples/imgui_impl_vulkan_with_textures.h>
 
 namespace Hazel {
 
 	class VulkanTexture2D : public Texture2D
 	{
 	public:
-		struct TextureDescriptorsSets
+		struct TextureArrayDescriptorsSets
 		{
 			int descriptorCount = 0;
 			std::vector<VkDescriptorSet> descriptorSets;
@@ -34,7 +35,7 @@ namespace Hazel {
 			}
 		};
 
-		static TextureDescriptorsSets s_TextureDescriptorSets;
+		static TextureArrayDescriptorsSets s_TextureArrayDescriptorSets;
 
 		VulkanTexture2D(uint32_t width, uint32_t height);
 		VulkanTexture2D(const std::string& path);
@@ -42,11 +43,12 @@ namespace Hazel {
 
 		virtual uint32_t GetWidth() const override { return m_Width; }
 		virtual uint32_t GetHeight() const override { return m_Height; }
+		virtual void* GetRendererID() override;
 
 		virtual void SetData(void* data, uint32_t size) override;
 
 		void CreateDescriptorSets();
-		void UpdateDescriptorSets(uint32_t slot, uint32_t swapImageIndex) const;
+		void UpdateDescriptorSets(uint32_t swapImageIndex) const;
 
 		virtual void Bind(uint32_t slot = 0) const override;
 
@@ -64,5 +66,6 @@ namespace Hazel {
 		VkSampler m_Sampler;
 		VkFormat m_Format;
 		VkDescriptorImageInfo m_ImageInfo;
+		ImTextureID m_ImguiDescriptorSet;
 	};
 }
