@@ -14,6 +14,11 @@ void Sandbox2D::OnAttach()
 	HZ_PROFILE_FUNCTION();
 
 	m_CheckerboardTexture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
+
+	Hazel::FramebufferSpecification fbSpec;
+	fbSpec.Width = 1280;
+	fbSpec.Height = 720;
+	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
 }
 
 void Sandbox2D::OnDetach()
@@ -33,7 +38,6 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	{
 		HZ_PROFILE_SCOPE("Renderer Prep");
 		Hazel::Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-		Hazel::Renderer::Clear();
 	}
 
 	{
@@ -42,6 +46,10 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 
 		HZ_PROFILE_SCOPE("Renderer Draw");
 		Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
+
+		m_Framebuffer->Bind();
+		Hazel::Renderer::Clear();
+
 		Hazel::Renderer2D::BeginBatch();
 		Hazel::Renderer2D::DrawRotatedQuad({ 1.0f, 0.0f }, { 0.8f, 0.8f }, -45.0f, { 0.8f, 0.2f, 0.3f, 1.0f });
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
@@ -61,7 +69,9 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 		}
 		Hazel::Renderer2D::EndBatch();
 
+		m_Framebuffer->Unbind();
 		Hazel::Renderer2D::EndScene();
+		
 	}
 
 }
@@ -71,7 +81,7 @@ void Sandbox2D::OnImGuiRender()
 	HZ_PROFILE_FUNCTION();
 
 	// Note: Switch this to true to enable dockspace
-	static bool dockingEnabled = false;
+	static bool dockingEnabled = true;
 	if (dockingEnabled)
 	{
 		static bool dockspaceOpen = true;
@@ -144,8 +154,10 @@ void Sandbox2D::OnImGuiRender()
 
 		ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
 
-		void* textureID = (void*)m_CheckerboardTexture->GetRendererID();
-		ImGui::Image(textureID, ImVec2{ 256.0f, 256.0f });
+		void* textureID = m_Framebuffer->GetColorAttachmentRendererID();
+		ImGui::Image(textureID, ImVec2{ 1280, 720 });
+//		void* textureID = (void*)m_CheckerboardTexture->GetRendererID();
+//		ImGui::Image(textureID, ImVec2{ 256.0f, 256.0f });
 		ImGui::End();
 
 		ImGui::End();
@@ -164,7 +176,9 @@ void Sandbox2D::OnImGuiRender()
 		ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
 
 		void* textureID = m_CheckerboardTexture->GetRendererID();
-		ImGui::Image(textureID, ImVec2{ 256.0f, 256.0f });
+		ImGui::Image(textureID, ImVec2{ 1280, 720});
+//		void* textureID = m_CheckerboardTexture->GetRendererID();
+//		ImGui::Image(textureID, ImVec2{ 256.0f, 256.0f });
 		ImGui::End();
 	}
 }

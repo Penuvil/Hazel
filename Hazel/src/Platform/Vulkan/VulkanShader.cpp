@@ -204,9 +204,9 @@ namespace Hazel {
 		const VkExtent2D* swapChainExtent = VulkanContext::GetContext()->GetSwapChain()->GetExtent2D();
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
-		viewport.y = 0.0f;
+		viewport.y = static_cast<uint32_t>(swapChainExtent->height);
 		viewport.width = static_cast<uint32_t>(swapChainExtent->width);
-		viewport.height = static_cast<uint32_t>(swapChainExtent->height);
+		viewport.height = -(static_cast<uint32_t>(swapChainExtent->height));
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 

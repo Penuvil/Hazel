@@ -126,6 +126,9 @@ namespace Hazel {
 
 		vkCmdSetViewport(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &m_Viewport);
 		vkCmdSetScissor(commandBuffers->at(s_CurrentFrame->imageIndex), 0, 1, &scissor);
+
+		vkCmdEndRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex));
+
 		
 		s_CurrentBatch.reset(new BatchInfo);
 		s_CurrentBatch->commandBuffer = commandBuffers->at(s_CurrentFrame->imageIndex);
@@ -138,7 +141,7 @@ namespace Hazel {
 		VulkanContext* vulkanContext = VulkanContext::GetContext();
 		std::vector<VkCommandBuffer>* commandBuffers = vulkanContext->GetSwapChain()->GetCommandBuffers();
 
-		vkCmdEndRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex));
+//		vkCmdEndRenderPass(commandBuffers->at(s_CurrentFrame->imageIndex));
 
 		result = vkEndCommandBuffer(commandBuffers->at(s_CurrentFrame->imageIndex));
 		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to en command buffer! " + result);
