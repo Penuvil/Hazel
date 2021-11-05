@@ -170,9 +170,9 @@ namespace Hazel {
 	void VulkanRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
 		m_Viewport.x = (float)x;
-		m_Viewport.y = (float)height;
+		m_Viewport.y = (float)y;
 		m_Viewport.width = (float)width;
-		m_Viewport.height = -((float)height);
+		m_Viewport.height = (float)height;
 		m_Viewport.minDepth = 0.0f;
 		m_Viewport.maxDepth = 1.0f;
 

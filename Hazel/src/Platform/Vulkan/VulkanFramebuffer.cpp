@@ -191,9 +191,9 @@ namespace Hazel {
 
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
-		viewport.y = 0.0f;
+		viewport.y = (float)m_Specification.Height;
 		viewport.width = (float)m_Specification.Width;
-		viewport.height = ((float)m_Specification.Height);
+		viewport.height = -((float)m_Specification.Height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
