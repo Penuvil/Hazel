@@ -55,7 +55,7 @@ namespace Hazel {
 			HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Frnce!");
 		}
 
-		SetViewport(0, swapChainExtent->height, swapChainExtent->width,  swapChainExtent->height);
+		SetViewport(0, 0, swapChainExtent->width,  swapChainExtent->height);
 		m_ResizeEvent = false;
 	}
 
@@ -69,7 +69,7 @@ namespace Hazel {
 		
 		{
 			HZ_PROFILE_SCOPE("Sync Wait");
-			while (result != VK_SUCCESS)
+			while (result == VK_NOT_READY)
 			{
 				result = vkAcquireNextImageKHR(*vulkanContext->GetDevice(), *vulkanSwapChain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_FrameIndex], VK_NULL_HANDLE, &imageIndex);
 			}
@@ -170,9 +170,9 @@ namespace Hazel {
 	void VulkanRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
 		m_Viewport.x = (float)x;
-		m_Viewport.y = (float)y;
+		m_Viewport.y = (float)height;
 		m_Viewport.width = (float)width;
-		m_Viewport.height = (float)height;
+		m_Viewport.height = -((float)height);
 		m_Viewport.minDepth = 0.0f;
 		m_Viewport.maxDepth = 1.0f;
 

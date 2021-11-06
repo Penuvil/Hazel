@@ -345,10 +345,14 @@ namespace Hazel {
 		VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
 		physicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
 
+		VkPhysicalDeviceExtendedDynamicStateFeaturesEXT physicalDeviceExtendedDynamicStateFeaturesEXT = {};
+		physicalDeviceExtendedDynamicStateFeaturesEXT.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+		physicalDeviceExtendedDynamicStateFeaturesEXT.extendedDynamicState = VK_TRUE;
+
 		VkPhysicalDeviceDescriptorIndexingFeatures physicalDeviceDescriptorIndexingFeatures = {};
 		physicalDeviceDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+		physicalDeviceDescriptorIndexingFeatures.pNext = &physicalDeviceExtendedDynamicStateFeaturesEXT;
 		physicalDeviceDescriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
-
 
 		VkDeviceCreateInfo deviceCreateInfo = {};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

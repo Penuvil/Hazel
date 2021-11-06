@@ -19,7 +19,7 @@ namespace Hazel {
 	class Application
 	{
 	public:
-		Application(RendererAPI::API api);
+		Application(RendererAPI::API api, const std::string& name = "Hazel App");
 		virtual ~Application();
 
 		void OnEvent(Event& e);

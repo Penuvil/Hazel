@@ -191,9 +191,9 @@ namespace Hazel {
 
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
-		viewport.y = (float)m_Specification.Height;
+		viewport.y = 0.0f;
 		viewport.width = (float)m_Specification.Width;
-		viewport.height = -((float)m_Specification.Height);
+		viewport.height = ((float)m_Specification.Height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
@@ -204,6 +204,10 @@ namespace Hazel {
 
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+		
+		VkFrontFace frontFace = m_Specification.SwapChainTarget ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE;
+		auto vkCmdSetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)vkGetDeviceProcAddr(*VulkanContext::GetContext()->GetDevice(), "vkCmdSetFrontFaceEXT");
+		vkCmdSetFrontFaceEXT(commandBuffer, frontFace);
 
 	}
 

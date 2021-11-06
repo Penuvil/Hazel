@@ -13,7 +13,7 @@ namespace Hazel {
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(RendererAPI::API api)
+	Application::Application(RendererAPI::API api, const std::string& name)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -22,7 +22,7 @@ namespace Hazel {
 
 		RendererAPI::SetAPI(api);
 
-		m_Window = Window::Create(api);
+		m_Window = Window::Create(api, WindowProps(name));
 		m_Window->SetEventCallback(HZ_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();

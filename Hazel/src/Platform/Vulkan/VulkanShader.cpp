@@ -204,9 +204,9 @@ namespace Hazel {
 		const VkExtent2D* swapChainExtent = VulkanContext::GetContext()->GetSwapChain()->GetExtent2D();
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
-		viewport.y = static_cast<uint32_t>(swapChainExtent->height);
-		viewport.width = static_cast<uint32_t>(swapChainExtent->width);
-		viewport.height = -(static_cast<uint32_t>(swapChainExtent->height));
+		viewport.y = static_cast<float>(swapChainExtent->height);
+		viewport.width = static_cast<float>(swapChainExtent->width);
+		viewport.height = -(static_cast<float>(swapChainExtent->height));
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
@@ -272,17 +272,18 @@ namespace Hazel {
 		colorBlendStateCreateInfo.blendConstants[3];
 		colorBlendStateCreateInfo.blendConstants[4];
 
-		VkDynamicState dynamicStates[] = {
+		std::vector<VkDynamicState> dynamicStates = {
 			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR
+			VK_DYNAMIC_STATE_SCISSOR,
+			VK_DYNAMIC_STATE_FRONT_FACE_EXT
 		};
 
 		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {};
 		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamicStateCreateInfo.pNext = NULL;
 		dynamicStateCreateInfo.flags = 0;
-		dynamicStateCreateInfo.dynamicStateCount = 2;
-		dynamicStateCreateInfo.pDynamicStates = dynamicStates;
+		dynamicStateCreateInfo.dynamicStateCount = dynamicStates.size();
+		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 
 		VkResult result;
 
@@ -350,8 +351,11 @@ namespace Hazel {
 		auto imageIndex = VulkanRendererAPI::GetFrame()->imageIndex;
 		auto* descriptorSets = &VulkanTexture2D::s_TextureArrayDescriptorSets;
 
-		vkCmdBindPipeline(commandBuffers->at(VulkanRendererAPI::GetFrame()->imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+		vkCmdBindPipeline(commandBuffers->at(imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 		VulkanRendererAPI::SetBatchShader(shared_from_this());
+
+		auto vkCmdSetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)vkGetDeviceProcAddr(*VulkanContext::GetContext()->GetDevice(), "vkCmdSetFrontFaceEXT");
+		vkCmdSetFrontFaceEXT(commandBuffers->at(imageIndex), VK_FRONT_FACE_COUNTER_CLOCKWISE);
 
 		vkCmdBindDescriptorSets(commandBuffers->at(imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS,
 			*std::static_pointer_cast<VulkanShader>(VulkanRendererAPI::GetBatch()->shader)->GetGraphicsPipelineLayout(),
