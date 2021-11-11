@@ -5,23 +5,23 @@
 
 namespace Hazel {
 
-	class HazelEditor : public Application
+	class Hazelnut : public Application
 	{
 	public:
-		HazelEditor(RendererAPI::API api)
-			: Application(api, "Hazel Editor")
+		Hazelnut(RendererAPI::API api)
+			: Application(api, "Hazelnut")
 		{
 			PushLayer(new EditorLayer());
 		}
 
-		~HazelEditor()
+		~Hazelnut()
 		{
 		}
 	};
 
 	Application* CreateApplication()
 	{
-		return new HazelEditor(RendererAPI::API::Vulkan);
+		return new Hazelnut(RendererAPI::API::Vulkan);
 	}
 
 }

@@ -12,15 +12,141 @@ namespace Hazel {
 		VulkanContext* context = VulkanContext::GetContext();
 		VkDevice* device = context->GetDevice();
 		uint32_t imageCount = context->GetSwapChain()->GetImageCount();
-		VkFormat depthFormat;
-		depthFormat = VulkanUtility::FindSupportedFormat({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+		
+		m_DepthFormat = VulkanUtility::FindSupportedFormat({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
 			VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
 		m_ColorAttchments.resize(imageCount);
 		m_ColorAttachmentMemory.resize(imageCount);
 		m_ColorAttachemntImageViews.resize(imageCount);
 		m_ImguiDescriptorSets.resize(imageCount);
+		m_Framebuffers.resize(imageCount);
 
+		CreateAttachments(imageCount);
+		CreateRenderPass();
+		CreateFramebuffers(imageCount);
+	}
+
+	VulkanFramebuffer::~VulkanFramebuffer()
+	{
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
+
+		for (auto frameBuffer : m_Framebuffers)
+			vkDestroyFramebuffer(*device, frameBuffer, nullptr);
+
+		vkDestroyRenderPass(*device, m_RenderPass, nullptr);
+		vkDestroySampler(*device, m_Sampler, nullptr);
+
+		for (auto view : m_ColorAttachemntImageViews)
+			vkDestroyImageView(*device, view, nullptr);
+
+		for (auto image : m_ColorAttchments)
+			vkDestroyImage(*device, image, nullptr);
+
+		for (auto iMemory : m_ColorAttachmentMemory)
+			vkFreeMemory(*device, iMemory, nullptr);
+
+		vkDestroyImageView(*device, m_DepthAttachemntView, nullptr);
+		vkDestroyImage(*device, m_DepthAttachment, nullptr);
+		vkFreeMemory(*device, m_DepthAttachemntMemory, nullptr);
+	}
+
+	void VulkanFramebuffer::Invalidate()
+	{
+		VulkanContext* context = VulkanContext::GetContext();
+		VkDevice* device = context->GetDevice();
+		uint32_t imageCount = context->GetSwapChain()->GetImageCount();
+
+		for (auto frameBuffer : m_Framebuffers)
+			vkDestroyFramebuffer(*device, frameBuffer, nullptr);
+
+		for (auto view : m_ColorAttachemntImageViews)
+			vkDestroyImageView(*device, view, nullptr);
+
+		for (auto image : m_ColorAttchments)
+			vkDestroyImage(*device, image, nullptr);
+
+		for (auto iMemory : m_ColorAttachmentMemory)
+			vkFreeMemory(*device, iMemory, nullptr);
+
+		vkDestroyImageView(*device, m_DepthAttachemntView, nullptr);
+		vkDestroyImage(*device, m_DepthAttachment, nullptr);
+		vkFreeMemory(*device, m_DepthAttachemntMemory, nullptr);
+
+		CreateAttachments(imageCount);
+		CreateFramebuffers(imageCount);
+
+		for (uint32_t i = 0; i < imageCount; i++)
+			m_ImguiDescriptorSets.at(i) = nullptr;
+	}
+
+	void VulkanFramebuffer::Bind()
+	{
+		auto currentFrame = VulkanRendererAPI::GetFrame();
+		uint32_t imageIndex = currentFrame->imageIndex;
+		VkCommandBuffer commandBuffer = VulkanRendererAPI::GetBatch()->commandBuffer;
+
+		VkRenderPassBeginInfo renderPassBeginInfo = {};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.pNext = NULL;
+		renderPassBeginInfo.renderPass = m_RenderPass;
+		renderPassBeginInfo.framebuffer = m_Framebuffers.at(imageIndex);
+		renderPassBeginInfo.renderArea.offset = { 0,0 };
+		renderPassBeginInfo.renderArea.extent.width = m_Specification.Width;
+		renderPassBeginInfo.renderArea.extent.height = m_Specification.Height;
+		renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(currentFrame->clearColors.size());
+		renderPassBeginInfo.pClearValues = currentFrame->clearColors.data();
+
+		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport = {};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = (float)m_Specification.Width;
+		viewport.height = ((float)m_Specification.Height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+
+		VkRect2D scissor = {};
+		scissor.offset = { 0 , 0 };
+		scissor.extent.height = m_Specification.Height;
+		scissor.extent.width = m_Specification.Width;
+
+		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+		
+		VkFrontFace frontFace = m_Specification.SwapChainTarget ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE;
+		auto vkCmdSetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)vkGetDeviceProcAddr(*VulkanContext::GetContext()->GetDevice(), "vkCmdSetFrontFaceEXT");
+		vkCmdSetFrontFaceEXT(commandBuffer, frontFace);
+
+	}
+
+	void VulkanFramebuffer::Unbind()
+	{
+		VkCommandBuffer commandBuffer = VulkanRendererAPI::GetBatch()->commandBuffer;
+		vkCmdEndRenderPass(commandBuffer);
+	}
+
+	void VulkanFramebuffer::Resize(uint32_t width, uint32_t height)
+	{
+		m_Specification.Width = width;
+		m_Specification.Height = height;
+
+		Invalidate();
+	}
+
+	void* VulkanFramebuffer::GetColorAttachmentRendererID()
+	{
+		uint32_t imageIndex = VulkanRendererAPI::GetFrame()->imageIndex;
+
+		if (m_ImguiDescriptorSets.at(imageIndex) == nullptr)
+			m_ImguiDescriptorSets.at(imageIndex) = ImGui_ImplVulkan_AddTexture(m_Sampler, m_ColorAttachemntImageViews.at(imageIndex), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		return m_ImguiDescriptorSets.at(imageIndex);
+	}
+
+	void VulkanFramebuffer::CreateAttachments(uint32_t &imageCount)
+	{
 		for (int i = 0; i < imageCount; i++)
 		{
 			VulkanUtility::CreateImage(m_Specification.Width, m_Specification.Height, VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
@@ -28,6 +154,16 @@ namespace Hazel {
 
 			m_ColorAttachemntImageViews.at(i) = VulkanUtility::CreateImageView(m_ColorAttchments.at(i), VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT);
 		}
+
+		VulkanUtility::CreateImage(m_Specification.Width, m_Specification.Height, m_DepthFormat, VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthAttachment, m_DepthAttachemntMemory);
+
+		m_DepthAttachemntView = VulkanUtility::CreateImageView(m_DepthAttachment, m_DepthFormat, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
+	}
+
+	void VulkanFramebuffer::CreateRenderPass()
+	{
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 
 		VkSamplerCreateInfo samplerCreateInfo = {};
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -51,11 +187,6 @@ namespace Hazel {
 
 		vkCreateSampler(*device, &samplerCreateInfo, nullptr, &m_Sampler);
 
-		VulkanUtility::CreateImage(m_Specification.Width, m_Specification.Height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthAttachment, m_DepthAttachemntMemory);
-
-		m_DepthAttachemntView = VulkanUtility::CreateImageView(m_DepthAttachment, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
-
 		std::array<VkAttachmentDescription, 2> attachmentDescriptions = {};
 
 		attachmentDescriptions.at(0).flags = 0;
@@ -69,7 +200,7 @@ namespace Hazel {
 		attachmentDescriptions.at(0).finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 		attachmentDescriptions.at(1).flags = 0;
-		attachmentDescriptions.at(1).format = depthFormat;
+		attachmentDescriptions.at(1).format = m_DepthFormat;
 		attachmentDescriptions.at(1).samples = VK_SAMPLE_COUNT_1_BIT;
 		attachmentDescriptions.at(1).loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		attachmentDescriptions.at(1).storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -123,8 +254,11 @@ namespace Hazel {
 		renderPassCreateInfo.pDependencies = dependencies.data();
 
 		vkCreateRenderPass(*device, &renderPassCreateInfo, nullptr, &m_RenderPass);
+	}
 
-		m_Framebuffers.resize(imageCount);
+	void VulkanFramebuffer::CreateFramebuffers(uint32_t& imageCount)
+	{
+		VkDevice* device = VulkanContext::GetContext()->GetDevice();
 
 		for (int i = 0; i < imageCount; i++)
 		{
@@ -143,87 +277,5 @@ namespace Hazel {
 
 			vkCreateFramebuffer(*device, &framebufferCreateInfo, nullptr, &m_Framebuffers[i]);
 		}
-
-	}
-
-	VulkanFramebuffer::~VulkanFramebuffer()
-	{
-		VkDevice* device = VulkanContext::GetContext()->GetDevice();
-
-		for (auto frameBuffer : m_Framebuffers)
-			vkDestroyFramebuffer(*device, frameBuffer, nullptr);
-
-		vkDestroyRenderPass(*device, m_RenderPass, nullptr);
-		vkDestroySampler(*device, m_Sampler, nullptr);
-
-		for (auto view : m_ColorAttachemntImageViews)
-			vkDestroyImageView(*device, view, nullptr);
-
-		for (auto image : m_ColorAttchments)
-			vkDestroyImage(*device, image, nullptr);
-
-		for (auto iMemory : m_ColorAttachmentMemory)
-			vkFreeMemory(*device, iMemory, nullptr);
-
-		vkDestroyImageView(*device, m_DepthAttachemntView, nullptr);
-		vkDestroyImage(*device, m_DepthAttachment, nullptr);
-		vkFreeMemory(*device, m_DepthAttachemntMemory, nullptr);
-	}
-
-	void VulkanFramebuffer::Bind()
-	{
-		auto currentFrame = VulkanRendererAPI::GetFrame();
-		uint32_t imageIndex = currentFrame->imageIndex;
-		VkCommandBuffer commandBuffer = VulkanRendererAPI::GetBatch()->commandBuffer;
-
-		VkRenderPassBeginInfo renderPassBeginInfo = {};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.pNext = NULL;
-		renderPassBeginInfo.renderPass = m_RenderPass;
-		renderPassBeginInfo.framebuffer = m_Framebuffers.at(imageIndex);
-		renderPassBeginInfo.renderArea.offset = { 0,0 };
-		renderPassBeginInfo.renderArea.extent.width = m_Specification.Width;
-		renderPassBeginInfo.renderArea.extent.height = m_Specification.Height;
-		renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(currentFrame->clearColors.size());
-		renderPassBeginInfo.pClearValues = currentFrame->clearColors.data();
-
-		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport = {};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = (float)m_Specification.Width;
-		viewport.height = ((float)m_Specification.Height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-
-		VkRect2D scissor = {};
-		scissor.offset = { 0 , 0 };
-		scissor.extent.height = m_Specification.Height;
-		scissor.extent.width = m_Specification.Width;
-
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-		
-		VkFrontFace frontFace = m_Specification.SwapChainTarget ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE;
-		auto vkCmdSetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)vkGetDeviceProcAddr(*VulkanContext::GetContext()->GetDevice(), "vkCmdSetFrontFaceEXT");
-		vkCmdSetFrontFaceEXT(commandBuffer, frontFace);
-
-	}
-
-	void VulkanFramebuffer::Unbind()
-	{
-		VkCommandBuffer commandBuffer = VulkanRendererAPI::GetBatch()->commandBuffer;
-		vkCmdEndRenderPass(commandBuffer);
-	}
-
-	void* VulkanFramebuffer::GetColorAttachmentRendererID()
-	{
-		uint32_t imageIndex = VulkanRendererAPI::GetFrame()->imageIndex;
-
-		if (m_ImguiDescriptorSets.at(imageIndex) == nullptr)
-			m_ImguiDescriptorSets.at(imageIndex) = ImGui_ImplVulkan_AddTexture(m_Sampler, m_ColorAttachemntImageViews.at(imageIndex), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-		return m_ImguiDescriptorSets.at(imageIndex);
 	}
 }
