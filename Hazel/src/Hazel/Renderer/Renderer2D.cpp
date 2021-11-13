@@ -30,7 +30,8 @@ namespace Hazel {
 		Ref<Shader> TextureShader;
 		Ref<Texture2D> WhiteTexture;
 
-		Ref<OrthographicCamera> Camera;
+//		Camera Cam;
+//		glm::mat4 CameraTransform;
 
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
@@ -129,11 +130,35 @@ namespace Hazel {
 		delete[] s_Data.QuadVertexBufferBase;
 	}
 
-	void Renderer2D::BeginScene(const Ref<OrthographicCamera> camera)
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
 		HZ_PROFILE_FUNCTION();
+		RenderCommand::BeginScene();
 
+		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
 
+		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->Bind();
+		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", viewProj);
+
+		int32_t samplers[s_Data.MaxTextureSlots];
+		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
+			samplers[i] = i;
+
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+//		s_Data.Cam = camera;
+//		s_Data.CameraTransform = transform;
+
+//		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->Bind();
+//		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
+//		s_Data.TextureShader->Bind();
+//		s_Data.TextureShader->3SetMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
+
+		
+	}
+
+	void Renderer2D::BeginScene(const Ref<OrthographicCamera> camera)
+	{
 		RenderCommand::BeginScene();
 
 		int32_t samplers[s_Data.MaxTextureSlots];
@@ -142,14 +167,7 @@ namespace Hazel {
 
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
-		s_Data.Camera = camera;
-
-		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->Bind();
-		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-//		s_Data.TextureShader->Bind();
-//		s_Data.TextureShader->SetMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-
-		
+//		s_Data.Camera = camera;
 	}
 
 	void Renderer2D::EndScene()
@@ -163,9 +181,6 @@ namespace Hazel {
 	{
 		if (s_Data.QuadVertexArrays.size() == s_Data.Stats.DrawCalls)
 			CreateBuffers(s_Data.Stats.DrawCalls);
-
-		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->Bind();
-		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", s_Data.Camera->GetViewProjectionMatrix());
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;

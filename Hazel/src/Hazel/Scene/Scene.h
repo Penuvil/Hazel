@@ -4,6 +4,7 @@
 
 
 #include "Hazel/Core/Timestep.h"
+#include "Hazel/Renderer/Framebuffer.h"
 
 namespace Hazel {
 
@@ -17,7 +18,7 @@ namespace Hazel {
 
 		Entity CreateEntity(const std::string& name = std::string());
 
-		void OnUpdate(Timestep ts);
+		void OnUpdate(Timestep ts, Ref<Framebuffer> framebuffer);
 	private:
 		entt::registry m_Registry;
 

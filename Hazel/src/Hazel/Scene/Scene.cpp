@@ -2,6 +2,7 @@
 #include "Scene.h"
 
 #include "Components.h"
+#include "Hazel/Renderer/Renderer.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
 #include <glm/glm.hpp>
@@ -60,19 +61,47 @@ namespace Hazel {
 		return entity;
 	}
 
-	void Scene::OnUpdate(Timestep ts)
+	void Scene::OnUpdate(Timestep ts, Ref<Framebuffer> framebuffer)
 	{
-		Renderer2D::BeginBatch();
-
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		for (auto entity : group)
+		// Render 2D
+		Camera* mainCamera = nullptr;
+		glm::mat4* cameraTransform = nullptr;
 		{
-			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-
-			Renderer2D::DrawQuad(transform, sprite.Color);
+			auto group = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : group)
+			{
+				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+				
+				if (camera.Primary)
+				{
+					mainCamera = &camera.Camera;
+					cameraTransform = &transform.Transform;
+					break;
+				}
+			}
 		}
 
-		Renderer2D::EndBatch();
+		if (mainCamera)
+		{
+			Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
+			framebuffer->Bind();
+			Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+			Renderer::Clear();
+			Renderer2D::BeginBatch();
+
+			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+			for (auto entity : group)
+			{
+				auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+				Renderer2D::DrawQuad(transform, sprite.Color);
+			}
+
+			Renderer2D::EndBatch();
+			framebuffer->Unbind();
+			Renderer2D::EndScene();
+		}
+
 	}
 
 }
