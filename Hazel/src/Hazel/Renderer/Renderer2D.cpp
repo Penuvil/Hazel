@@ -146,13 +146,10 @@ namespace Hazel {
 
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
-//		s_Data.Cam = camera;
-//		s_Data.CameraTransform = transform;
 
-//		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->Bind();
-//		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-//		s_Data.TextureShader->Bind();
-//		s_Data.TextureShader->3SetMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
+		// Set first texture slot to 0
+		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+
 
 		
 	}
@@ -247,7 +244,7 @@ namespace Hazel {
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		DrawQuad(transform, texture, tilingFactor);
+		DrawQuad(transform, texture, tilingFactor, tintColor);
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
@@ -290,7 +287,7 @@ namespace Hazel {
 		float textureIndex = 0.0f;
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 		{
-			if (*s_Data.TextureSlots[i].get() == *texture.get())
+			if (*s_Data.TextureSlots[i] == *texture)
 			{
 				textureIndex = (float)i;
 				break;

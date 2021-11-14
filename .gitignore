@@ -14,7 +14,7 @@ Makefile
 =======
 # Binaries
 **/bin/
-!vendor/bin/premake/
+!vendor/premake/bin/
 bin-int/
 
 # Hazel files
