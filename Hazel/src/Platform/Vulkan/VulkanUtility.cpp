@@ -188,7 +188,7 @@ namespace Hazel {
 
 		VkCommandBuffer commandBuffer;
 		result = vkAllocateCommandBuffers(*device, &commandBufferAllocateInfo, &commandBuffer);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate command buffers! {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate command buffers!");
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo = {};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -197,7 +197,7 @@ namespace Hazel {
 		commandBufferBeginInfo.pInheritanceInfo = VK_NULL_HANDLE;
 
 		result = vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer! {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer!");
 
 		return commandBuffer;
 	}
@@ -209,7 +209,7 @@ namespace Hazel {
 		VkCommandPool* commandPool = VulkanContext::GetContext()->GetCommandPool();
 
 		result = vkEndCommandBuffer(commandBuffer);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to end command buffer! {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to end command buffer!");
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -224,7 +224,7 @@ namespace Hazel {
 
 		VkQueue* graphicsQueue = VulkanContext::GetContext()->GetGraphicsQueue();
 		result = vkQueueSubmit(*graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command buffers to queue! {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to submit command buffers to queue!");
 		vkQueueWaitIdle(*graphicsQueue);
 
 		vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer);
@@ -242,7 +242,7 @@ namespace Hazel {
 		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
 		EndTransientCommand(commandBuffer);
- 	}
+	}
 
 	void VulkanUtility::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 	{
@@ -395,7 +395,7 @@ namespace Hazel {
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
 		result = vkCreateImageView(*device, &imageViewCreateInfo, nullptr, &imageView);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create image views! {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create image views!");
 
 		return imageView;
 	}

@@ -38,7 +38,7 @@ namespace Hazel {
 		VkResult result;
 		uint32_t vulkanVersion;
 		result = vkEnumerateInstanceVersion(&vulkanVersion);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Vulkan version >= 1.1.0 not available: {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Vulkan version >= 1.1.0 not available!");
 		
 		CreateInstance(&vulkanVersion);
 		SetupDebugMessenger();
@@ -143,7 +143,7 @@ namespace Hazel {
 		instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
 		result = vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Unable to create Vulkan instance: {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Unable to create Vulkan instance!");
 
 	}
 
@@ -212,7 +212,7 @@ namespace Hazel {
 		auto CreateDebugUtilsMessengerEXT =
 			(PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugUtilsMessengerEXT");
 		VkResult result = CreateDebugUtilsMessengerEXT(m_Instance, &debugMessengerCreateInfo, nullptr, &m_debugMessenger);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger callback! {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger callback!");
 	}
 	uint32_t VulkanContext::EvaluateDevice(VkPhysicalDevice device)
 	{

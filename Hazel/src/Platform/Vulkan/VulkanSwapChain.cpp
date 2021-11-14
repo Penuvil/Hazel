@@ -74,7 +74,7 @@ namespace Hazel
 		swapChainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
 		VkResult result = vkCreateSwapchainKHR(m_Device, &swapChainCreateInfo, nullptr, &m_SwapChain);
-		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create swap chain! {0}", result);
+		HZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to create swap chain!");
 
 		vkGetSwapchainImagesKHR(m_Device, m_SwapChain, &imageCount, nullptr);
 		m_SwapChainImages.resize(imageCount);
