@@ -187,6 +187,7 @@ namespace Hazel {
 
 	void Renderer2D::EndBatch()
 	{
+		HZ_PROFILE_FUNCTION();
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
 		s_Data.QuadVertexBuffers.at(s_Data.Stats.DrawCalls)->SetData(s_Data.QuadVertexBufferBase, dataSize);
 
@@ -197,7 +198,7 @@ namespace Hazel {
 	{
 		if (s_Data.QuadIndexCount == 0)
 			return; // Nothing to draw
-		
+
 		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->Bind( 0 );
 
 		// Bind textures
@@ -209,7 +210,7 @@ namespace Hazel {
 
 	}
 
-	void Renderer2D::FlushAndReset()
+	void Renderer2D::NextBatch()
 	{
 		EndBatch();
 
@@ -257,7 +258,7 @@ namespace Hazel {
 		const float tilingFactor = 1.0f;
 
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
@@ -282,7 +283,7 @@ namespace Hazel {
 		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
-			FlushAndReset();
+			NextBatch();
 
 		float textureIndex = 0.0f;
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
@@ -297,7 +298,7 @@ namespace Hazel {
 		if (textureIndex == 0.0f)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
-				FlushAndReset();
+				NextBatch();
 
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;

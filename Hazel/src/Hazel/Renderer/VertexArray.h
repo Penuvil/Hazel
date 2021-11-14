@@ -8,7 +8,7 @@ namespace Hazel {
 	class VertexArray
 	{
 	public:
-		virtual ~VertexArray() {}
+		virtual ~VertexArray() = default;
 
 		virtual void Bind(uint32_t instanceId) = 0;
 		virtual void Unbind() const = 0;
