@@ -135,21 +135,22 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 		RenderCommand::BeginScene();
 
-		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
+		if (&camera) {
+			glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
 
-		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->Bind();
-		s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", viewProj);
+			s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->Bind();
+			s_Data.QuadVertexArrays.at(s_Data.Stats.DrawCalls)->GetUniformBuffer(0, "Matrices")->UpdateMat4("u_ViewProjection", viewProj);
 
-		int32_t samplers[s_Data.MaxTextureSlots];
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
-			samplers[i] = i;
+			int32_t samplers[s_Data.MaxTextureSlots];
+			for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
+				samplers[i] = i;
 
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+			s_Data.TextureShader->Bind();
+			s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
-		// Set first texture slot to 0
-		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
-
+			// Set first texture slot to 0
+			s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+		}
 
 		
 	}
