@@ -36,6 +36,7 @@ project "Hazel"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
+		"%{IncludeDir.yaml_cpp}",
 		"$(VULKAN_SDK)/include"
 	}
 
@@ -44,6 +45,7 @@ project "Hazel"
 		"GLFW",
 		"Glad",
 		"ImGui",
+		"yaml-cpp",
 		"opengl32.lib",
 		"vulkan-1.lib",
 		"shaderc_combined.lib"
