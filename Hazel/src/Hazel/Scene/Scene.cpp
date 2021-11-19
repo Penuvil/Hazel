@@ -89,6 +89,11 @@ namespace Hazel {
 			Renderer2D::EndBatch();
 			framebuffer->Unbind();			
 		}
+		else
+		{
+			Renderer::Clear();
+		}
+
 		Renderer2D::EndScene();
 	}
 
