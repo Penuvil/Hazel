@@ -70,10 +70,10 @@ namespace Hazel {
 		}
 
 		Renderer2D::BeginScene(*mainCamera, cameraTransform);
+		framebuffer->Bind();
 
 		if (mainCamera)
 		{			
-			framebuffer->Bind();
 			Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 			Renderer::Clear();
 			Renderer2D::BeginBatch();
@@ -87,13 +87,9 @@ namespace Hazel {
 			}
 
 			Renderer2D::EndBatch();
-			framebuffer->Unbind();			
-		}
-		else
-		{
-			Renderer::Clear();
 		}
 
+		framebuffer->Unbind();
 		Renderer2D::EndScene();
 	}
 
