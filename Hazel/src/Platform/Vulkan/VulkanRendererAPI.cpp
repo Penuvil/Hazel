@@ -75,7 +75,7 @@ namespace Hazel {
 			}
 		}
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_ResizeEvent == true)
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 		{
 			vulkanSwapChain->RecreateSwapChain();
 			m_ResizeEvent = false;

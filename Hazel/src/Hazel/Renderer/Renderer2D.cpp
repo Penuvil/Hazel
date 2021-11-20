@@ -190,7 +190,8 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
-		s_Data.QuadVertexBuffers.at(s_Data.Stats.DrawCalls)->SetData(s_Data.QuadVertexBufferBase, dataSize);
+		if (dataSize)
+			s_Data.QuadVertexBuffers.at(s_Data.Stats.DrawCalls)->SetData(s_Data.QuadVertexBufferBase, dataSize);
 
 		Flush();
 	}

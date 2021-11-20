@@ -21,7 +21,7 @@ namespace Hazel {
 
 	Application* CreateApplication()
 	{
-		return new Hazelnut(RendererAPI::API::Vulkan);
+		return new Hazelnut(RendererAPI::API::OpenGL);
 	}
 
 }

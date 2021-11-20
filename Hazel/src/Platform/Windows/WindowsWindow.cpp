@@ -196,7 +196,8 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		glfwPollEvents();
-		m_Context->SwapBuffers();
+		if (m_Data.Width && m_Data.Height)
+			m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
