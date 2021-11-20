@@ -8,6 +8,8 @@
 #include "imgui.h"
 
 
+#include "ImGuizmo.h"
+
 namespace Hazel {
 
 	ImGuiAPI* ImGuiLayer::s_ImGuiAPI = nullptr;
@@ -54,8 +56,8 @@ namespace Hazel {
 	void ImGuiLayer::Begin()
 	{
 		HZ_PROFILE_FUNCTION();
-
 		s_ImGuiAPI->Begin();
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiLayer::End()
